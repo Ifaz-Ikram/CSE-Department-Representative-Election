@@ -92,9 +92,14 @@ export default function ManageCandidatesPage() {
           photoUrl: "",
         });
         fetchCandidates();
+      } else {
+        const error = await res.json();
+        console.error("Failed to create candidate:", error);
+        alert(`Failed to create candidate: ${error.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Failed to create candidate:", error);
+      alert("Failed to create candidate. Please try again.");
     }
   };
 

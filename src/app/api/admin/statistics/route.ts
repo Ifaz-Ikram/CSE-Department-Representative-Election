@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
     const isElectionEnded = now > election.endTime;
 
     // Access control
-    const isSuperAdmin = session.user.role === UserRole.super_admin;
-    const isAdmin = session.user.role === UserRole.admin;
+    const isSuperAdmin = session.user.role === "super_admin";
+    const isAdmin = session.user.role === "admin";
 
     // During election: only super_admin can see stats
     if (isElectionActive && !isSuperAdmin) {

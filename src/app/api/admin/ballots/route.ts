@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
     const isElectionEnded = now > election.endTime;
 
     // Access control for voter-candidate mapping
-    const isSuperAdmin = session.user.role === UserRole.super_admin;
-    const isAdmin = session.user.role === UserRole.admin;
+    const isSuperAdmin = session.user.role === "super_admin";
+    const isAdmin = session.user.role === "admin";
 
     // During election: only super_admin
     if (isElectionActive && !isSuperAdmin) {

@@ -52,19 +52,32 @@ export default function AdminPage() {
   const handleCreateElection = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Convert datetime-local format to ISO 8601
+      const payload = {
+        name: formData.name,
+        description: formData.description,
+        startTime: new Date(formData.startTime).toISOString(),
+        endTime: new Date(formData.endTime).toISOString(),
+      };
+
       const res = await fetch("/api/admin/elections", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         setShowCreateForm(false);
         setFormData({ name: "", description: "", startTime: "", endTime: "" });
         fetchElections();
+      } else {
+        const error = await res.json();
+        console.error("Failed to create election:", error);
+        alert(`Failed to create election: ${error.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Failed to create election:", error);
+      alert("Failed to create election. Please try again.");
     }
   };
 
@@ -109,7 +122,7 @@ export default function AdminPage() {
     );
   }
 
-  const isSuperAdmin = session?.user.role === "super_admin";
+  const isSuperAdmin = session?.user && 'role' in session.user && session.user.role === "super_admin";
 
   return (
     <div className="min-h-screen circuit-bg">

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
 import { z } from "zod";
 
 const CreateElectionSchema = z.object({
@@ -21,10 +20,10 @@ const UpdateElectionSchema = z.object({
   publicResultsVisible: z.boolean().optional(),
 });
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    await requireRole([UserRole.super_admin]);
-    const body = await req.json();
+    await requireRole(["super_admin"]);
+    const body = await request.json();
     const data = CreateElectionSchema.parse(body);
 
     const election = await prisma.election.create({
@@ -62,10 +61,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PATCH(req: NextRequest) {
+export async function PATCH(request: NextRequest) {
   try {
-    await requireRole([UserRole.super_admin]);
-    const body = await req.json();
+    await requireRole(["super_admin"]);
+    const body = await request.json();
     const data = UpdateElectionSchema.parse(body);
 
     const updateData: any = {};
@@ -107,10 +106,10 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
-    await requireRole([UserRole.super_admin]);
-    const { searchParams } = new URL(req.url);
+    await requireRole(["super_admin"]);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {

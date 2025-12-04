@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
 import { z } from "zod";
 
 const CreateCandidateSchema = z.object({
@@ -9,42 +8,47 @@ const CreateCandidateSchema = z.object({
   userId: z.string().optional(),
   name: z.string().min(1),
   indexNumber: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().email().optional().or(z.literal("")),
   bio: z.string().optional(),
-  photoUrl: z.string().url().optional(),
+  photoUrl: z.string().url().optional().or(z.literal("")),
 });
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    await requireRole([UserRole.super_admin]);
-    const body = await req.json();
+    await requireRole(["super_admin"]);
+    const body = await request.json();
     const data = CreateCandidateSchema.parse(body);
 
-    // Find or create user for the candidate
-    let user = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: data.email,
-          name: data.name,
-          indexNumber: data.indexNumber,
-          role: UserRole.voter,
-        },
+    // Find or create user for the candidate (only if email is provided)
+    let userId = data.userId || null;
+    
+    if (data.email && data.email.trim() !== "") {
+      let user = await prisma.user.findUnique({
+        where: { email: data.email },
       });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: data.email,
+            name: data.name,
+            indexNumber: data.indexNumber,
+            role: "voter",
+          },
+        });
+      }
+      userId = user.id;
     }
 
     const candidate = await prisma.candidate.create({
       data: {
         electionId: data.electionId,
-        userId: user.id,
+        userId: userId,
         name: data.name,
         indexNumber: data.indexNumber,
-        email: data.email,
+        email: data.email && data.email.trim() !== "" ? data.email : null,
         bio: data.bio,
-        photoUrl: data.photoUrl,
+        photoUrl: data.photoUrl && data.photoUrl.trim() !== "" ? data.photoUrl : null,
       },
     });
 
@@ -74,10 +78,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function DELETE(request: NextRequest) {
   try {
-    await requireRole([UserRole.super_admin]);
-    const { searchParams } = new URL(req.url);
+    await requireRole(["super_admin"]);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {

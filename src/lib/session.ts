@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "./auth";
-import { UserRole } from "@prisma/client";
+
+type UserRole = "voter" | "admin" | "super_admin";
 
 export async function getSession() {
   return await getServerSession(authOptions);

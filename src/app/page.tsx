@@ -79,7 +79,7 @@ export default function Home() {
               <span>Sign In with Google</span>
             </button>
             <p className="text-xs text-gray-500">
-              Only CSE23 students with official @cse.du.ac.bd emails can vote
+              Only CSE23 students with official @cse.mrt.ac.lk emails can vote
             </p>
           </div>
 

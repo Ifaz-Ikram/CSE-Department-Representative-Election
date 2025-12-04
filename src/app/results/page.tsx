@@ -243,7 +243,7 @@ export default function ResultsPage() {
             </>
           )}
 
-          {!selectedElection && elections.length === 0 && (
+          {!selectedElectionId && elections.length === 0 && (
             <div className="card text-center text-gray-400">
               <p>No elections available.</p>
             </div>

@@ -2,7 +2,6 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
-import { UserRole } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -21,29 +20,26 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      // Check if user exists, if not create with voter role
+      // Check if user exists and update indexNumber if needed
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email },
       });
 
-      if (!existingUser) {
+      if (existingUser && !existingUser.indexNumber) {
         // Extract index number from email (e.g., "2307001@cse.du.ac.bd" -> "2307001")
         const indexNumber = user.email.split("@")[0];
         
-        await prisma.user.create({
+        await prisma.user.update({
+          where: { email: user.email },
           data: {
-            id: user.id!,
-            email: user.email,
-            name: user.name || "",
             indexNumber,
-            role: UserRole.voter,
           },
         });
       }
 
       return true;
     },
-    async session({ session, user }) {
+    async session({ session, token }) {
       if (session.user) {
         const dbUser = await prisma.user.findUnique({
           where: { email: session.user.email! },
@@ -52,8 +48,8 @@ export const authOptions: NextAuthOptions = {
 
         if (dbUser) {
           session.user.id = dbUser.id;
-          session.user.role = dbUser.role;
-          session.user.indexNumber = dbUser.indexNumber;
+          session.user.role = dbUser.role as "voter" | "admin" | "super_admin";
+          session.user.indexNumber = dbUser.indexNumber || "";
         }
       }
       return session;
