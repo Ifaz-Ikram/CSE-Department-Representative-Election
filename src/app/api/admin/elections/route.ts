@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+export const dynamic = "force-dynamic";
+
 const CreateElectionSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
