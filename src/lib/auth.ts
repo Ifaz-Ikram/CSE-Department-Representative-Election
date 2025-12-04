@@ -25,8 +25,8 @@ export const authOptions: NextAuthOptions = {
       const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || "cse.du.ac.bd";
       
       if (!user.email?.endsWith(`@${allowedDomain}`)) {
-        // Redirect back to home (no error query) - user will see notification
-        return "/";
+        // Redirect with error parameter so notification can be shown
+        return "/?error=InvalidDomain";
       }
 
       // Check if user exists and update indexNumber if needed

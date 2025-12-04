@@ -21,18 +21,31 @@ function HomeContent() {
   useEffect(() => {
     // Check if user was redirected due to sign-in failure
     const error = searchParams.get("error");
-    if (error === "AccessDenied" || !session && status === "unauthenticated") {
-      // Check if we just attempted to sign in (based on callback parameter)
-      const callbackUrl = searchParams.get("callbackUrl");
-      if (error || callbackUrl) {
-        setErrorMessage("Sign-in failed. Please use your CSE Gmail account.");
-        setShowError(true);
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => setShowError(false), 5000);
-      }
+    
+    if (error === "InvalidDomain") {
+      setErrorMessage("Sign-in failed. Please use your CSE Gmail account.");
+      setShowError(true);
+      
+      // Clean the URL after showing error
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => setShowError(false), 5000);
+    } else if (error === "AccessDenied") {
+      setErrorMessage("Access denied. Only CSE accounts are allowed.");
+      setShowError(true);
+      
+      // Clean the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => setShowError(false), 5000);
     }
-  }, [searchParams, session, status]);
+  }, [searchParams]);
 
   if (status === "loading") {
     return (
