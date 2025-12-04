@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 
 function normalizeName(raw: string | null | undefined): string {
@@ -11,7 +10,7 @@ function normalizeName(raw: string | null | undefined): string {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Removed PrismaAdapter - we handle user creation manually in signIn callback
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
