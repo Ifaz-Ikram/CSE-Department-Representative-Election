@@ -19,6 +19,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = CreateCandidateSchema.parse(body);
 
+    // SECURITY: Validate candidate is from the 200-student whitelist
+    if (data.email && data.email.trim() !== "") {
+      const registryEntry = await prisma.voterRegistry.findUnique({
+        where: { email: data.email },
+      });
+
+      if (!registryEntry || !registryEntry.isActive) {
+        return NextResponse.json(
+          { 
+            error: "Candidate must be from the authorized CSE23 voter list",
+            details: "Only students from the 200-person whitelist can be candidates"
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Find or create user for the candidate (only if email is provided)
     let userId = data.userId || null;
     

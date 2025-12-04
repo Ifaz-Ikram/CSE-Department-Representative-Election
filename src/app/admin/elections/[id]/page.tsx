@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import CandidateSelector from "@/components/CandidateSelector";
 import Link from "next/link";
 
 interface Candidate {
@@ -24,14 +25,7 @@ export default function ManageCandidatesPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [election, setElection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    indexNumber: "",
-    email: "",
-    bio: "",
-    photoUrl: "",
-  });
+  const [showCandidateSelector, setShowCandidateSelector] = useState(false);
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
@@ -77,37 +71,9 @@ export default function ManageCandidatesPage() {
     }
   };
 
-  const handleCreateCandidate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("/api/admin/candidates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          electionId,
-        }),
-      });
-
-      if (res.ok) {
-        setShowForm(false);
-        setFormData({
-          name: "",
-          indexNumber: "",
-          email: "",
-          bio: "",
-          photoUrl: "",
-        });
-        fetchCandidates();
-      } else {
-        const error = await res.json();
-        console.error("Failed to create candidate:", error);
-        alert(`Failed to create candidate: ${error.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error("Failed to create candidate:", error);
-      alert("Failed to create candidate. Please try again.");
-    }
+  const handleCandidateAdded = () => {
+    setShowCandidateSelector(false);
+    fetchCandidates();
   };
 
   const handleDeleteCandidate = async (candidateId: string) => {
@@ -152,96 +118,21 @@ export default function ManageCandidatesPage() {
                 )}
               </div>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => setShowCandidateSelector(true)}
                 className="btn-primary"
               >
-                {showForm ? "Cancel" : "+ Add Candidate"}
+                + Add Candidate from CSE23 Batch
               </button>
             </div>
           </div>
 
-          {/* Add Candidate Form */}
-          {showForm && (
-            <div className="card mb-6">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                Add New Candidate
-              </h2>
-              <form onSubmit={handleCreateCandidate} className="space-y-4">
-                <div>
-                  <label className="block text-cyan text-sm font-bold mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="input-field w-full"
-                    required
-                  />
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-cyan text-sm font-bold mb-2">
-                      Index Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.indexNumber}
-                      onChange={(e) =>
-                        setFormData({ ...formData, indexNumber: e.target.value })
-                      }
-                      className="input-field w-full"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-cyan text-sm font-bold mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="input-field w-full"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-cyan text-sm font-bold mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bio: e.target.value })
-                    }
-                    className="input-field w-full"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-cyan text-sm font-bold mb-2">
-                    Photo URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.photoUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, photoUrl: e.target.value })
-                    }
-                    className="input-field w-full"
-                  />
-                </div>
-                <button type="submit" className="btn-primary">
-                  Add Candidate
-                </button>
-              </form>
-            </div>
+          {/* Candidate Selector Modal */}
+          {showCandidateSelector && (
+            <CandidateSelector
+              electionId={electionId}
+              onSuccess={handleCandidateAdded}
+              onCancel={() => setShowCandidateSelector(false)}
+            />
           )}
 
           {/* Candidates List */}
