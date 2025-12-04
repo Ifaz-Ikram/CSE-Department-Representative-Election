@@ -9,6 +9,7 @@ import Link from "next/link";
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+    
   const [elections, setElections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -22,17 +23,17 @@ export default function AdminPage() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
-    } else if (
-      session &&
-      session.user.role !== "super_admin" &&
-      session.user.role !== "admin"
-    ) {
-      router.push("/vote");
+    } else if (session) {
+      const role = (session.user as any)?.role;
+      if (role !== "super_admin" && role !== "admin") {
+        router.push("/vote");
+      }
     }
   }, [status, session, router]);
 
   useEffect(() => {
-    if (session?.user.role === "super_admin" || session?.user.role === "admin") {
+    const role = (session?.user as any)?.role;
+    if (role === "super_admin" || role === "admin") {
       fetchElections();
     }
   }, [session]);

@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 
 interface CandidateStats {
@@ -14,7 +14,17 @@ interface CandidateStats {
   voteCount: number;
 }
 
+export const dynamic = "force-dynamic";
+
 export default function ResultsPage() {
+  return (
+    <Suspense fallback={<FullPageLoader />}>
+      <ResultsPageContent />
+    </Suspense>
+  );
+}
+
+function ResultsPageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,11 +101,7 @@ export default function ResultsPage() {
   };
 
   if (loading || status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-cyan text-xl">Loading...</div>
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   const maxVotes = Math.max(...stats.map((s) => s.voteCount), 1);
@@ -250,6 +256,14 @@ export default function ResultsPage() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function FullPageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-cyan text-xl">Loading...</div>
     </div>
   );
 }

@@ -63,23 +63,21 @@ export async function POST(req: NextRequest) {
     // Use transaction to ensure atomic update
     const result = await prisma.$transaction(async (tx) => {
       // Find or create ballot
-      let ballot = await tx.ballot.findUnique({
-        where: {
-          electionId_voterId: {
-            electionId,
-            voterId: session.user.id,
+      let ballot =
+        (await tx.ballot.findUnique({
+          where: {
+            electionId_voterId: {
+              electionId,
+              voterId: session.user.id,
+            },
           },
-        },
-      });
-
-      if (!ballot) {
-        ballot = await tx.ballot.create({
+        })) ??
+        (await tx.ballot.create({
           data: {
             electionId,
             voterId: session.user.id,
           },
-        });
-      }
+        }));
 
       // Delete existing choices
       await tx.ballotChoice.deleteMany({

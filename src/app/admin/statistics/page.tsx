@@ -2,11 +2,21 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminStatisticsPage() {
+  return (
+    <Suspense fallback={<FullPageLoader />}>
+      <AdminStatisticsContent />
+    </Suspense>
+  );
+}
+
+function AdminStatisticsContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,17 +31,17 @@ export default function AdminStatisticsPage() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
-    } else if (
-      session &&
-      session.user.role !== "super_admin" &&
-      session.user.role !== "admin"
-    ) {
-      router.push("/vote");
+    } else if (session) {
+      const role = (session.user as any)?.role;
+      if (role !== "super_admin" && role !== "admin") {
+        router.push("/vote");
+      }
     }
   }, [status, session, router]);
 
   useEffect(() => {
-    if ((session?.user.role === "super_admin" || session?.user.role === "admin") && electionId) {
+    const role = (session?.user as any)?.role;
+    if ((role === "super_admin" || role === "admin") && electionId) {
       fetchStatistics();
     }
   }, [session, electionId]);
@@ -58,11 +68,7 @@ export default function AdminStatisticsPage() {
   };
 
   if (loading || status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-cyan text-xl">Loading...</div>
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   const maxVotes = Math.max(...stats.map((s) => s.voteCount), 1);
@@ -73,8 +79,11 @@ export default function AdminStatisticsPage() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <Link href="/admin" className="text-cyan hover:text-cyan-light mb-4 inline-block">
-            ← Back to Admin Dashboard
+          <Link
+            href="/admin"
+            className="text-cyan hover:text-cyan-light mb-4 inline-block"
+          >
+            ƒ+? Back to Admin Dashboard
           </Link>
 
           <div className="mb-8">
@@ -148,6 +157,14 @@ export default function AdminStatisticsPage() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function FullPageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-cyan text-xl">Loading...</div>
     </div>
   );
 }

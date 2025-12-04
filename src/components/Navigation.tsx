@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 
 export default function Navigation() {
   const { data: session, status } = useSession();
+  const user = session?.user;
+  const role = user?.role;
   const pathname = usePathname();
 
   if (status === "loading") {

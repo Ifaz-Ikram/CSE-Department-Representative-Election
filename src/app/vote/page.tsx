@@ -113,13 +113,13 @@ export default function VotePage() {
       
       if (data.ballot) {
         setBallot(data.ballot);
-        const chosenIds = new Set(
+        const chosenIds = new Set<string>(
           data.ballot.choices.map((c: any) => c.candidate.id)
         );
         setSelectedCandidates(chosenIds);
       } else {
         setBallot(null);
-        setSelectedCandidates(new Set());
+        setSelectedCandidates(new Set<string>());
       }
     } catch (error) {
       console.error("Failed to fetch ballot:", error);

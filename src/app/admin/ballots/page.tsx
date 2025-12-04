@@ -2,11 +2,21 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminBallotsPage() {
+  return (
+    <Suspense fallback={<FullPageLoader />}>
+      <AdminBallotsContent />
+    </Suspense>
+  );
+}
+
+function AdminBallotsContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,17 +30,21 @@ export default function AdminBallotsPage() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
-    } else if (
-      session &&
-      session.user.role !== "super_admin" &&
-      session.user.role !== "admin"
-    ) {
+      return;
+    }
+
+    const user = session?.user as any;
+
+    if (user && user.role !== "super_admin" && user.role !== "admin") {
       router.push("/vote");
     }
   }, [status, session, router]);
 
   useEffect(() => {
-    if ((session?.user.role === "super_admin" || session?.user.role === "admin") && electionId) {
+    const user = session?.user as any;
+    const role = user?.role;
+
+    if ((role === "super_admin" || role === "admin") && electionId) {
       fetchBallots();
     }
   }, [session, electionId]);
@@ -56,11 +70,7 @@ export default function AdminBallotsPage() {
   };
 
   if (loading || status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-cyan text-xl">Loading...</div>
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   return (
@@ -69,17 +79,18 @@ export default function AdminBallotsPage() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <Link href="/admin" className="text-cyan hover:text-cyan-light mb-4 inline-block">
-            ← Back to Admin Dashboard
+          <Link
+            href="/admin"
+            className="text-cyan hover:text-cyan-light mb-4 inline-block"
+          >
+            ƒ+? Back to Admin Dashboard
           </Link>
 
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">
               Voter <span className="text-cyan glow-text">Ballots</span>
             </h1>
-            {election && (
-              <p className="text-gray-400">{election.name}</p>
-            )}
+            {election && <p className="text-gray-400">{election.name}</p>}
           </div>
 
           {error && (
@@ -100,7 +111,7 @@ export default function AdminBallotsPage() {
                     {ballots.length}
                   </p>
                   <p className="text-xs text-yellow-400">
-                    ⚠️ This data is sensitive. Handle with care.
+                    ƒsÿ‹,? This data is sensitive. Handle with care.
                   </p>
                 </div>
               </div>
@@ -166,6 +177,14 @@ export default function AdminBallotsPage() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function FullPageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-cyan text-xl">Loading...</div>
     </div>
   );
 }

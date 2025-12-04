@@ -33,16 +33,23 @@ export default function ManageCandidatesPage() {
     photoUrl: "",
   });
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/");
-    } else if (session && session.user.role !== "super_admin") {
-      router.push("/admin");
-    }
-  }, [status, session, router]);
+	useEffect(() => {
+		if (status === "unauthenticated") {
+			router.push("/");
+			return;
+		}
+
+		const role = (session?.user as any)?.role;
+
+		if (role && role !== "super_admin") {
+			router.push("/admin");
+		}
+	}, [status, session, router]);
+
 
   useEffect(() => {
-    if (session?.user.role === "super_admin" && electionId) {
+    const role = (session?.user as any)?.role;
+    if (role === "super_admin" && electionId) {
       fetchCandidates();
       fetchElection();
     }
