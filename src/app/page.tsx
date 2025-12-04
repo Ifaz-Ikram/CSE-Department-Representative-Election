@@ -55,7 +55,7 @@ export default function Home() {
               </p>
             </div>
             <button
-              onClick={() => signIn("google")}
+              onClick={() => signIn("google", { callbackUrl: "/" })}
               className="btn-primary w-full text-lg py-4 flex items-center justify-center space-x-3"
             >
               <svg className="w-6 h-6" viewBox="0 0 24 24">

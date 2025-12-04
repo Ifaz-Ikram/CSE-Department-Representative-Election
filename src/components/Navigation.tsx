@@ -74,7 +74,7 @@ export default function Navigation() {
                 </div>
               </>
             ) : (
-              <button onClick={() => signIn("google")} className="btn-primary">
+              <button onClick={() => signIn("google", { callbackUrl: "/" })} className="btn-primary">
                 Sign In with Google
               </button>
             )}

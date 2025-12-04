@@ -62,6 +62,13 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // Only ever redirect within our own site
+      if (url.startsWith(baseUrl)) return url;
+      
+      // If some external or old value appears, ignore it and redirect to base
+      return baseUrl;
+    },
   },
   pages: {
     signIn: "/",
