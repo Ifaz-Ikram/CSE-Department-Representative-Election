@@ -61,3 +61,18 @@ body {
 .input-field {
   @apply bg-navy-dark border border-cyan/30 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-cyan focus:ring-1 focus:ring-cyan;
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}

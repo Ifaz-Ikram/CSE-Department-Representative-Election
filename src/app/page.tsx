@@ -1,19 +1,38 @@
 "use client";
 
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (session) {
       router.push("/vote");
     }
   }, [session, router]);
+
+  useEffect(() => {
+    // Check if user was redirected due to sign-in failure
+    const error = searchParams.get("error");
+    if (error === "AccessDenied" || !session && status === "unauthenticated") {
+      // Check if we just attempted to sign in (based on callback parameter)
+      const callbackUrl = searchParams.get("callbackUrl");
+      if (error || callbackUrl) {
+        setErrorMessage("Sign-in failed. Please use your CSE Gmail account.");
+        setShowError(true);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => setShowError(false), 5000);
+      }
+    }
+  }, [searchParams, session, status]);
 
   if (status === "loading") {
     return (
@@ -26,6 +45,29 @@ export default function Home() {
   return (
     <div className="min-h-screen circuit-bg">
       <Navigation />
+      
+      {/* Error Notification */}
+      {showError && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+          <div className="bg-red-500/20 border border-red-500 rounded-lg px-6 py-4 shadow-lg backdrop-blur-sm">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="text-red-400 font-semibold">{errorMessage}</p>
+                <p className="text-red-300 text-sm">Only @cse.du.ac.bd accounts are allowed</p>
+              </div>
+              <button 
+                onClick={() => setShowError(false)}
+                className="text-red-400 hover:text-red-300 ml-4"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center space-y-12">

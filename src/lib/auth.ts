@@ -25,7 +25,8 @@ export const authOptions: NextAuthOptions = {
       const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || "cse.du.ac.bd";
       
       if (!user.email?.endsWith(`@${allowedDomain}`)) {
-        return false;
+        // Redirect back to home (no error query) - user will see notification
+        return "/";
       }
 
       // Check if user exists and update indexNumber if needed
@@ -63,11 +64,25 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Only ever redirect within our own site
-      if (url.startsWith(baseUrl)) return url;
-      
-      // If some external or old value appears, ignore it and redirect to base
-      return baseUrl;
+      try {
+        const parsed = new URL(url, baseUrl);
+
+        // If NextAuth is trying to send us back with an AccessDenied error,
+        // ignore it and just go to the base URL
+        if (parsed.searchParams.get("error") === "AccessDenied") {
+          return baseUrl;
+        }
+
+        // If redirect is within the same origin, allow it
+        if (parsed.origin === baseUrl) {
+          return parsed.toString();
+        }
+
+        // For any external or weird URL, always fall back to base URL
+        return baseUrl;
+      } catch {
+        return baseUrl;
+      }
     },
   },
   pages: {
