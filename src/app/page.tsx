@@ -2,10 +2,10 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Navigation from "@/components/Navigation";
 
-export default function Home() {
+function HomeContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -182,5 +182,17 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-cyan text-xl">Loading...</div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   );
 }
