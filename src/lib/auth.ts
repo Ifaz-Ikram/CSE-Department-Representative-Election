@@ -3,6 +3,13 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
 
+function normalizeName(raw: string | null | undefined): string {
+  if (!raw) return "";
+  const lower = raw.trim().toLowerCase();
+  if (!lower) return "";
+  return lower[0].toUpperCase() + lower.slice(1);
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -20,28 +27,47 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user, account, profile }) {
-      // Only allow emails from the whitelisted domain
-      const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || "cse.du.ac.bd";
-      
-      if (!user.email?.endsWith(`@${allowedDomain}`)) {
-        // Redirect with error parameter so notification can be shown
-        return "/?error=InvalidDomain";
-      }
+    async signIn({ user }) {
+      if (!user.email) return "/?error=InvalidDomain";
 
-      // Check if user exists and update indexNumber if needed
-      const existingUser = await prisma.user.findUnique({
+      // 1) Check whitelist
+      const registry = await prisma.voterRegistry.findUnique({
         where: { email: user.email },
       });
 
-      if (existingUser && !existingUser.indexNumber) {
-        // Extract index number from email (e.g., "2307001@cse.du.ac.bd" -> "2307001")
-        const indexNumber = user.email.split("@")[0];
-        
+      if (!registry || !registry.isActive) {
+        // Not in our whitelist - deny access
+        return "/?error=InvalidDomain";
+      }
+
+      // 2) Build normalized full name
+      const firstName = normalizeName(registry.firstName);
+      const lastName = normalizeName(registry.lastName);
+      const fullName = (firstName + " " + lastName).trim() || (user.name ?? "");
+
+      // 3) Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email: registry.email },
+      });
+
+      if (existingUser) {
+        // User exists - only update name and indexNumber, preserve role
         await prisma.user.update({
-          where: { email: user.email },
+          where: { email: registry.email },
           data: {
-            indexNumber,
+            name: fullName,
+            indexNumber: registry.regNo,
+            // Don't touch role - preserves super_admin if already set
+          },
+        });
+      } else {
+        // New user - create with voter role
+        await prisma.user.create({
+          data: {
+            email: registry.email,
+            name: fullName,
+            indexNumber: registry.regNo,
+            role: "voter", // All new users start as voter
           },
         });
       }
