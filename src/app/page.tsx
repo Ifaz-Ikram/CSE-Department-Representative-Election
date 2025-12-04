@@ -56,7 +56,7 @@ function HomeContent() {
               </svg>
               <div>
                 <p className="text-red-400 font-semibold">{errorMessage}</p>
-                <p className="text-red-300 text-sm">Only @cse.du.ac.bd accounts are allowed</p>
+                <p className="text-red-300 text-sm">Only @cse.mrt.ac.lk accounts are allowed</p>
               </div>
               <button 
                 onClick={() => setShowError(false)}
