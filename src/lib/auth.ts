@@ -29,14 +29,20 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user }) {
       if (!user.email) return "/?error=InvalidDomain";
 
-      // 1) Check whitelist
+      // Check if it's a CSE email but not CSE23
+      if (user.email.endsWith('@cse.mrt.ac.lk') && !user.email.includes('.23@cse.mrt.ac.lk')) {
+        // CSE email but wrong batch
+        return "/?error=NotCSE23";
+      }
+
+      // 1) Check whitelist - must be in the 200 authorized CSE23 students
       const registry = await prisma.voterRegistry.findUnique({
         where: { email: user.email },
       });
 
       if (!registry || !registry.isActive) {
-        // Not in our whitelist - deny access
-        return "/?error=InvalidDomain";
+        // Not in our whitelist of 200 CSE23 students - deny access
+        return "/?error=NotWhitelisted";
       }
 
       // 2) Build normalized full name

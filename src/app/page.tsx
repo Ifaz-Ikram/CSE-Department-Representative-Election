@@ -22,8 +22,8 @@ function HomeContent() {
     // Check if user was redirected due to sign-in failure
     const error = searchParams.get("error");
     
-    if (error === "InvalidDomain") {
-      setErrorMessage("Sign-in failed. Please use your CSE Gmail account.");
+    if (error === "NotCSE23") {
+      setErrorMessage("Access denied. Only CSE23 batch accounts are allowed (.23@cse.mrt.ac.lk)");
       setShowError(true);
       
       // Clean the URL after showing error
@@ -31,10 +31,10 @@ function HomeContent() {
       url.searchParams.delete("error");
       window.history.replaceState({}, "", url.toString());
       
-      // Auto-hide after 5 seconds
-      setTimeout(() => setShowError(false), 5000);
-    } else if (error === "AccessDenied") {
-      setErrorMessage("Access denied. Only CSE accounts are allowed.");
+      // Auto-hide after 7 seconds
+      setTimeout(() => setShowError(false), 7000);
+    } else if (error === "NotWhitelisted") {
+      setErrorMessage("Access denied. Your email is not in the authorized voter list.");
       setShowError(true);
       
       // Clean the URL
@@ -42,8 +42,30 @@ function HomeContent() {
       url.searchParams.delete("error");
       window.history.replaceState({}, "", url.toString());
       
-      // Auto-hide after 5 seconds
-      setTimeout(() => setShowError(false), 5000);
+      // Auto-hide after 7 seconds
+      setTimeout(() => setShowError(false), 7000);
+    } else if (error === "InvalidDomain") {
+      setErrorMessage("Sign-in failed. Please use your CSE Gmail account.");
+      setShowError(true);
+      
+      // Clean the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+      
+      // Auto-hide after 7 seconds
+      setTimeout(() => setShowError(false), 7000);
+    } else if (error === "AccessDenied") {
+      setErrorMessage("Access denied. Only authorized CSE23 accounts are allowed.");
+      setShowError(true);
+      
+      // Clean the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+      
+      // Auto-hide after 7 seconds
+      setTimeout(() => setShowError(false), 7000);
     }
   }, [searchParams]);
 
