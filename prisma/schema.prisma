@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  voter
+  admin
+  super_admin
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  indexNumber String   @map("index_number")
+  name        String?
+  role        UserRole @default(voter)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  ballots     Ballot[]
+  candidacies Candidate[]
+
+  @@map("users")
+}
+
+model Election {
+  id                    String    @id @default(cuid())
+  name                  String
+  description           String?
+  startTime             DateTime  @map("start_time")
+  endTime               DateTime  @map("end_time")
+  resultsVisible        Boolean   @default(false) @map("results_visible")
+  publicResultsVisible  Boolean   @default(false) @map("public_results_visible")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  candidates  Candidate[]
+  ballots     Ballot[]
+
+  @@map("elections")
+}
+
+model Candidate {
+  id          String  @id @default(cuid())
+  electionId  String  @map("election_id")
+  userId      String  @map("user_id")
+  name        String
+  indexNumber String  @map("index_number")
+  email       String
+  bio         String?
+  photoUrl    String? @map("photo_url")
+
+  election      Election        @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ballotChoices BallotChoice[]
+
+  @@map("candidates")
+}
+
+model Ballot {
+  id         String   @id @default(cuid())
+  electionId String   @map("election_id")
+  voterId    String   @map("voter_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  election Election       @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  voter    User           @relation(fields: [voterId], references: [id], onDelete: Cascade)
+  choices  BallotChoice[]
+
+  @@unique([electionId, voterId])
+  @@map("ballots")
+}
+
+model BallotChoice {
+  id          String @id @default(cuid())
+  ballotId    String @map("ballot_id")
+  candidateId String @map("candidate_id")
+
+  ballot    Ballot    @relation(fields: [ballotId], references: [id], onDelete: Cascade)
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@map("ballot_choices")
+}
