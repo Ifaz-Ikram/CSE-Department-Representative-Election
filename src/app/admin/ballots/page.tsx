@@ -83,7 +83,7 @@ function AdminBallotsContent() {
             href="/admin"
             className="text-cyan hover:text-cyan-light mb-4 inline-block"
           >
-            ƒ+? Back to Admin Dashboard
+          Back to Admin Dashboard
           </Link>
 
           <div className="mb-8">
@@ -111,7 +111,7 @@ function AdminBallotsContent() {
                     {ballots.length}
                   </p>
                   <p className="text-xs text-yellow-400">
-                    ƒsÿ‹,? This data is sensitive. Handle with care.
+                    This data is sensitive. Handle with care.
                   </p>
                 </div>
               </div>

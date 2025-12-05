@@ -83,7 +83,7 @@ function AdminStatisticsContent() {
             href="/admin"
             className="text-cyan hover:text-cyan-light mb-4 inline-block"
           >
-            ƒ+? Back to Admin Dashboard
+            Back to Admin Dashboard
           </Link>
 
           <div className="mb-8">
