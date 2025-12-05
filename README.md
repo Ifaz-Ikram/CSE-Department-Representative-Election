@@ -292,7 +292,7 @@ npx prisma db push       # Push schema without migration
 
 ## 📄 License
 
-This project is built for CSE23 batch elections at the University of Dhaka.
+This project is built for CSE23 batch elections at the University of Moratuwa.
 
 ## 🤝 Support
 

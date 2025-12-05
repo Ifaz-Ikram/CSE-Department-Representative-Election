@@ -238,4 +238,4 @@ For detailed instructions, troubleshooting, and deployment guides, refer to the 
 
 ---
 
-**Built for CSE23 Batch | University of Dhaka**
+**Built for CSE23 Batch | University of Moratuwa**
