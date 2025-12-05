@@ -97,8 +97,8 @@ export async function PATCH(request: NextRequest) {
     const data = UpdateElectionSchema.parse(body);
 
     const updateData: any = {};
-    if (data.name) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.name) updateData.name = sanitizeInput(data.name, 200);
+    if (data.description !== undefined) updateData.description = sanitizeHtml(data.description);
     if (data.startTime) updateData.startTime = new Date(data.startTime);
     if (data.endTime) updateData.endTime = new Date(data.endTime);
     if (data.resultsVisible !== undefined) updateData.resultsVisible = data.resultsVisible;
