@@ -16,16 +16,17 @@ const createPrismaClient = () => {
     globalForPrisma.pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       
-      // Connection pool sizing
-      max: isDevelopment ? 5 : 10, // Dev: 5 connections, Prod: 10 connections
-      min: 2, // Maintain minimum 2 idle connections
+      // Connection pool sizing - CRITICAL for serverless (Vercel)
+      // Each serverless function gets its own pool, so keep it minimal
+      max: isDevelopment ? 5 : 1, // Dev: 5, Prod (serverless): 1 connection per function
+      min: isDevelopment ? 2 : 0, // Serverless: no idle connections
       
       // Timing settings
-      idleTimeoutMillis: 30000, // Close idle connections after 30s
+      idleTimeoutMillis: 10000, // Close idle connections quickly (10s)
       connectionTimeoutMillis: 10000, // Timeout if can't connect in 10s
       
       // Error handling
-      allowExitOnIdle: false, // Keep process alive
+      allowExitOnIdle: !isDevelopment, // Allow serverless functions to exit when idle
     });
 
     // Log pool errors
