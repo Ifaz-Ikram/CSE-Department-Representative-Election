@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logAnonymousVote } from "@/lib/auditLog";
+import { rateLimit } from "@/lib/rateLimit";
 
 const SubmitBallotSchema = z.object({
   electionId: z.string(),
@@ -11,6 +12,10 @@ const SubmitBallotSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(req, "vote");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await requireAuth();
     const body = await req.json();
 

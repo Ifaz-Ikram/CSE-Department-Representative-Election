@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
+import { rateLimit } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,10 @@ const UpdateElectionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await requireRole(["super_admin"]);
     const body = await request.json();
     const data = CreateElectionSchema.parse(body);
