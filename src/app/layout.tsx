@@ -10,8 +10,17 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "CSE23 Department Representative Elections",
+  title: "CSE 23 Department Representative Elections",
   description: "Secure voting platform for CSE23 batch representative elections",
+  icons: {
+    icon: "/cse23logo.jpg",
+    apple: "/cse23logo.jpg",
+  },
+  openGraph: {
+    title: "CSE 23 Department Representative Elections",
+    description: "Secure voting platform for CSE23 batch representative elections",
+    images: ["/cse23logo.jpg"],
+  },
 };
 
 export default function RootLayout({
