@@ -34,6 +34,9 @@ model User {
   sessions      Session[]
   ballots       Ballot[]
   candidates    Candidate[]
+
+  @@index([role])
+  @@index([email, role])
 }
 
 model Account {
@@ -62,6 +65,9 @@ model Session {
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
 }
 
 model VerificationToken {
@@ -84,6 +90,9 @@ model Election {
 
   candidates Candidate[]
   ballots    Ballot[]
+
+  @@index([startTime, endTime])
+  @@index([createdAt])
 }
 
 model Candidate {
@@ -100,6 +109,10 @@ model Candidate {
   election      Election      @relation(fields: [electionId], references: [id], onDelete: Cascade)
   user          User?         @relation(fields: [userId], references: [id])
   ballotChoices BallotChoice[]
+
+  @@index([electionId])
+  @@index([userId])
+  @@index([email])
 }
 
 model Ballot {
@@ -114,6 +127,10 @@ model Ballot {
   choices  BallotChoice[]
 
   @@unique([electionId, voterId])
+  @@index([electionId])
+  @@index([voterId])
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model BallotChoice {
@@ -125,6 +142,8 @@ model BallotChoice {
   candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 
   @@unique([ballotId, candidateId])
+  @@index([ballotId])
+  @@index([candidateId])
 }
 
 model AuditLog {
@@ -138,4 +157,10 @@ model AuditLog {
   targetId    String?  // ID of affected resource
   targetName  String?  // Human-readable name of target
   details     Json?    // Additional context (old/new values, metadata)
+
+  @@index([timestamp])
+  @@index([category])
+  @@index([actorEmail])
+  @@index([category, timestamp])
+  @@index([targetId])
 }
