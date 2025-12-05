@@ -5,6 +5,7 @@ import { z } from "zod";
 import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
 import { rateLimit } from "@/lib/rateLimit";
 import { sanitizeInput, sanitizeHtml } from "@/lib/sanitize";
+import { invalidateElectionCache } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,9 @@ export async function POST(request: NextRequest) {
       targetName: election.name,
       details: { startTime: election.startTime, endTime: election.endTime },
     });
+
+    // Invalidate elections cache
+    await invalidateElectionCache(election.id);
 
     return NextResponse.json({ success: true, election });
   } catch (error) {
@@ -120,6 +124,9 @@ export async function PATCH(request: NextRequest) {
       details: updateData,
     });
 
+    // Invalidate election cache
+    await invalidateElectionCache(election.id);
+
     return NextResponse.json({ success: true, election });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -176,6 +183,9 @@ export async function DELETE(request: NextRequest) {
       targetId: id,
       targetName: electionToDelete?.name || 'Unknown',
     });
+
+    // Invalidate election cache
+    await invalidateElectionCache(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

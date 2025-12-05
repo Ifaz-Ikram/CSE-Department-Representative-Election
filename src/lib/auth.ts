@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "./prisma";
+import { monitorAuthFailure, monitorSecurityEvent, AlertSeverity } from "./monitoring";
 
 function normalizeName(raw: string | null | undefined): string {
   if (!raw) return "";
@@ -27,7 +28,10 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user }) {
-      if (!user.email) return "/?error=InvalidDomain";
+      if (!user.email) {
+        monitorAuthFailure("No email provided", undefined, undefined);
+        return "/?error=InvalidDomain";
+      }
 
       // 1) Check whitelist - must be in the authorized voter registry
       const registry = await prisma.voterRegistry.findUnique({
@@ -36,6 +40,16 @@ export const authOptions: NextAuthOptions = {
 
       if (!registry || !registry.isActive) {
         // Not in our whitelist of 200 CSE23 students - deny access
+        monitorAuthFailure(
+          "User not in voter registry or inactive",
+          user.email,
+          undefined
+        );
+        monitorSecurityEvent(
+          "unauthorized_login_attempt",
+          AlertSeverity.WARNING,
+          { email: user.email, reason: "not_in_whitelist" }
+        );
         return "/?error=NotWhitelisted";
       }
 

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
 import { sanitizeInput, sanitizeHtml, sanitizeUrl, sanitizeEmail } from "@/lib/sanitize";
+import { invalidateCandidateCache } from "@/lib/cache";
 
 const CreateCandidateSchema = z.object({
   electionId: z.string(),
@@ -109,6 +110,9 @@ export async function POST(request: NextRequest) {
       details: { electionId: candidate.electionId, indexNumber: candidate.indexNumber },
     });
 
+    // Invalidate candidate cache for this election
+    await invalidateCandidateCache(data.electionId);
+
     return NextResponse.json({ success: true, candidate });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -167,6 +171,11 @@ export async function DELETE(request: NextRequest) {
       details: { electionId: candidate?.electionId },
     });
 
+    // Invalidate candidate cache for this election
+    if (candidate?.electionId) {
+      await invalidateCandidateCache(candidate.electionId);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error) {
@@ -212,6 +221,9 @@ export async function PUT(request: NextRequest) {
       targetName: candidate.name,
       details: { bio: data.bio, photoUrl: data.photoUrl, languages: data.languages },
     });
+
+    // Invalidate candidate cache for this election
+    await invalidateCandidateCache(candidate.electionId);
 
     return NextResponse.json({ success: true, candidate });
   } catch (error) {

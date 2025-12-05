@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { getOrSetCached, CacheKeys, CacheTTL } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +18,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const election = await prisma.election.findUnique({
-      where: { id: electionId },
-    });
+    // Cache election data for 5 minutes
+    const election = await getOrSetCached(
+      CacheKeys.ELECTION(electionId),
+      async () => {
+        return await prisma.election.findUnique({
+          where: { id: electionId },
+        });
+      },
+      CacheTTL.MEDIUM
+    );
 
     if (!election) {
       return NextResponse.json(
@@ -28,10 +36,17 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const candidates = await prisma.candidate.findMany({
-      where: { electionId },
-      orderBy: { id: "asc" },
-    });
+    // Cache candidates list for 5 minutes
+    const candidates = await getOrSetCached(
+      CacheKeys.CANDIDATES(electionId),
+      async () => {
+        return await prisma.candidate.findMany({
+          where: { electionId },
+          orderBy: { id: "asc" },
+        });
+      },
+      CacheTTL.MEDIUM
+    );
 
     return NextResponse.json({ candidates, election });
   } catch (error) {
