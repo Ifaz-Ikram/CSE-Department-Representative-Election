@@ -660,7 +660,7 @@ export default function VotePage() {
               </div>
 
               {/* Selection Summary & Submit */}
-              <div className="glass-card mb-8 p-6 sticky top-20 z-30 animate-slide-up border-cyan/30">
+              <div className="mb-8 p-6 sticky top-[88px] z-40 rounded-xl border border-cyan/30" style={{ backgroundColor: '#050a15', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.9)' }}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="w-full md:w-auto">
                     <div className="flex items-center justify-between md:justify-start space-x-4 mb-3">
