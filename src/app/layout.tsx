@@ -10,6 +10,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://cse23-elections.vercel.app"),
   title: "CSE 23 Department Representative Elections",
   description: "Secure voting platform for CSE23 batch representative elections",
   icons: {
