@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
 import { normalizePhotoUrl, getInitials } from "@/lib/themeHelpers";
@@ -56,6 +57,7 @@ export default function VotePage() {
     seconds: number;
   } | null>(null);
   const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -209,9 +211,17 @@ export default function VotePage() {
     setMessage(null);
   };
 
-  const handleSubmit = async () => {
+  // Show confirmation modal before submitting
+  const handleShowConfirmation = () => {
+    if (!selectedElectionId || selectedCandidates.size === 0) return;
+    setShowConfirmModal(true);
+  };
+
+  // Actual submission after confirmation
+  const handleConfirmSubmit = async () => {
     if (!selectedElectionId) return;
 
+    setShowConfirmModal(false);
     setSubmitting(true);
     setMessage(null);
 
@@ -247,6 +257,11 @@ export default function VotePage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Get selected candidates data for confirmation modal
+  const getSelectedCandidatesData = () => {
+    return candidates.filter(c => selectedCandidates.has(c.id));
   };
 
   if (loading || status === "loading") {
@@ -377,6 +392,116 @@ export default function VotePage() {
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span>I Understand, Let Me Vote</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Vote Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-navy-dark/95 backdrop-blur-md"
+            onClick={() => setShowConfirmModal(false)}
+          />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-lg max-h-[90vh] animate-slide-up rounded-2xl overflow-hidden bg-gradient-to-br from-navy-light to-navy-darker border-2 border-cyan/50 shadow-2xl" style={{ boxShadow: '0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(0, 229, 255, 0.1)' }}>
+            <div className="max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="p-6 border-b-2 border-cyan/30 bg-gradient-to-r from-cyan/10 to-transparent">
+                <div className="flex items-center justify-center space-x-3 mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan/30 to-cyan/10 flex items-center justify-center border-2 border-cyan/50 shadow-lg shadow-cyan/20">
+                    <svg className="w-6 h-6 text-cyan" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-xl md:text-2xl font-bold text-center text-white mb-1">
+                  Confirm Your <span className="text-gradient glow-text">Selection</span>
+                </h2>
+                <p className="text-center text-gray-400 text-sm">
+                  You have selected <span className="text-cyan font-bold">{selectedCandidates.size}</span> candidate{selectedCandidates.size !== 1 ? 's' : ''}
+                </p>
+              </div>
+
+              {/* Selected Candidates List */}
+              <div className="p-4 md:p-6">
+                <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2">
+                  {getSelectedCandidatesData().map((candidate, index) => {
+                    const photoUrl = normalizePhotoUrl(candidate.photoUrl);
+                    return (
+                      <div
+                        key={candidate.id}
+                        className="flex items-center space-x-3 p-3 rounded-lg bg-navy-darker/70 border border-cyan/20 hover:border-cyan/40 transition-all duration-200"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 text-navy-dark font-bold text-xs">
+                          {index + 1}
+                        </div>
+                        {/* Candidate Photo */}
+                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/40 flex-shrink-0">
+                          {photoUrl ? (
+                            <img
+                              src={photoUrl}
+                              alt={candidate.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-full h-full bg-gradient-to-br from-cyan/30 to-cyan-light/20 flex items-center justify-center text-cyan font-bold text-sm ${photoUrl ? 'hidden' : ''}`}>
+                            {getInitials(candidate.name)}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-semibold truncate">{candidate.name}</p>
+                          <p className="text-cyan text-xs">{candidate.indexNumber}</p>
+                        </div>
+                        <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Footer with Buttons */}
+              <div className="p-4 md:p-6 border-t-2 border-cyan/30 bg-navy-darker/50 space-y-3">
+                <button
+                  onClick={handleConfirmSubmit}
+                  disabled={submitting}
+                  className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center space-x-2 hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>{ballot ? "Confirm Update" : "Confirm Vote"}</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="w-full py-3 text-gray-400 hover:text-white transition-colors font-medium flex items-center justify-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  <span>Go Back & Edit</span>
                 </button>
               </div>
             </div>
@@ -564,29 +689,6 @@ export default function VotePage() {
               </div>
 
               {/* Message Alert */}
-              {message && (
-                <div
-                  className={`glass-card mb-6 p-4 animate-fade-in ${message.type === "success"
-                    ? "border-green-500 bg-green-500/10"
-                    : "border-red-500 bg-red-500/10"
-                    }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    {message.type === "success" ? (
-                      <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                    <p className={message.type === "success" ? "text-green-400" : "text-red-400"}>
-                      {message.text}
-                    </p>
-                  </div>
-                </div>
-              )}
 
               {/* Voting Guidelines Section */}
               <div className="mb-8 animate-slide-up" style={{ animationDelay: '150ms' }}>
@@ -659,6 +761,45 @@ export default function VotePage() {
                 </div>
               </div>
 
+              {/* Success/Error Message */}
+              {message && (
+                <div
+                  className={`glass-card mb-6 p-4 animate-fade-in ${message.type === "success"
+                    ? "border-green-500 bg-green-500/10"
+                    : "border-red-500 bg-red-500/10"
+                    }`}
+                >
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center space-x-3">
+                      {message.type === "success" ? (
+                        <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      <p className={message.type === "success" ? "text-green-400" : "text-red-400"}>
+                        {message.text}
+                      </p>
+                    </div>
+                    {message.type === "success" && (
+                      <Link
+                        href="/my-votes"
+                        className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-cyan/20 border border-cyan/50 text-cyan hover:bg-cyan/30 transition-all text-sm font-medium"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                          <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>View My Votes</span>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Selection Summary & Submit */}
               <div className="mb-8 p-6 sticky top-[88px] z-40 rounded-xl border border-cyan/30" style={{ backgroundColor: '#050a15', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.9)' }}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -695,7 +836,7 @@ export default function VotePage() {
                     </div>
                   </div>
                   <button
-                    onClick={handleSubmit}
+                    onClick={handleShowConfirmation}
                     disabled={submitting || !isElectionActive || selectedCandidates.size === 0}
                     className={`btn-primary w-full md:w-auto px-8 py-3 text-lg flex items-center justify-center space-x-2 ${isElectionActive && selectedCandidates.size > 0 ? 'animate-pulse-glow' : ''
                       } disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none`}

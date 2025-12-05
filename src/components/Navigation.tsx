@@ -49,76 +49,157 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="border-b border-cyan/20 bg-navy-dark/90 backdrop-blur-md sticky top-0 z-50 shadow-lg">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative w-12 h-12 flex-shrink-0">
-              <Image
-                src="/cse23logo.jpg"
-                alt="CSE23 Logo"
-                fill
-                className="object-contain rounded-lg glow-border-gold"
-                priority
-              />
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                <span className="text-white">CSE</span>
-                <span className="text-gold glow-text-gold">23</span>
+    <>
+      <nav className="border-b border-cyan/20 bg-navy-dark sticky top-0 z-50 shadow-lg">
+        {/* Extended background to cover the gap below nav */}
+        <div className="absolute left-0 right-0 top-full h-4 bg-navy-dark z-50" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)' }}></div>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Logo Section */}
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="relative w-12 h-12 flex-shrink-0">
+                <Image
+                  src="/cse23logo.jpg"
+                  alt="CSE23 Logo"
+                  fill
+                  className="object-contain rounded-lg glow-border-gold"
+                  priority
+                />
               </div>
-              <div className="hidden md:block text-cyan text-xs tracking-wide uppercase">
-                Department Elections
+              <div>
+                <div className="text-2xl font-bold">
+                  <span className="text-white">CSE</span>
+                  <span className="text-gold glow-text-gold">23</span>
+                </div>
+                <div className="hidden md:block text-cyan text-xs tracking-wide uppercase">
+                  Department Elections
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            {session ? (
-              <>
-                <Link
-                  href="/vote"
-                  className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/vote" ? "text-cyan" : "text-white hover:text-cyan"
-                    }`}
-                >
-                  <span className="relative z-10">Vote</span>
-                  {pathname === "/vote" && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
-                  )}
-                </Link>
-                {showResults && (
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              {session ? (
+                <>
                   <Link
-                    href="/results"
-                    className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/results" ? "text-cyan" : "text-white hover:text-cyan"
+                    href="/vote"
+                    className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/vote" ? "text-cyan" : "text-white hover:text-cyan"
                       }`}
                   >
-                    <span className="relative z-10">Results</span>
-                    {pathname === "/results" && (
+                    <span className="relative z-10">Vote</span>
+                    {pathname === "/vote" && (
                       <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
                     )}
                   </Link>
-                )}
-                {(session.user.role === "admin" ||
-                  session.user.role === "super_admin") && (
+                  <Link
+                    href="/my-votes"
+                    className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/my-votes" ? "text-cyan" : "text-white hover:text-cyan"
+                      }`}
+                  >
+                    <span className="relative z-10">My Votes</span>
+                    {pathname === "/my-votes" && (
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
+                    )}
+                  </Link>
+                  {showResults && (
                     <Link
-                      href="/admin"
-                      className={`relative group px-3 py-2 transition-all duration-300 ${pathname.startsWith("/admin") ? "text-cyan" : "text-white hover:text-cyan"
+                      href="/results"
+                      className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/results" ? "text-cyan" : "text-white hover:text-cyan"
                         }`}
                     >
-                      <span className="relative z-10">Admin</span>
-                      {pathname.startsWith("/admin") && (
+                      <span className="relative z-10">Results</span>
+                      {pathname === "/results" && (
                         <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
                       )}
                     </Link>
                   )}
+                  {(session.user.role === "admin" ||
+                    session.user.role === "super_admin") && (
+                      <Link
+                        href="/admin"
+                        className={`relative group px-3 py-2 transition-all duration-300 ${pathname.startsWith("/admin") ? "text-cyan" : "text-white hover:text-cyan"
+                          }`}
+                      >
+                        <span className="relative z-10">Admin</span>
+                        {pathname.startsWith("/admin") && (
+                          <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
+                        )}
+                      </Link>
+                    )}
 
-                {/* User Profile Section */}
-                <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-cyan/30">
-                  <div className="flex items-center space-x-3">
-                    {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 shadow-lg flex-shrink-0">
+                  {/* User Profile Section */}
+                  <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-cyan/30">
+                    <div className="flex items-center space-x-3">
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 shadow-lg flex-shrink-0">
+                        {session.user.image ? (
+                          <img
+                            src={session.user.image}
+                            alt={session.user.name || 'User'}
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center font-bold text-navy">
+                            {getInitials(session.user.name || "")}
+                          </div>
+                        )}
+                      </div>
+                      {/* User Info */}
+                      <div className="text-sm">
+                        <div className="text-white font-semibold">{session.user.name}</div>
+                        <div className="text-cyan text-xs">
+                          {session.user.indexNumber}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => signOut()}
+                      className="btn-glass text-xs"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <button onClick={() => signIn("google", { callbackUrl: "/" })} className="btn-primary flex items-center space-x-2">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                  <span>Sign In</span>
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden text-cyan p-2"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-4 pb-4 space-y-3 animate-slide-up">
+              {session ? (
+                <>
+                  {/* User Info Mobile */}
+                  <div className="flex items-center space-x-3 p-3 bg-navy-light/50 rounded-lg border border-cyan/20">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 flex-shrink-0">
                       {session.user.image ? (
                         <img
                           src={session.user.image}
@@ -132,136 +213,79 @@ export default function Navigation() {
                         </div>
                       )}
                     </div>
-                    {/* User Info */}
-                    <div className="text-sm">
+                    <div className="text-sm flex-1">
                       <div className="text-white font-semibold">{session.user.name}</div>
-                      <div className="text-cyan text-xs">
-                        {session.user.indexNumber}
-                      </div>
+                      <div className="text-cyan text-xs">{session.user.indexNumber}</div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => signOut()}
-                    className="btn-glass text-xs"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </>
-            ) : (
-              <button onClick={() => signIn("google", { callbackUrl: "/" })} className="btn-primary flex items-center space-x-2">
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                <span>Sign In</span>
-              </button>
-            )}
-          </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-cyan p-2"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-3 animate-slide-up">
-            {session ? (
-              <>
-                {/* User Info Mobile */}
-                <div className="flex items-center space-x-3 p-3 bg-navy-light/50 rounded-lg border border-cyan/20">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 flex-shrink-0">
-                    {session.user.image ? (
-                      <img
-                        src={session.user.image}
-                        alt={session.user.name || 'User'}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center font-bold text-navy">
-                        {getInitials(session.user.name || "")}
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-sm flex-1">
-                    <div className="text-white font-semibold">{session.user.name}</div>
-                    <div className="text-cyan text-xs">{session.user.indexNumber}</div>
-                  </div>
-                </div>
-
-                <Link
-                  href="/vote"
-                  className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/vote"
-                    ? "bg-cyan/20 text-cyan border border-cyan/50"
-                    : "text-white hover:bg-cyan/10"
-                    }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Vote
-                </Link>
-                {showResults && (
                   <Link
-                    href="/results"
-                    className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/results"
+                    href="/vote"
+                    className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/vote"
                       ? "bg-cyan/20 text-cyan border border-cyan/50"
                       : "text-white hover:bg-cyan/10"
                       }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Results
+                    Vote
                   </Link>
-                )}
-                {(session.user.role === "admin" ||
-                  session.user.role === "super_admin") && (
+                  <Link
+                    href="/my-votes"
+                    className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/my-votes"
+                      ? "bg-cyan/20 text-cyan border border-cyan/50"
+                      : "text-white hover:bg-cyan/10"
+                      }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    My Votes
+                  </Link>
+                  {showResults && (
                     <Link
-                      href="/admin"
-                      className={`block px-4 py-3 rounded-lg transition-all ${pathname.startsWith("/admin")
+                      href="/results"
+                      className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/results"
                         ? "bg-cyan/20 text-cyan border border-cyan/50"
                         : "text-white hover:bg-cyan/10"
                         }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Admin
+                      Results
                     </Link>
                   )}
-                <button
-                  onClick={() => signOut()}
-                  className="w-full btn-secondary"
-                >
-                  Sign Out
+                  {(session.user.role === "admin" ||
+                    session.user.role === "super_admin") && (
+                      <Link
+                        href="/admin"
+                        className={`block px-4 py-3 rounded-lg transition-all ${pathname.startsWith("/admin")
+                          ? "bg-cyan/20 text-cyan border border-cyan/50"
+                          : "text-white hover:bg-cyan/10"
+                          }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Admin
+                      </Link>
+                    )}
+                  <button
+                    onClick={() => signOut()}
+                    className="w-full btn-secondary"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => signIn("google", { callbackUrl: "/" })} className="w-full btn-primary flex items-center justify-center space-x-2">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
+                  <span>Sign In with Google</span>
                 </button>
-              </>
-            ) : (
-              <button onClick={() => signIn("google", { callbackUrl: "/" })} className="w-full btn-primary flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                <span>Sign In with Google</span>
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </nav >
+              )}
+            </div>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }
