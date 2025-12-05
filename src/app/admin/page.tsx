@@ -434,7 +434,7 @@ export default function AdminPage() {
                             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
                         )}
-                        <span>{election.publicResultsVisible ? "Public Results (Everyone)" : "Private Results (Admins Only)"}</span>
+                        <span>{election.publicResultsVisible ? "Public Results Visible (Voters)" : "Private Results (Admins Only when Results Visible(Admins) is ON else Super Admin Only)"}</span>
                       </button>
                     </div>
                   )}
