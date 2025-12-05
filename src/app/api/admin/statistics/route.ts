@@ -39,19 +39,29 @@ export async function GET(req: NextRequest) {
     // Access control
     const isSuperAdmin = session.user.role === "super_admin";
     const isAdmin = session.user.role === "admin";
+    const isVoter = session.user.role === "voter";
 
     // During election: only super_admin can see stats
     if (isElectionActive && !isSuperAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // After election: only super_admin can see stats unless resultsVisible is true
-    if (isElectionEnded && !isSuperAdmin) {
-      if (!election.resultsVisible) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
-      // If resultsVisible but user is not admin or super_admin, they can't see detailed stats
-      if (!isAdmin) {
+    // After election: visibility rules
+    if (isElectionEnded) {
+      if (isSuperAdmin) {
+        // Super admin can always see results
+      } else if (isAdmin) {
+        // Admins can see if resultsVisible is true
+        if (!election.resultsVisible) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      } else if (isVoter) {
+        // Regular voters can only see if publicResultsVisible is true
+        if (!election.publicResultsVisible) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      } else {
+        // Unknown role - deny access
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }
