@@ -4,7 +4,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getInitials } from "@/lib/themeHelpers";
 
 export default function Navigation() {
@@ -13,6 +13,36 @@ export default function Navigation() {
   const role = user?.role;
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
+  // Check if results should be visible (no active elections)
+  useEffect(() => {
+    const checkElectionStatus = async () => {
+      try {
+        const res = await fetch('/api/elections');
+        if (res.ok) {
+          const data = await res.json();
+          const now = new Date();
+          // Check if any election is currently active
+          const hasActiveElection = data.elections?.some((election: any) => {
+            const start = new Date(election.startTime);
+            const end = new Date(election.endTime);
+            return now >= start && now <= end;
+          });
+          // Show results only if no active elections OR user is admin
+          const isAdmin = role === 'admin' || role === 'super_admin';
+          setShowResults(!hasActiveElection || isAdmin);
+        }
+      } catch (error) {
+        console.error('Failed to check election status:', error);
+        setShowResults(false);
+      }
+    };
+
+    if (session) {
+      checkElectionStatus();
+    }
+  }, [session, role]);
 
   if (status === "loading") {
     return null;
@@ -58,16 +88,18 @@ export default function Navigation() {
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
                   )}
                 </Link>
-                <Link
-                  href="/results"
-                  className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/results" ? "text-cyan" : "text-white hover:text-cyan"
-                    }`}
-                >
-                  <span className="relative z-10">Results</span>
-                  {pathname === "/results" && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
-                  )}
-                </Link>
+                {showResults && (
+                  <Link
+                    href="/results"
+                    className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/results" ? "text-cyan" : "text-white hover:text-cyan"
+                      }`}
+                  >
+                    <span className="relative z-10">Results</span>
+                    {pathname === "/results" && (
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent glow-border" />
+                    )}
+                  </Link>
+                )}
                 {(session.user.role === "admin" ||
                   session.user.role === "super_admin") && (
                     <Link
@@ -184,16 +216,18 @@ export default function Navigation() {
                 >
                   Vote
                 </Link>
-                <Link
-                  href="/results"
-                  className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/results"
-                    ? "bg-cyan/20 text-cyan border border-cyan/50"
-                    : "text-white hover:bg-cyan/10"
-                    }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Results
-                </Link>
+                {showResults && (
+                  <Link
+                    href="/results"
+                    className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/results"
+                      ? "bg-cyan/20 text-cyan border border-cyan/50"
+                      : "text-white hover:bg-cyan/10"
+                      }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Results
+                  </Link>
+                )}
                 {(session.user.role === "admin" ||
                   session.user.role === "super_admin") && (
                     <Link

@@ -55,6 +55,7 @@ export default function VotePage() {
     minutes: number;
     seconds: number;
   } | null>(null);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(true);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -272,6 +273,114 @@ export default function VotePage() {
     <div className="min-h-screen circuit-bg">
       <Navigation />
 
+      {/* Voting Guidelines Modal */}
+      {showGuidelinesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
+          {/* Modal */}
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
+            <div className="glass-card p-0 border-2 border-cyan/50 shadow-2xl shadow-cyan/20">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-red-500/20 p-6 border-b border-cyan/20">
+                <div className="flex items-center justify-center space-x-3 mb-2">
+                  <div className="w-12 h-12 rounded-full bg-yellow-500/30 flex items-center justify-center animate-pulse">
+                    <svg className="w-7 h-7 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-center text-white">
+                  📢 READ BEFORE <span className="text-gradient glow-text">VOTING</span>
+                </h2>
+                <p className="text-center text-gray-400 mt-2">Please read these important guidelines carefully</p>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                {/* Category Breakdown */}
+                <div>
+                  <h3 className="text-lg font-bold text-cyan mb-4 flex items-center space-x-2">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                    <span>Category Breakdown</span>
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-navy-dark/70 rounded-xl p-4 border border-cyan/30 text-center transform hover:scale-105 transition-transform">
+                      <div className="text-3xl font-bold text-cyan mb-1">6</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Boy</div>
+                    </div>
+                    <div className="bg-navy-dark/70 rounded-xl p-4 border border-pink-500/30 text-center transform hover:scale-105 transition-transform">
+                      <div className="text-3xl font-bold text-pink-400 mb-1">1</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Girl</div>
+                    </div>
+                    <div className="bg-navy-dark/70 rounded-xl p-4 border border-gold/30 text-center transform hover:scale-105 transition-transform">
+                      <div className="text-3xl font-bold text-gold mb-1">2</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Boy</div>
+                    </div>
+                    <div className="bg-navy-dark/70 rounded-xl p-4 border border-purple-500/30 text-center transform hover:scale-105 transition-transform">
+                      <div className="text-3xl font-bold text-purple-400 mb-1">1</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Girl</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Important Notes */}
+                <div className="bg-gradient-to-r from-yellow-500/10 to-transparent rounded-xl p-5 border border-yellow-500/30">
+                  <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center space-x-2">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <span>Important Voting Notes</span>
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
+                        <span className="text-navy font-bold">1</span>
+                      </div>
+                      <p className="text-gray-300">
+                        <span className="text-white font-semibold">Selection is NOT purely based on vote count.</span> Final representatives will be chosen <span className="text-cyan font-medium">within each category</span>, not by highest votes overall.
+                      </p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
+                        <span className="text-navy font-bold">2</span>
+                      </div>
+                      <p className="text-gray-300">
+                        <span className="text-white font-semibold">Keep category numbers in mind</span> while voting to ensure balanced representation across all groups.
+                      </p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
+                        <span className="text-navy font-bold">3</span>
+                      </div>
+                      <p className="text-gray-300">
+                        <span className="text-white font-semibold">Every stream needs representation.</span> A candidate with high votes <span className="text-red-400 font-medium">might NOT be selected</span> if their stream is filled. A candidate with fewer votes <span className="text-green-400 font-medium">might be selected</span> to ensure fair representation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-cyan/20 bg-navy-dark/50">
+                <button
+                  onClick={() => setShowGuidelinesModal(false)}
+                  className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center space-x-2 animate-pulse-glow"
+                >
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>I Understand, Let Me Vote</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Welcome Message */}
@@ -475,6 +584,77 @@ export default function VotePage() {
                   </div>
                 </div>
               )}
+
+              {/* Voting Guidelines Section */}
+              <div className="mb-8 animate-slide-up" style={{ animationDelay: '150ms' }}>
+                {/* Category Counts */}
+                <div className="glass-card p-6 mb-4">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/30 to-cyan/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Category Breakdown</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-navy-dark/50 rounded-xl p-4 border border-cyan/10 text-center">
+                      <div className="text-2xl font-bold text-cyan mb-1">6</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Boy</div>
+                    </div>
+                    <div className="bg-navy-dark/50 rounded-xl p-4 border border-pink-500/20 text-center">
+                      <div className="text-2xl font-bold text-pink-400 mb-1">1</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Girl</div>
+                    </div>
+                    <div className="bg-navy-dark/50 rounded-xl p-4 border border-gold/20 text-center">
+                      <div className="text-2xl font-bold text-gold mb-1">2</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Boy</div>
+                    </div>
+                    <div className="bg-navy-dark/50 rounded-xl p-4 border border-purple-500/20 text-center">
+                      <div className="text-2xl font-bold text-purple-400 mb-1">1</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Girl</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Important Notes */}
+                <div className="glass-card p-6 border-yellow-500/30 bg-gradient-to-r from-yellow-500/5 to-transparent">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-yellow-400">Important Voting Notes</h3>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 rounded-full bg-cyan/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-cyan text-xs font-bold">1</span>
+                      </div>
+                      <p className="text-gray-300 text-sm">
+                        <span className="text-white font-medium">Selection is not purely based on vote count.</span> Final representatives will be chosen <span className="text-cyan">within each category</span>, not by highest votes overall.
+                      </p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 rounded-full bg-cyan/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-cyan text-xs font-bold">2</span>
+                      </div>
+                      <p className="text-gray-300 text-sm">
+                        <span className="text-white font-medium">Keep category numbers in mind</span> while voting to ensure balanced representation across all groups.
+                      </p>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 rounded-full bg-cyan/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-cyan text-xs font-bold">3</span>
+                      </div>
+                      <p className="text-gray-300 text-sm">
+                        <span className="text-white font-medium">Every stream needs representation.</span> A candidate with high votes <span className="text-red-400">might not be selected</span> if their stream is filled. A candidate with fewer votes <span className="text-green-400">might be selected</span> to ensure fair representation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Selection Summary & Submit */}
               <div className="glass-card mb-8 p-6 sticky top-20 z-30 animate-slide-up border-cyan/30">
