@@ -439,9 +439,7 @@ export default function VotePage() {
                         className="flex items-center space-x-3 p-3 rounded-lg bg-navy-darker/70 border border-cyan/20 hover:border-cyan/40 transition-all duration-200"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 text-navy-dark font-bold text-xs">
-                          {index + 1}
-                        </div>
+
                         {/* Candidate Photo */}
                         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/40 flex-shrink-0">
                           {photoUrl ? (

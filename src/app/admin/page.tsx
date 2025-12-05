@@ -410,7 +410,7 @@ export default function AdminPage() {
                             <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                           </svg>
                         )}
-                        <span>{election.resultsVisible ? "Results Visible" : "Results Hidden"}</span>
+                        <span>{election.resultsVisible ? "Results Visible (Admins)" : "Results Hidden (Super Admin Only)"}</span>
                       </button>
                       <button
                         onClick={() =>
@@ -434,7 +434,7 @@ export default function AdminPage() {
                             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                           </svg>
                         )}
-                        <span>{election.publicResultsVisible ? "Public Results" : "Private Results"}</span>
+                        <span>{election.publicResultsVisible ? "Public Results (Everyone)" : "Private Results (Admins Only)"}</span>
                       </button>
                     </div>
                   )}
@@ -519,7 +519,7 @@ export default function AdminPage() {
                     {isSuperAdmin && (
                       <button
                         onClick={() => handleDeleteElection(election.id)}
-                        className="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300 border border-red-500/50 hover:border-red-500 glow-border-red"
+                        className="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300 border border-red-500/50 hover:border-red-500"
                       >
                         <span className="flex items-center space-x-2">
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

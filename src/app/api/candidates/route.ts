@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     const candidates = await prisma.candidate.findMany({
       where: { electionId },
-      orderBy: { name: "asc" },
+      orderBy: { id: "asc" },
     });
 
     return NextResponse.json({ candidates, election });
