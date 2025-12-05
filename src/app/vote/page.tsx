@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import GlowDivider from "@/components/GlowDivider";
+import { normalizePhotoUrl, getInitials } from "@/lib/themeHelpers";
 
 interface Candidate {
   id: string;
@@ -72,7 +74,7 @@ export default function VotePage() {
       const res = await fetch("/api/elections");
       const data = await res.json();
       setElections(data.elections);
-      
+
       // Auto-select active election
       const now = new Date();
       const activeElection = data.elections.find((e: any) => {
@@ -80,13 +82,13 @@ export default function VotePage() {
         const end = new Date(e.endTime);
         return now >= start && now <= end;
       });
-      
+
       if (activeElection) {
         setSelectedElectionId(activeElection.id);
       } else if (data.elections.length > 0) {
         setSelectedElectionId(data.elections[0].id);
       }
-      
+
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch elections:", error);
@@ -110,7 +112,7 @@ export default function VotePage() {
     try {
       const res = await fetch(`/api/vote?electionId=${selectedElectionId}`);
       const data = await res.json();
-      
+
       if (data.ballot) {
         setBallot(data.ballot);
         const chosenIds = new Set<string>(
@@ -124,7 +126,8 @@ export default function VotePage() {
     } catch (error) {
       console.error("Failed to fetch ballot:", error);
     }
-  };
+  }
+
 
   const handleCandidateToggle = (candidateId: string) => {
     const election = elections.find((e) => e.id === selectedElectionId);
@@ -199,8 +202,11 @@ export default function VotePage() {
 
   if (loading || status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-cyan text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center circuit-bg">
+        <div className="text-center space-y-4">
+          <div className="loading-spinner mx-auto" />
+          <p className="text-cyan text-lg animate-pulse">Loading elections...</p>
+        </div>
       </div>
     );
   }
@@ -212,33 +218,36 @@ export default function VotePage() {
     new Date() <= new Date(selectedElection.endTime);
   const isElectionEnded =
     selectedElection && new Date() > new Date(selectedElection.endTime);
+  const progressPercent = (selectedCandidates.size / 10) * 100;
 
   return (
     <div className="min-h-screen circuit-bg">
       <Navigation />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Cast Your <span className="text-cyan glow-text">Vote</span>
+          <div className="mb-8 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+              Cast Your <span className="text-gradient glow-text">Vote</span>
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-400 text-lg">
               Select up to 10 candidates for the election
             </p>
           </div>
 
+          <GlowDivider className="mb-8" />
+
           {/* Election Selector */}
           {elections.length > 1 && (
-            <div className="card mb-6">
-              <label className="block text-sm font-bold text-cyan mb-2">
+            <div className="glass-card p-6 mb-6 animate-slide-up">
+              <label className="block text-sm font-bold text-cyan mb-3 uppercase tracking-wide">
                 Select Election
               </label>
               <select
                 value={selectedElectionId}
                 onChange={(e) => setSelectedElectionId(e.target.value)}
-                className="input-field w-full"
+                className="input-field w-full md:w-96"
               >
                 {elections.map((election) => (
                   <option key={election.id} value={election.id}>
@@ -251,145 +260,208 @@ export default function VotePage() {
 
           {selectedElection && (
             <>
-              {/* Election Info */}
-              <div className="card mb-6">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  {selectedElection.name}
-                </h2>
-                {selectedElection.description && (
-                  <p className="text-gray-400 mb-4">
-                    {selectedElection.description}
-                  </p>
-                )}
-                <div className="grid md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-cyan">Start:</span>{" "}
-                    <span className="text-gray-300">
-                      {new Date(selectedElection.startTime).toLocaleString()}
-                    </span>
+              {/* Election Info Card */}
+              <div className="card-premium mb-6 animate-slide-up">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                      {selectedElection.name}
+                    </h2>
+                    {selectedElection.description && (
+                      <p className="text-gray-400 mb-4">
+                        {selectedElection.description}
+                      </p>
+                    )}
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        <span className="text-cyan font-semibold">Start:</span>
+                        <span className="text-gray-300">
+                          {new Date(selectedElection.startTime).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                        <span className="text-cyan font-semibold">End:</span>
+                        <span className="text-gray-300">
+                          {new Date(selectedElection.endTime).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Status Badge */}
                   <div>
-                    <span className="text-cyan">End:</span>{" "}
-                    <span className="text-gray-300">
-                      {new Date(selectedElection.endTime).toLocaleString()}
-                    </span>
+                    {isElectionActive && (
+                      <span className="badge badge-active animate-pulse">
+                        🟢 Active
+                      </span>
+                    )}
+                    {isElectionEnded && (
+                      <span className="badge badge-ended">
+                        🔒 Ended
+                      </span>
+                    )}
+                    {!isElectionActive && !isElectionEnded && (
+                      <span className="badge badge-pending">
+                        ⏳ Pending
+                      </span>
+                    )}
                   </div>
                 </div>
-                {!isElectionActive && !isElectionEnded && (
-                  <div className="mt-4 text-yellow-accent font-bold">
-                    ⏳ Election has not started yet
-                  </div>
-                )}
-                {isElectionEnded && (
-                  <div className="mt-4 text-red-400 font-bold">
-                    🔒 Election has ended. Votes are locked.
-                  </div>
-                )}
+
                 {ballot && (
-                  <div className="mt-4 text-cyan">
-                    <div className="text-sm">
-                      Last updated:{" "}
-                      {new Date(ballot.updatedAt).toLocaleString()}
-                    </div>
+                  <div className="mt-4 pt-4 border-t border-cyan/20">
+                    <p className="text-cyan text-sm flex items-center space-x-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      <span>Last updated: {new Date(ballot.updatedAt).toLocaleString()}</span>
+                    </p>
                   </div>
                 )}
               </div>
 
-              {/* Message */}
+              {/* Message Alert */}
               {message && (
                 <div
-                  className={`card mb-6 ${
-                    message.type === "success"
-                      ? "border-green-500 bg-green-500/10"
-                      : "border-red-500 bg-red-500/10"
-                  }`}
+                  className={`glass-card mb-6 p-4 animate-fade-in ${message.type === "success"
+                    ? "border-green-500 bg-green-500/10"
+                    : "border-red-500 bg-red-500/10"
+                    }`}
                 >
-                  <p
-                    className={
-                      message.type === "success"
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }
-                  >
-                    {message.text}
-                  </p>
+                  <div className="flex items-center space-x-3">
+                    {message.type === "success" ? (
+                      <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    <p className={message.type === "success" ? "text-green-400" : "text-red-400"}>
+                      {message.text}
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Selection Summary */}
-              <div className="card mb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-white font-bold">
-                      Selected: {selectedCandidates.size} / 10
-                    </span>
+              {/* Selection Summary & Submit */}
+              <div className="glass-card mb-8 p-6 sticky top-20 z-30 animate-slide-up">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="w-full md:w-auto">
+                    <div className="flex items-center justify-between md:justify-start space-x-4 mb-3">
+                      <span className="text-white font-bold text-lg">
+                        Selected: <span className="text-cyan">{selectedCandidates.size}</span> / 10
+                      </span>
+                      {selectedCandidates.size === 10 && (
+                        <span className="text-gold text-sm animate-pulse">✨ Maximum reached</span>
+                      )}
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="progress-bar w-full md:w-64">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
                   </div>
                   <button
                     onClick={handleSubmit}
-                    disabled={submitting || !isElectionActive}
-                    className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={submitting || !isElectionActive || selectedCandidates.size === 0}
+                    className={`btn-primary w-full md:w-auto ${isElectionActive && selectedCandidates.size > 0 ? 'animate-pulse-glow' : ''
+                      } disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none`}
                   >
-                    {submitting
-                      ? "Submitting..."
-                      : ballot
-                      ? "Update Vote"
-                      : "Submit Vote"}
+                    {submitting ? (
+                      <span className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                        <span>Submitting...</span>
+                      </span>
+                    ) : ballot ? (
+                      "Update Vote"
+                    ) : (
+                      "Submit Vote"
+                    )}
                   </button>
                 </div>
               </div>
 
               {/* Candidates Grid */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {candidates.map((candidate) => {
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {candidates.map((candidate, index) => {
                   const isSelected = selectedCandidates.has(candidate.id);
+                  const photoUrl = normalizePhotoUrl(candidate.photoUrl);
+
                   return (
                     <div
                       key={candidate.id}
-                      className={`card cursor-pointer transition-all ${
-                        isSelected
-                          ? "border-cyan glow-border bg-cyan/10"
-                          : "hover:border-cyan/60"
-                      }`}
                       onClick={() => handleCandidateToggle(candidate.id)}
+                      className={`glass-card cursor-pointer transition-all duration-300 p-5 animate-slide-up ${isSelected
+                        ? "border-cyan glow-border bg-cyan/10 scale-[1.02]"
+                        : "hover:border-cyan/60 hover:scale-[1.01]"
+                        }`}
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className="flex items-start space-x-4">
+                      {/* Selection Indicator */}
+                      <div className="absolute top-3 right-3">
                         <div
-                          className={`w-6 h-6 rounded border-2 flex items-center justify-center flex-shrink-0 mt-1 ${
-                            isSelected
-                              ? "border-cyan bg-cyan"
-                              : "border-gray-500"
-                          }`}
+                          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${isSelected
+                            ? "border-cyan bg-cyan shadow-lg shadow-cyan/50"
+                            : "border-gray-500 bg-navy-dark/50"
+                            }`}
                         >
                           {isSelected && (
-                            <svg
-                              className="w-4 h-4 text-navy"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
+                            <svg className="w-4 h-4 text-navy" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           )}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-white mb-1">
-                            {candidate.name}
-                          </h3>
-                          <p className="text-cyan text-sm mb-1">
-                            {candidate.indexNumber}
+                      </div>
+
+                      {/* Candidate Photo */}
+                      <div className="flex justify-center mb-4">
+                        {photoUrl ? (
+                          <div className={`relative w-24 h-24 rounded-xl overflow-hidden border-2 transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
+                            }`}>
+                            <img
+                              src={photoUrl}
+                              alt={candidate.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                            <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
+                              <span className="text-2xl font-bold text-cyan">{getInitials(candidate.name)}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={`w-24 h-24 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 flex items-center justify-center transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
+                            }`}>
+                            <span className="text-2xl font-bold text-cyan">{getInitials(candidate.name)}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Candidate Info */}
+                      <div className="text-center">
+                        <h3 className={`text-lg font-bold mb-1 transition-colors ${isSelected ? 'text-cyan' : 'text-white'
+                          }`}>
+                          {candidate.name}
+                        </h3>
+                        <p className="text-gold text-sm font-semibold mb-1">
+                          {candidate.indexNumber}
+                        </p>
+                        <p className="text-gray-400 text-xs mb-3 truncate">
+                          {candidate.email}
+                        </p>
+                        {candidate.bio && (
+                          <p className="text-gray-300 text-sm line-clamp-3 text-left bg-navy-dark/50 p-3 rounded-lg">
+                            {candidate.bio}
                           </p>
-                          <p className="text-gray-400 text-xs mb-2">
-                            {candidate.email}
-                          </p>
-                          {candidate.bio && (
-                            <p className="text-gray-300 text-sm">
-                              {candidate.bio}
-                            </p>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -397,16 +469,23 @@ export default function VotePage() {
               </div>
 
               {candidates.length === 0 && (
-                <div className="card text-center text-gray-400">
-                  <p>No candidates available for this election.</p>
+                <div className="glass-card text-center p-12">
+                  <svg className="w-16 h-16 mx-auto text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <p className="text-gray-400 text-lg">No candidates available for this election.</p>
                 </div>
               )}
             </>
           )}
 
           {!selectedElection && elections.length === 0 && (
-            <div className="card text-center text-gray-400">
-              <p>No elections available at the moment.</p>
+            <div className="glass-card text-center p-12 animate-fade-in">
+              <svg className="w-20 h-20 mx-auto text-cyan/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <p className="text-gray-400 text-lg">No elections available at the moment.</p>
+              <p className="text-gray-500 text-sm mt-2">Please check back later.</p>
             </div>
           )}
         </div>

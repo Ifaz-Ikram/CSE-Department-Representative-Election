@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
+import GlowDivider from "@/components/GlowDivider";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -117,8 +118,11 @@ export default function AdminPage() {
 
   if (loading || status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-cyan text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center circuit-bg">
+        <div className="text-center space-y-4">
+          <div className="loading-spinner mx-auto" />
+          <p className="text-cyan text-lg animate-pulse">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -130,36 +134,74 @@ export default function AdminPage() {
       <Navigation />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-fade-in">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
-                Admin <span className="text-cyan glow-text">Dashboard</span>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                Admin <span className="text-gradient glow-text">Dashboard</span>
               </h1>
-              <p className="text-gray-400">
-                Manage elections and view statistics
+              <p className="text-gray-400 text-lg">
+                Manage elections, candidates, and view statistics
               </p>
             </div>
             {isSuperAdmin && (
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
-                className="btn-primary"
+                className={`btn-primary ${showCreateForm ? 'bg-red-500 hover:bg-red-600' : ''}`}
               >
-                {showCreateForm ? "Cancel" : "+ Create Election"}
+                {showCreateForm ? "✕ Cancel" : "+ Create Election"}
               </button>
             )}
           </div>
 
+          <GlowDivider className="mb-8" />
+
+          {/* Quick Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-slide-up">
+            <div className="glass-card p-4 text-center">
+              <div className="text-3xl font-bold text-cyan mb-1">{elections.length}</div>
+              <div className="text-gray-400 text-sm uppercase tracking-wide">Elections</div>
+            </div>
+            <div className="glass-card p-4 text-center">
+              <div className="text-3xl font-bold text-green-400 mb-1">
+                {elections.filter(e => {
+                  const now = new Date();
+                  return now >= new Date(e.startTime) && now <= new Date(e.endTime);
+                }).length}
+              </div>
+              <div className="text-gray-400 text-sm uppercase tracking-wide">Active</div>
+            </div>
+            <div className="glass-card p-4 text-center">
+              <div className="text-3xl font-bold text-gold mb-1">
+                {elections.reduce((acc, e) => acc + e._count.candidates, 0)}
+              </div>
+              <div className="text-gray-400 text-sm uppercase tracking-wide">Candidates</div>
+            </div>
+            <div className="glass-card p-4 text-center">
+              <div className="text-3xl font-bold text-purple-400 mb-1">
+                {elections.reduce((acc, e) => acc + e._count.ballots, 0)}
+              </div>
+              <div className="text-gray-400 text-sm uppercase tracking-wide">Total Votes</div>
+            </div>
+          </div>
+
           {/* Create Election Form */}
           {showCreateForm && isSuperAdmin && (
-            <div className="card mb-6">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                Create New Election
-              </h2>
-              <form onSubmit={handleCreateElection} className="space-y-4">
+            <div className="card-premium mb-8 animate-slide-up">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-cyan/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-white">
+                  Create New Election
+                </h2>
+              </div>
+              <form onSubmit={handleCreateElection} className="space-y-6">
                 <div>
-                  <label className="block text-cyan text-sm font-bold mb-2">
+                  <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
                     Election Name
                   </label>
                   <input
@@ -169,11 +211,12 @@ export default function AdminPage() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     className="input-field w-full"
+                    placeholder="e.g., Department Representative Election 2025"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-cyan text-sm font-bold mb-2">
+                  <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
                     Description
                   </label>
                   <textarea
@@ -183,11 +226,12 @@ export default function AdminPage() {
                     }
                     className="input-field w-full"
                     rows={3}
+                    placeholder="Brief description of the election..."
                   />
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-cyan text-sm font-bold mb-2">
+                    <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
                       Start Time
                     </label>
                     <input
@@ -201,7 +245,7 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-cyan text-sm font-bold mb-2">
+                    <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
                       End Time
                     </label>
                     <input
@@ -215,7 +259,7 @@ export default function AdminPage() {
                     />
                   </div>
                 </div>
-                <button type="submit" className="btn-primary">
+                <button type="submit" className="btn-primary animate-pulse-glow">
                   Create Election
                 </button>
               </form>
@@ -224,7 +268,14 @@ export default function AdminPage() {
 
           {/* Elections List */}
           <div className="space-y-6">
-            {elections.map((election) => {
+            <h2 className="text-2xl font-bold text-white flex items-center space-x-3">
+              <svg className="w-6 h-6 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span>Elections</span>
+            </h2>
+            
+            {elections.map((election, index) => {
               const now = new Date();
               const start = new Date(election.startTime);
               const end = new Date(election.endTime);
@@ -233,126 +284,165 @@ export default function AdminPage() {
               const isPending = now < start;
 
               return (
-                <div key={election.id} className="card">
-                  <div className="flex items-start justify-between mb-4">
+                <div 
+                  key={election.id} 
+                  className="card-premium animate-slide-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        {election.name}
-                      </h3>
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-2xl font-bold text-white">
+                          {election.name}
+                        </h3>
+                        <span className={`badge ${
+                          isActive ? 'badge-active animate-pulse' : 
+                          isEnded ? 'badge-ended' : 
+                          'badge-pending'
+                        }`}>
+                          {isActive ? '🟢 Active' : isEnded ? '🔒 Ended' : '⏳ Pending'}
+                        </span>
+                      </div>
                       {election.description && (
-                        <p className="text-gray-400 mb-3">
+                        <p className="text-gray-400 mb-4">
                           {election.description}
                         </p>
                       )}
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span
-                          className={`px-3 py-1 rounded-full font-bold ${
-                            isActive
-                              ? "bg-green-500/20 text-green-400"
-                              : isEnded
-                              ? "bg-red-500/20 text-red-400"
-                              : "bg-yellow-500/20 text-yellow-400"
-                          }`}
-                        >
-                          {isActive ? "Active" : isEnded ? "Ended" : "Pending"}
-                        </span>
-                        <span className="text-gray-400">
-                          {election._count.candidates} candidates
-                        </span>
-                        <span className="text-gray-400">
-                          {election._count.ballots} votes
-                        </span>
+                      
+                      {/* Stats Row */}
+                      <div className="flex flex-wrap items-center gap-4 text-sm">
+                        <div className="flex items-center space-x-2 bg-navy-dark/50 px-3 py-1.5 rounded-lg">
+                          <svg className="w-4 h-4 text-cyan" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                          </svg>
+                          <span className="text-gray-300">{election._count.candidates} candidates</span>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-navy-dark/50 px-3 py-1.5 rounded-lg">
+                          <svg className="w-4 h-4 text-gold" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-gray-300">{election._count.ballots} votes</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4 text-sm mb-4">
-                    <div>
-                      <span className="text-cyan">Start:</span>{" "}
-                      <span className="text-gray-300">
-                        {start.toLocaleString()}
-                      </span>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm mb-6 p-4 bg-navy-dark/30 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                      <span className="text-cyan font-semibold">Start:</span>
+                      <span className="text-gray-300">{start.toLocaleString()}</span>
                     </div>
-                    <div>
-                      <span className="text-cyan">End:</span>{" "}
-                      <span className="text-gray-300">
-                        {end.toLocaleString()}
-                      </span>
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                      <span className="text-cyan font-semibold">End:</span>
+                      <span className="text-gray-300">{end.toLocaleString()}</span>
                     </div>
                   </div>
 
                   {/* Visibility Toggles */}
                   {isSuperAdmin && (
-                    <div className="space-y-2 mb-4 text-sm">
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() =>
-                            handleToggleVisibility(
-                              election.id,
-                              "resultsVisible",
-                              election.resultsVisible
-                            )
-                          }
-                          className={`px-3 py-1 rounded ${
+                    <div className="flex flex-wrap gap-3 mb-6">
+                      <button
+                        onClick={() =>
+                          handleToggleVisibility(
+                            election.id,
+                            "resultsVisible",
                             election.resultsVisible
-                              ? "bg-cyan text-navy"
-                              : "bg-navy-light text-cyan border border-cyan"
-                          }`}
-                        >
-                          {election.resultsVisible
-                            ? "✓ Results Visible to Admins"
-                            : "Results Hidden from Admins"}
-                        </button>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={() =>
-                            handleToggleVisibility(
-                              election.id,
-                              "publicResultsVisible",
-                              election.publicResultsVisible
-                            )
-                          }
-                          className={`px-3 py-1 rounded ${
+                          )
+                        }
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                          election.resultsVisible
+                            ? "bg-cyan text-navy shadow-lg shadow-cyan/30"
+                            : "bg-navy-dark text-cyan border border-cyan/50 hover:border-cyan"
+                        }`}
+                      >
+                        {election.resultsVisible ? (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                            <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                          </svg>
+                        )}
+                        <span>{election.resultsVisible ? "Results Visible" : "Results Hidden"}</span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleToggleVisibility(
+                            election.id,
+                            "publicResultsVisible",
                             election.publicResultsVisible
-                              ? "bg-cyan text-navy"
-                              : "bg-navy-light text-cyan border border-cyan"
-                          }`}
-                        >
-                          {election.publicResultsVisible
-                            ? "✓ Results Public"
-                            : "Results Not Public"}
-                        </button>
-                      </div>
+                          )
+                        }
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                          election.publicResultsVisible
+                            ? "bg-gold text-navy shadow-lg shadow-gold/30"
+                            : "bg-navy-dark text-gold border border-gold/50 hover:border-gold"
+                        }`}
+                      >
+                        {election.publicResultsVisible ? (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        <span>{election.publicResultsVisible ? "Public Results" : "Private Results"}</span>
+                      </button>
                     </div>
                   )}
 
                   {/* Action Buttons */}
-                  <div className="flex items-center space-x-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <Link
                       href={`/admin/elections/${election.id}`}
                       className="btn-secondary text-sm"
                     >
-                      Manage Candidates
+                      <span className="flex items-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Manage Candidates</span>
+                      </span>
                     </Link>
                     <Link
                       href={`/admin/statistics?electionId=${election.id}`}
                       className="btn-secondary text-sm"
                     >
-                      View Statistics
+                      <span className="flex items-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>Statistics</span>
+                      </span>
                     </Link>
                     <Link
                       href={`/admin/ballots?electionId=${election.id}`}
                       className="btn-secondary text-sm"
                     >
-                      View Ballots
+                      <span className="flex items-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Ballots</span>
+                      </span>
                     </Link>
                     {isSuperAdmin && (
                       <button
                         onClick={() => handleDeleteElection(election.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300"
+                        className="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300 border border-red-500/50 hover:border-red-500 glow-border-red"
                       >
-                        Delete
+                        <span className="flex items-center space-x-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Delete</span>
+                        </span>
                       </button>
                     )}
                   </div>
@@ -361,8 +451,12 @@ export default function AdminPage() {
             })}
 
             {elections.length === 0 && (
-              <div className="card text-center text-gray-400">
-                <p>No elections found. Create one to get started.</p>
+              <div className="glass-card text-center p-12 animate-fade-in">
+                <svg className="w-16 h-16 mx-auto text-cyan/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p className="text-gray-400 text-lg">No elections found.</p>
+                <p className="text-gray-500 text-sm mt-2">Create one to get started.</p>
               </div>
             )}
           </div>
