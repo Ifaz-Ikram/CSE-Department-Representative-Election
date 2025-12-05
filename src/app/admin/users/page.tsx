@@ -254,7 +254,7 @@ export default function UsersPage() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span
-                                                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${roleColors[user.role]
+                                                            className={`px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${roleColors[user.role]
                                                                 }`}
                                                         >
                                                             {user.role.replace("_", " ")}
@@ -271,7 +271,8 @@ export default function UsersPage() {
                                                                     value={user.role}
                                                                     onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                                                     disabled={updating === user.id}
-                                                                    className="input-field text-sm py-1 px-2 bg-navy-dark disabled:opacity-50"
+                                                                    className="input-field text-sm py-2 px-3 pr-10 bg-navy-dark disabled:opacity-50 appearance-none cursor-pointer"
+                                                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2300E5FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25rem' }}
                                                                 >
                                                                     <option value="voter">Voter</option>
                                                                     <option value="admin">Admin</option>

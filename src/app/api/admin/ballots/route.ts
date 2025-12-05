@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
             name: true,
             email: true,
             indexNumber: true,
+            image: true,
           },
         },
         choices: {

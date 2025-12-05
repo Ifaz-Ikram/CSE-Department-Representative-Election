@@ -206,10 +206,21 @@ function AdminBallotsContent() {
                     {/* Voter Info */}
                     <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
                       <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan/20 to-navy-lighter border-2 border-cyan/30 flex items-center justify-center">
-                          <span className="text-lg font-bold text-cyan">
-                            {ballot.voter.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || '??'}
-                          </span>
+                        <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-cyan/30 flex-shrink-0">
+                          {ballot.voter.image ? (
+                            <img
+                              src={ballot.voter.image}
+                              alt={ballot.voter.name || 'Voter'}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-cyan/20 to-navy-lighter flex items-center justify-center">
+                              <span className="text-lg font-bold text-cyan">
+                                {ballot.voter.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || '??'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <h4 className="text-lg font-bold text-white">
