@@ -40,16 +40,16 @@ export default function CandidateSelector({
       try {
         const res = await fetch("/api/registry");
         if (!res.ok) throw new Error("Failed to load voter registry");
-        
+
         const data = await res.json();
-        
+
         // Transform into react-select options
         const options: VoterOption[] = data.map((voter: any) => ({
           value: voter.email,
           label: `${voter.regNo} - ${voter.firstName} ${voter.lastName} - ${voter.email}`,
           data: voter,
         }));
-        
+
         setRegistry(options);
       } catch (err) {
         setError("Failed to load student list");
@@ -58,7 +58,7 @@ export default function CandidateSelector({
         setLoading(false);
       }
     }
-    
+
     loadRegistry();
   }, []);
 
@@ -184,8 +184,8 @@ export default function CandidateSelector({
   }
 
   const photoPreviewUrl = normalizePhotoUrl(photoUrl);
-  const candidateName = selectedVoter 
-    ? `${selectedVoter.data.firstName} ${selectedVoter.data.lastName}` 
+  const candidateName = selectedVoter
+    ? `${selectedVoter.data.firstName} ${selectedVoter.data.lastName}`
     : "";
 
   return (
@@ -206,7 +206,7 @@ export default function CandidateSelector({
               <p className="text-gray-400 text-sm">Select from CSE23 Batch</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onCancel}
             className="w-10 h-10 rounded-lg bg-navy-dark/50 hover:bg-red-500/20 flex items-center justify-center text-gray-400 hover:text-red-400 transition-all"
           >
@@ -261,7 +261,7 @@ export default function CandidateSelector({
               </svg>
               <span>Selected Candidate</span>
             </h3>
-            
+
             <div className="flex items-start space-x-4">
               {/* Photo Preview or Initials */}
               <div className="flex-shrink-0">
@@ -271,8 +271,14 @@ export default function CandidateSelector({
                       src={photoPreviewUrl}
                       alt="Preview"
                       className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        setTimeout(() => {
+                          const img = e.target as HTMLImageElement;
+                          if (img.naturalWidth === 0) {
+                            img.style.display = 'none';
+                          }
+                        }, 100);
                       }}
                     />
                   </div>
@@ -284,7 +290,7 @@ export default function CandidateSelector({
                   </div>
                 )}
               </div>
-              
+
               <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <span className="text-gray-500 text-xs uppercase tracking-wide">Name</span>
@@ -292,12 +298,12 @@ export default function CandidateSelector({
                     {candidateName}
                   </p>
                 </div>
-                
+
                 <div>
                   <span className="text-gray-500 text-xs uppercase tracking-wide">Reg No</span>
                   <p className="text-gold font-semibold">{selectedVoter.data.regNo}</p>
                 </div>
-                
+
                 <div className="md:col-span-2">
                   <span className="text-gray-500 text-xs uppercase tracking-wide">Email</span>
                   <p className="text-cyan font-medium break-all">{selectedVoter.data.email}</p>
@@ -349,7 +355,7 @@ export default function CandidateSelector({
           >
             Cancel
           </button>
-          
+
           <button
             onClick={handleSubmit}
             disabled={!selectedVoter || submitting}

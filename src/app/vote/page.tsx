@@ -428,9 +428,15 @@ export default function VotePage() {
                               src={photoUrl}
                               alt={candidate.name}
                               className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                                setTimeout(() => {
+                                  const img = e.target as HTMLImageElement;
+                                  if (img.naturalWidth === 0) {
+                                    img.style.display = 'none';
+                                    img.nextElementSibling?.classList.remove('hidden');
+                                  }
+                                }, 100);
                               }}
                             />
                             <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">

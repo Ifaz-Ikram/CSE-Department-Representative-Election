@@ -222,8 +222,14 @@ function ResultsPageContent() {
                               src={normalizePhotoUrl(winner.photoUrl)!}
                               alt={winner.name}
                               className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                setTimeout(() => {
+                                  const img = e.target as HTMLImageElement;
+                                  if (img.naturalWidth === 0) {
+                                    img.style.display = 'none';
+                                  }
+                                }, 100);
                               }}
                             />
                           </div>
@@ -309,8 +315,14 @@ function ResultsPageContent() {
                               src={photoUrl}
                               alt={candidate.name}
                               className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
+                                setTimeout(() => {
+                                  const img = e.target as HTMLImageElement;
+                                  if (img.naturalWidth === 0) {
+                                    img.style.display = 'none';
+                                  }
+                                }, 100);
                               }}
                             />
                           </div>

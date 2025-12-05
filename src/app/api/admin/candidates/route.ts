@@ -13,6 +13,13 @@ const CreateCandidateSchema = z.object({
   photoUrl: z.string().url().optional().or(z.literal("")),
 });
 
+const UpdateCandidateSchema = z.object({
+  id: z.string(),
+  bio: z.string().nullable().optional(),
+  photoUrl: z.string().url().nullable().optional().or(z.literal("")).or(z.null()),
+});
+
+
 export async function POST(request: NextRequest) {
   try {
     await requireRole(["super_admin"]);
@@ -27,7 +34,7 @@ export async function POST(request: NextRequest) {
 
       if (!registryEntry || !registryEntry.isActive) {
         return NextResponse.json(
-          { 
+          {
             error: "Candidate must be from the authorized CSE23 voter list",
             details: "Only students from the 200-person whitelist can be candidates"
           },
@@ -38,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Find or create user for the candidate (only if email is provided)
     let userId = data.userId || null;
-    
+
     if (data.email && data.email.trim() !== "") {
       let user = await prisma.user.findUnique({
         where: { email: data.email },
@@ -124,6 +131,46 @@ export async function DELETE(request: NextRequest) {
     }
 
     console.error("Delete candidate error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    await requireRole(["super_admin"]);
+    const body = await request.json();
+    const data = UpdateCandidateSchema.parse(body);
+
+    const candidate = await prisma.candidate.update({
+      where: { id: data.id },
+      data: {
+        bio: data.bio,
+        photoUrl: data.photoUrl === "" ? null : data.photoUrl,
+      },
+    });
+
+    return NextResponse.json({ success: true, candidate });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid input", details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      if (error.message === "Forbidden") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
+    console.error("Update candidate error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

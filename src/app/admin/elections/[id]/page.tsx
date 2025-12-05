@@ -28,19 +28,24 @@ export default function ManageCandidatesPage() {
   const [election, setElection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCandidateSelector, setShowCandidateSelector] = useState(false);
+  const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
+  const [editBio, setEditBio] = useState("");
+  const [editPhotoUrl, setEditPhotoUrl] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState("");
 
-	useEffect(() => {
-		if (status === "unauthenticated") {
-			router.push("/");
-			return;
-		}
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/");
+      return;
+    }
 
-		const role = (session?.user as any)?.role;
+    const role = (session?.user as any)?.role;
 
-		if (role && role !== "super_admin") {
-			router.push("/admin");
-		}
-	}, [status, session, router]);
+    if (role && role !== "super_admin") {
+      router.push("/admin");
+    }
+  }, [status, session, router]);
 
 
   useEffect(() => {
@@ -91,6 +96,45 @@ export default function ManageCandidatesPage() {
     }
   };
 
+  const handleEditClick = (candidate: Candidate) => {
+    setEditingCandidate(candidate);
+    setEditBio(candidate.bio || "");
+    setEditPhotoUrl(candidate.photoUrl || "");
+    setEditError("");
+  };
+
+  const handleEditSave = async () => {
+    if (!editingCandidate) return;
+
+    setEditSubmitting(true);
+    setEditError("");
+
+    try {
+      const response = await fetch(`/api/admin/candidates`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingCandidate.id,
+          bio: editBio.trim() || null,
+          photoUrl: editPhotoUrl.trim() || null,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to update candidate");
+      }
+
+      setEditingCandidate(null);
+      fetchCandidates();
+    } catch (err: any) {
+      setEditError(err.message || "Failed to update candidate");
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
   if (loading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center circuit-bg">
@@ -110,8 +154,8 @@ export default function ManageCandidatesPage() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8 animate-fade-in">
-            <Link 
-              href="/admin" 
+            <Link
+              href="/admin"
               className="text-cyan hover:text-cyan-light mb-4 inline-flex items-center space-x-2 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -161,18 +205,17 @@ export default function ManageCandidatesPage() {
               {election && (
                 <div className="text-right">
                   <div className="text-sm text-gray-400">Election Status</div>
-                  <div className={`badge ${
-                    new Date() >= new Date(election.startTime) && new Date() <= new Date(election.endTime)
-                      ? 'badge-active'
-                      : new Date() > new Date(election.endTime)
+                  <div className={`badge ${new Date() >= new Date(election.startTime) && new Date() <= new Date(election.endTime)
+                    ? 'badge-active'
+                    : new Date() > new Date(election.endTime)
                       ? 'badge-ended'
                       : 'badge-pending'
-                  }`}>
+                    }`}>
                     {new Date() >= new Date(election.startTime) && new Date() <= new Date(election.endTime)
                       ? '🟢 Active'
                       : new Date() > new Date(election.endTime)
-                      ? '🔒 Ended'
-                      : '⏳ Pending'}
+                        ? '🔒 Ended'
+                        : '⏳ Pending'}
                   </div>
                 </div>
               )}
@@ -188,14 +231,178 @@ export default function ManageCandidatesPage() {
             />
           )}
 
+          {/* Edit Candidate Modal */}
+          {editingCandidate && (
+            <div className="fixed inset-0 bg-navy-dark/90 backdrop-blur-md flex items-center justify-center z-[9999] p-4 overflow-y-auto animate-fade-in">
+              <div className="card-premium max-w-2xl w-full my-8 max-h-[95vh] overflow-y-auto border-2 border-cyan/50 glow-border">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-xl bg-cyan/20 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                        Edit Candidate
+                      </h2>
+                      <p className="text-gray-400 text-sm">Update candidate details</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setEditingCandidate(null)}
+                    className="w-10 h-10 rounded-lg bg-navy-dark/50 hover:bg-red-500/20 flex items-center justify-center text-gray-400 hover:text-red-400 transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {editError && (
+                  <div className="glass-card bg-red-500/10 border-red-500 p-4 mb-6 animate-fade-in">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-red-400">{editError}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Candidate Info Display */}
+                <div className="glass-card bg-cyan/5 p-5 mb-6">
+                  <h3 className="text-cyan font-semibold mb-4 flex items-center space-x-2">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                    <span>Candidate Information</span>
+                  </h3>
+
+                  <div className="flex items-start space-x-4">
+                    {/* Photo Preview or Initials */}
+                    <div className="flex-shrink-0">
+                      {normalizePhotoUrl(editPhotoUrl) ? (
+                        <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-cyan shadow-lg shadow-cyan/20">
+                          <img
+                            src={normalizePhotoUrl(editPhotoUrl)!}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              setTimeout(() => {
+                                const img = e.target as HTMLImageElement;
+                                if (img.naturalWidth === 0) {
+                                  img.style.display = 'none';
+                                }
+                              }, 100);
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan/20 to-navy-lighter border-2 border-cyan/30 flex items-center justify-center">
+                          <span className="text-2xl font-bold text-cyan">
+                            {getInitials(editingCandidate.name)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-gray-500 text-xs uppercase tracking-wide">Name</span>
+                        <p className="text-white font-semibold">
+                          {editingCandidate.name}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span className="text-gray-500 text-xs uppercase tracking-wide">Reg No</span>
+                        <p className="text-gold font-semibold">{editingCandidate.indexNumber}</p>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <span className="text-gray-500 text-xs uppercase tracking-wide">Email</span>
+                        <p className="text-cyan font-medium break-all">{editingCandidate.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Editable Fields */}
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
+                      Candidate Manifesto / Bio
+                    </label>
+                    <textarea
+                      value={editBio}
+                      onChange={(e) => setEditBio(e.target.value)}
+                      placeholder="Enter candidate's manifesto, vision, and qualifications..."
+                      className="input-field w-full min-h-[120px] resize-y"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
+                      Photo URL (Optional)
+                    </label>
+                    <input
+                      type="url"
+                      value={editPhotoUrl}
+                      onChange={(e) => setEditPhotoUrl(e.target.value)}
+                      placeholder="https://drive.google.com/... or direct image URL"
+                      className="input-field w-full"
+                    />
+                    <p className="text-gray-500 text-xs mt-2">
+                      💡 Google Drive links will be automatically converted to viewable URLs
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 justify-end mt-8 pt-6 border-t border-cyan/20">
+                  <button
+                    onClick={() => setEditingCandidate(null)}
+                    disabled={editSubmitting}
+                    className="btn-secondary order-2 sm:order-1"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={handleEditSave}
+                    disabled={editSubmitting}
+                    className="btn-primary order-1 sm:order-2 animate-pulse-glow"
+                  >
+                    {editSubmitting ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving...</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center space-x-2">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Save Changes</span>
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Candidates Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {candidates.map((candidate, index) => {
               const photoUrl = normalizePhotoUrl(candidate.photoUrl);
-              
+
               return (
-                <div 
-                  key={candidate.id} 
+                <div
+                  key={candidate.id}
                   className="glass-card p-5 animate-slide-up hover:border-cyan/50 transition-all duration-300 group"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
@@ -207,9 +414,16 @@ export default function ManageCandidatesPage() {
                           src={photoUrl}
                           alt={candidate.name}
                           className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                            // Delay check to allow for redirects
+                            setTimeout(() => {
+                              const img = e.target as HTMLImageElement;
+                              if (img.naturalWidth === 0) {
+                                img.style.display = 'none';
+                                img.nextElementSibling?.classList.remove('hidden');
+                              }
+                            }, 100);
                           }}
                         />
                         <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
@@ -222,7 +436,7 @@ export default function ManageCandidatesPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Candidate Info */}
                   <div className="text-center mb-4">
                     <h3 className="text-lg font-bold text-white mb-1 group-hover:text-cyan transition-colors">
@@ -235,7 +449,7 @@ export default function ManageCandidatesPage() {
                       {candidate.email}
                     </p>
                   </div>
-                  
+
                   {candidate.bio && (
                     <div className="bg-navy-dark/50 p-3 rounded-lg mb-4">
                       <p className="text-gray-300 text-sm line-clamp-3">
@@ -243,17 +457,28 @@ export default function ManageCandidatesPage() {
                       </p>
                     </div>
                   )}
-                  
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => handleDeleteCandidate(candidate.id)}
-                    className="w-full bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2.5 px-4 rounded-lg transition-all duration-300 border border-red-500/50 hover:border-red-500 flex items-center justify-center space-x-2 glow-border-red"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span>Remove</span>
-                  </button>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditClick(candidate)}
+                      className="flex-1 bg-cyan/20 hover:bg-cyan text-cyan hover:text-navy-dark font-bold py-2.5 px-3 rounded-lg transition-all duration-300 border border-cyan/50 hover:border-cyan flex items-center justify-center space-x-1.5"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCandidate(candidate.id)}
+                      className="flex-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2.5 px-3 rounded-lg transition-all duration-300 border border-red-500/50 hover:border-red-500 flex items-center justify-center space-x-1.5"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span>Remove</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}

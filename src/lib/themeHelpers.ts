@@ -21,7 +21,8 @@ export function normalizePhotoUrl(url: string | null | undefined): string | null
   const idMatch = url.match(/[-\w]{25,}/);
   if (!idMatch) return url; // Return original if no ID found
 
-  // Convert to direct view URL using lh3.googleusercontent.com which is more reliable for embedding
+  // Use lh3.googleusercontent.com which is Google's image CDN
+  // This works for publicly shared files
   return `https://lh3.googleusercontent.com/d/${idMatch[0]}`;
 }
 
