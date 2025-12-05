@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
-          prompt: "select_account",    
+          prompt: "select_account",
           access_type: "offline",
           response_type: "code",
         },
@@ -56,12 +56,13 @@ export const authOptions: NextAuthOptions = {
       });
 
       if (existingUser) {
-        // User exists - only update name and indexNumber, preserve role
+        // User exists - update name, indexNumber, and image, preserve role
         await prisma.user.update({
           where: { email: registry.email },
           data: {
             name: fullName,
             indexNumber: registry.regNo,
+            image: user.image || existingUser.image, // Update image from Google
             // Don't touch role - preserves super_admin if already set
           },
         });
@@ -72,6 +73,7 @@ export const authOptions: NextAuthOptions = {
             email: registry.email,
             name: fullName,
             indexNumber: registry.regNo,
+            image: user.image, // Save Google profile picture
             role: "voter", // All new users start as voter
           },
         });
@@ -83,13 +85,14 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         const dbUser = await prisma.user.findUnique({
           where: { email: session.user.email! },
-          select: { id: true, role: true, indexNumber: true },
+          select: { id: true, role: true, indexNumber: true, image: true },
         });
 
         if (dbUser) {
           session.user.id = dbUser.id;
           session.user.role = dbUser.role as "voter" | "admin" | "super_admin";
           session.user.indexNumber = dbUser.indexNumber || "";
+          session.user.image = dbUser.image || session.user.image;
         }
       }
       return session;

@@ -274,14 +274,30 @@ export default function VotePage() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-              Cast Your <span className="text-gradient glow-text">Vote</span>
-            </h1>
+          {/* Welcome Message */}
+          <div className="mb-6 animate-fade-in">
             <p className="text-gray-400 text-lg">
-              Select up to 10 candidates for the election
+              Welcome back, <span className="text-cyan font-semibold">{session?.user?.name || 'Voter'}</span>
             </p>
+          </div>
+
+          {/* Header */}
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 rounded-xl bg-cyan/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-white">
+                  Cast Your <span className="text-gradient glow-text">Vote</span>
+                </h1>
+                <p className="text-gray-400 text-lg">
+                  Select up to 10 candidates for the election
+                </p>
+              </div>
+            </div>
           </div>
 
           <GlowDivider className="mb-8" />
@@ -341,18 +357,25 @@ export default function VotePage() {
                   {/* Status Badge & Countdown */}
                   <div className="text-right">
                     {isElectionActive && (
-                      <span className="badge badge-active animate-pulse">
-                        🟢 Active
+                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/50 animate-pulse">
+                        <span className="w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
+                        <span className="text-green-400 font-semibold text-sm">LIVE</span>
                       </span>
                     )}
                     {isElectionEnded && (
-                      <span className="badge badge-ended">
-                        🔒 Ended
+                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/50">
+                        <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-red-400 font-semibold text-sm">ENDED</span>
                       </span>
                     )}
                     {!isElectionActive && !isElectionEnded && (
-                      <span className="badge badge-pending">
-                        ⏳ Pending
+                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/50">
+                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-yellow-400 font-semibold text-sm">UPCOMING</span>
                       </span>
                     )}
                   </div>
@@ -454,21 +477,36 @@ export default function VotePage() {
               )}
 
               {/* Selection Summary & Submit */}
-              <div className="glass-card mb-8 p-6 sticky top-20 z-30 animate-slide-up">
+              <div className="glass-card mb-8 p-6 sticky top-20 z-30 animate-slide-up border-cyan/30">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="w-full md:w-auto">
                     <div className="flex items-center justify-between md:justify-start space-x-4 mb-3">
-                      <span className="text-white font-bold text-lg">
-                        Selected: <span className="text-cyan">{selectedCandidates.size}</span> / 10
-                      </span>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-lg bg-cyan/20 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-cyan" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                            <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div>
+                          <span className="text-white font-bold text-lg">
+                            Selected: <span className="text-cyan text-2xl">{selectedCandidates.size}</span><span className="text-gray-500 text-base"> / 10</span>
+                          </span>
+                        </div>
+                      </div>
                       {selectedCandidates.size === 10 && (
-                        <span className="text-gold text-sm animate-pulse">✨ Maximum reached</span>
+                        <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-gold/20 border border-gold/50 text-gold text-sm animate-pulse">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
+                          </svg>
+                          <span>Maximum</span>
+                        </span>
                       )}
                     </div>
                     {/* Progress Bar */}
-                    <div className="progress-bar w-full md:w-64">
+                    <div className="w-full md:w-72 h-3 rounded-full bg-navy-dark overflow-hidden border border-cyan/20">
                       <div
-                        className="progress-fill"
+                        className="h-full rounded-full bg-gradient-to-r from-cyan to-cyan-light transition-all duration-500 ease-out"
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>
@@ -476,18 +514,21 @@ export default function VotePage() {
                   <button
                     onClick={handleSubmit}
                     disabled={submitting || !isElectionActive || selectedCandidates.size === 0}
-                    className={`btn-primary w-full md:w-auto ${isElectionActive && selectedCandidates.size > 0 ? 'animate-pulse-glow' : ''
+                    className={`btn-primary w-full md:w-auto px-8 py-3 text-lg flex items-center justify-center space-x-2 ${isElectionActive && selectedCandidates.size > 0 ? 'animate-pulse-glow' : ''
                       } disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none`}
                   >
                     {submitting ? (
                       <span className="flex items-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-5 h-5 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
                         <span>Submitting...</span>
                       </span>
-                    ) : ballot ? (
-                      "Update Vote"
                     ) : (
-                      "Submit Vote"
+                      <>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <span>{ballot ? "Update Vote" : "Submit Vote"}</span>
+                      </>
                     )}
                   </button>
                 </div>

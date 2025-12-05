@@ -86,8 +86,19 @@ export default function Navigation() {
                 <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-cyan/30">
                   <div className="flex items-center space-x-3">
                     {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center font-bold text-navy border-2 border-cyan/50 shadow-lg">
-                      {getInitials(session.user.name || "")}
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 shadow-lg flex-shrink-0">
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name || 'User'}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center font-bold text-navy">
+                          {getInitials(session.user.name || "")}
+                        </div>
+                      )}
                     </div>
                     {/* User Info */}
                     <div className="text-sm">
@@ -143,8 +154,19 @@ export default function Navigation() {
               <>
                 {/* User Info Mobile */}
                 <div className="flex items-center space-x-3 p-3 bg-navy-light/50 rounded-lg border border-cyan/20">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center font-bold text-navy border-2 border-cyan/50">
-                    {getInitials(session.user.name || "")}
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 flex-shrink-0">
+                    {session.user.image ? (
+                      <img
+                        src={session.user.image}
+                        alt={session.user.name || 'User'}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center font-bold text-navy">
+                        {getInitials(session.user.name || "")}
+                      </div>
+                    )}
                   </div>
                   <div className="text-sm flex-1">
                     <div className="text-white font-semibold">{session.user.name}</div>
