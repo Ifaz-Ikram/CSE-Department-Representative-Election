@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
+import { sanitizeInput, sanitizeHtml, sanitizeUrl, sanitizeEmail } from "@/lib/sanitize";
 
 const CreateCandidateSchema = z.object({
   electionId: z.string(),
@@ -31,8 +32,16 @@ export async function POST(request: NextRequest) {
 
     // SECURITY: Validate candidate is from the 200-student whitelist
     if (data.email && data.email.trim() !== "") {
+      const sanitizedEmail = sanitizeEmail(data.email);
+      if (!sanitizedEmail) {
+        return NextResponse.json(
+          { error: "Invalid email format" },
+          { status: 400 }
+        );
+      }
+      
       const registryEntry = await prisma.voterRegistry.findUnique({
-        where: { email: data.email },
+        where: { email: sanitizedEmail },
       });
 
       if (!registryEntry || !registryEntry.isActive) {
@@ -46,20 +55,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Sanitize all input fields
+    const sanitizedName = sanitizeInput(data.name, 100);
+    const sanitizedIndexNumber = sanitizeInput(data.indexNumber, 20);
+    const sanitizedEmail = data.email ? sanitizeEmail(data.email) : null;
+    const sanitizedBio = data.bio ? sanitizeHtml(data.bio) : undefined;
+    const sanitizedPhotoUrl = data.photoUrl ? sanitizeUrl(data.photoUrl) : null;
+
     // Find or create user for the candidate (only if email is provided)
     let userId = data.userId || null;
 
-    if (data.email && data.email.trim() !== "") {
+    if (sanitizedEmail && sanitizedEmail.trim() !== "") {
       let user = await prisma.user.findUnique({
-        where: { email: data.email },
+        where: { email: sanitizedEmail },
       });
 
       if (!user) {
         user = await prisma.user.create({
           data: {
-            email: data.email,
-            name: data.name,
-            indexNumber: data.indexNumber,
+            email: sanitizedEmail,
+            name: sanitizedName,
+            indexNumber: sanitizedIndexNumber,
             role: "voter",
           },
         });
@@ -71,11 +87,11 @@ export async function POST(request: NextRequest) {
       data: {
         electionId: data.electionId,
         userId: userId,
-        name: data.name,
-        indexNumber: data.indexNumber,
-        email: data.email && data.email.trim() !== "" ? data.email : null,
-        bio: data.bio,
-        photoUrl: data.photoUrl && data.photoUrl.trim() !== "" ? data.photoUrl : null,
+        name: sanitizedName,
+        indexNumber: sanitizedIndexNumber,
+        email: sanitizedEmail,
+        bio: sanitizedBio,
+        photoUrl: sanitizedPhotoUrl,
         languages: data.languages || [],
       },
     });

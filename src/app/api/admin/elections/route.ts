@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
 import { rateLimit } from "@/lib/rateLimit";
+import { sanitizeInput, sanitizeHtml } from "@/lib/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -34,10 +35,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = CreateElectionSchema.parse(body);
 
+    // Sanitize input
+    const sanitizedName = sanitizeInput(data.name, 200);
+    const sanitizedDescription = data.description ? sanitizeHtml(data.description) : undefined;
+
     const election = await prisma.election.create({
       data: {
-        name: data.name,
-        description: data.description,
+        name: sanitizedName,
+        description: sanitizedDescription,
         startTime: new Date(data.startTime),
         endTime: new Date(data.endTime),
       },

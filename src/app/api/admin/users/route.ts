@@ -13,7 +13,7 @@ const UpdateRoleSchema = z.object({
 });
 
 // GET /api/admin/users - Fetch all users (view for admin + super_admin)
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         const userRole = (session?.user as any)?.role;
@@ -26,7 +26,18 @@ export async function GET() {
             );
         }
 
+        // Pagination parameters
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '50');
+        const skip = (page - 1) * limit;
+
+        // Get total count
+        const total = await prisma.user.count();
+
         const users = await prisma.user.findMany({
+            skip,
+            take: limit,
             orderBy: [
                 { role: 'asc' },
                 { name: 'asc' },
@@ -41,7 +52,15 @@ export async function GET() {
             },
         });
 
-        return NextResponse.json({ users });
+        return NextResponse.json({ 
+            users,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
     } catch (error) {
         console.error('Failed to fetch users:', error);
         return NextResponse.json(

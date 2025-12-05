@@ -91,6 +91,30 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+    async jwt({ token, user, account, trigger }) {
+      // Set token expiration
+      if (!token.exp) {
+        token.exp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days
+      }
+      
+      // On sign in, store account info
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      
+      // Force refresh user data if session was updated
+      if (trigger === "update") {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email! },
+          select: { id: true, role: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role as "voter" | "admin" | "super_admin";
+        }
+      }
+      
+      return token;
+    },
     async redirect({ url, baseUrl }) {
       try {
         const parsed = new URL(url, baseUrl);
@@ -119,6 +143,19 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours - refresh token if older than this
+  },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

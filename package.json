@@ -19,6 +19,7 @@
     "@sentry/nextjs": "^10.29.0",
     "@upstash/ratelimit": "^2.0.7",
     "@upstash/redis": "^1.35.7",
+    "isomorphic-dompurify": "^2.33.0",
     "next": "^14.2.33",
     "next-auth": "^4.24.10",
     "pg": "^8.16.3",
