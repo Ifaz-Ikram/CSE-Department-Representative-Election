@@ -92,6 +92,10 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await requireRole(["super_admin"]);
     const body = await request.json();
     const data = UpdateElectionSchema.parse(body);
@@ -155,6 +159,10 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await requireRole(["super_admin"]);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

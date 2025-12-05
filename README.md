@@ -334,7 +334,7 @@
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/cse-election.git
+   git clone https://github.com/Ifaz-Ikram/cse-election.git
    cd cse-election
    ```
 
