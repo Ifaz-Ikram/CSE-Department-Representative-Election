@@ -26,3 +26,6 @@ export async function register() {
         });
     }
 }
+
+// Export the required hook for server-side error tracking
+export const onRequestError = Sentry.captureRequestError;
