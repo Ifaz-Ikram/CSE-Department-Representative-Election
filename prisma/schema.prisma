@@ -95,6 +95,7 @@ model Candidate {
   email        String?
   bio          String?
   photoUrl     String?
+  languages    String[]      @default([])
 
   election      Election      @relation(fields: [electionId], references: [id], onDelete: Cascade)
   user          User?         @relation(fields: [userId], references: [id])
@@ -124,4 +125,17 @@ model BallotChoice {
   candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 
   @@unique([ballotId, candidateId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  timestamp   DateTime @default(now())
+  action      String   // e.g., "ELECTION_CREATED", "CANDIDATE_ADDED", "VOTE_CAST"
+  category    String   // "ELECTION", "CANDIDATE", "VOTE", "AUTH"
+  actorEmail  String   // Admin who performed the action (or "SYSTEM" for anonymous)
+  actorRole   String   // "admin", "super_admin", or "voter"
+  targetType  String?  // What was affected (Election, Candidate, etc.)
+  targetId    String?  // ID of affected resource
+  targetName  String?  // Human-readable name of target
+  details     Json?    // Additional context (old/new values, metadata)
 }

@@ -14,6 +14,7 @@ interface Candidate {
   email: string;
   bio?: string | null;
   photoUrl?: string | null;
+  languages?: string[];
 }
 
 interface Election {
@@ -562,12 +563,25 @@ export default function VotePage() {
                           }`}>
                           {candidate.name}
                         </h3>
-                        <p className="text-gold text-sm font-semibold mb-1">
+                        <p className="text-gold text-sm font-semibold mb-2">
                           {candidate.indexNumber}
                         </p>
-                        <p className="text-gray-400 text-xs mb-3 truncate">
-                          {candidate.email}
-                        </p>
+                        {/* Language Badges */}
+                        {candidate.languages && candidate.languages.length > 0 && (
+                          <div className="flex flex-wrap gap-1 justify-center mb-3">
+                            {["English", "Sinhala", "Tamil"].filter(lang => candidate.languages?.includes(lang)).map((lang) => (
+                              <span
+                                key={lang}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${lang === "English" ? "bg-cyan/10 text-cyan border-cyan/30"
+                                  : lang === "Sinhala" ? "bg-gold/10 text-gold border-gold/30"
+                                    : "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                                  }`}
+                              >
+                                {lang}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {candidate.bio && (
                           <p className="text-gray-300 text-sm line-clamp-3 text-left bg-navy-dark/50 p-3 rounded-lg">
                             {candidate.bio}

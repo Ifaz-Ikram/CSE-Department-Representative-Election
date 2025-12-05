@@ -16,6 +16,7 @@ interface Candidate {
   email: string;
   bio?: string | null;
   photoUrl?: string | null;
+  languages?: string[];
 }
 
 export default function ManageCandidatesPage() {
@@ -31,6 +32,7 @@ export default function ManageCandidatesPage() {
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
   const [editBio, setEditBio] = useState("");
   const [editPhotoUrl, setEditPhotoUrl] = useState("");
+  const [editLanguages, setEditLanguages] = useState<string[]>([]);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
 
@@ -100,6 +102,7 @@ export default function ManageCandidatesPage() {
     setEditingCandidate(candidate);
     setEditBio(candidate.bio || "");
     setEditPhotoUrl(candidate.photoUrl || "");
+    setEditLanguages(candidate.languages || []);
     setEditError("");
   };
 
@@ -117,6 +120,7 @@ export default function ManageCandidatesPage() {
           id: editingCandidate.id,
           bio: editBio.trim() || null,
           photoUrl: editPhotoUrl.trim() || null,
+          languages: editLanguages,
         }),
       });
 
@@ -359,6 +363,48 @@ export default function ManageCandidatesPage() {
                       💡 Google Drive links will be automatically converted to viewable URLs
                     </p>
                   </div>
+
+                  {/* Languages Checkboxes */}
+                  <div>
+                    <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
+                      Languages
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {["English", "Sinhala", "Tamil"].map((lang) => (
+                        <label
+                          key={lang}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg border cursor-pointer transition-all ${editLanguages.includes(lang)
+                            ? lang === "English" ? "bg-cyan/20 border-cyan text-cyan"
+                              : lang === "Sinhala" ? "bg-gold/20 border-gold text-gold"
+                                : "bg-purple-500/20 border-purple-500 text-purple-400"
+                            : "bg-navy-dark/50 border-cyan/30 text-gray-400 hover:border-cyan/50"
+                            }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={editLanguages.includes(lang)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setEditLanguages([...editLanguages, lang]);
+                              } else {
+                                setEditLanguages(editLanguages.filter((l) => l !== lang));
+                              }
+                            }}
+                            className="sr-only"
+                          />
+                          <span className="font-medium">{lang}</span>
+                          {editLanguages.includes(lang) && (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-gray-500 text-xs mt-2">
+                      Select all languages the candidate can speak
+                    </p>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -455,6 +501,23 @@ export default function ManageCandidatesPage() {
                       <p className="text-gray-300 text-sm line-clamp-3">
                         {candidate.bio}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Language Badges */}
+                  {candidate.languages && candidate.languages.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-4 justify-center">
+                      {["English", "Sinhala", "Tamil"].filter(lang => candidate.languages?.includes(lang)).map((lang) => (
+                        <span
+                          key={lang}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${lang === "English" ? "bg-cyan/10 text-cyan border-cyan/30"
+                            : lang === "Sinhala" ? "bg-gold/10 text-gold border-gold/30"
+                              : "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                            }`}
+                        >
+                          {lang}
+                        </span>
+                      ))}
                     </div>
                   )}
 

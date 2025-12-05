@@ -10,7 +10,7 @@ import GlowDivider from "@/components/GlowDivider";
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-    
+
   const [elections, setElections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -186,6 +186,51 @@ export default function AdminPage() {
             </div>
           </div>
 
+          {/* Admin Quick Actions */}
+          <div className="flex flex-wrap gap-4 mb-8 animate-slide-up">
+            {/* Audit Log - visible to all admins */}
+            <Link
+              href="/admin/audit-log"
+              className="inline-flex items-center space-x-3 glass-card p-4 hover:bg-cyan/10 transition-all duration-300 group flex-1 min-w-[280px]"
+            >
+              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </div>
+              <div className="text-left flex-1">
+                <div className="text-white font-semibold group-hover:text-cyan transition-colors">Audit Log</div>
+                <div className="text-gray-400 text-sm">
+                  {isSuperAdmin ? "View all administrative actions" : "Monitor super admin actions"}
+                </div>
+              </div>
+              <svg className="w-5 h-5 text-gray-500 group-hover:text-cyan transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+
+            {/* User Management - visible to all admins */}
+            <Link
+              href="/admin/users"
+              className="inline-flex items-center space-x-3 glass-card p-4 hover:bg-cyan/10 transition-all duration-300 group flex-1 min-w-[280px]"
+            >
+              <div className="w-10 h-10 rounded-lg bg-gold/20 flex items-center justify-center group-hover:bg-gold/30 transition-colors">
+                <svg className="w-5 h-5 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <div className="text-left flex-1">
+                <div className="text-white font-semibold group-hover:text-cyan transition-colors">User Management</div>
+                <div className="text-gray-400 text-sm">
+                  {isSuperAdmin ? "Manage user roles and permissions" : "View user roles (read-only)"}
+                </div>
+              </div>
+              <svg className="w-5 h-5 text-gray-500 group-hover:text-cyan transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
           {/* Create Election Form */}
           {showCreateForm && isSuperAdmin && (
             <div className="card-premium mb-8 animate-slide-up">
@@ -274,7 +319,7 @@ export default function AdminPage() {
               </svg>
               <span>Elections</span>
             </h2>
-            
+
             {elections.map((election, index) => {
               const now = new Date();
               const start = new Date(election.startTime);
@@ -284,8 +329,8 @@ export default function AdminPage() {
               const isPending = now < start;
 
               return (
-                <div 
-                  key={election.id} 
+                <div
+                  key={election.id}
                   className="card-premium animate-slide-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
@@ -295,11 +340,10 @@ export default function AdminPage() {
                         <h3 className="text-2xl font-bold text-white">
                           {election.name}
                         </h3>
-                        <span className={`badge ${
-                          isActive ? 'badge-active animate-pulse' : 
-                          isEnded ? 'badge-ended' : 
-                          'badge-pending'
-                        }`}>
+                        <span className={`badge ${isActive ? 'badge-active animate-pulse' :
+                          isEnded ? 'badge-ended' :
+                            'badge-pending'
+                          }`}>
                           {isActive ? '🟢 Active' : isEnded ? '🔒 Ended' : '⏳ Pending'}
                         </span>
                       </div>
@@ -308,7 +352,7 @@ export default function AdminPage() {
                           {election.description}
                         </p>
                       )}
-                      
+
                       {/* Stats Row */}
                       <div className="flex flex-wrap items-center gap-4 text-sm">
                         <div className="flex items-center space-x-2 bg-navy-dark/50 px-3 py-1.5 rounded-lg">
@@ -351,11 +395,10 @@ export default function AdminPage() {
                             election.resultsVisible
                           )
                         }
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          election.resultsVisible
-                            ? "bg-cyan text-navy shadow-lg shadow-cyan/30"
-                            : "bg-navy-dark text-cyan border border-cyan/50 hover:border-cyan"
-                        }`}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${election.resultsVisible
+                          ? "bg-cyan text-navy shadow-lg shadow-cyan/30"
+                          : "bg-navy-dark text-cyan border border-cyan/50 hover:border-cyan"
+                          }`}
                       >
                         {election.resultsVisible ? (
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -377,11 +420,10 @@ export default function AdminPage() {
                             election.publicResultsVisible
                           )
                         }
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                          election.publicResultsVisible
-                            ? "bg-gold text-navy shadow-lg shadow-gold/30"
-                            : "bg-navy-dark text-gold border border-gold/50 hover:border-gold"
-                        }`}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${election.publicResultsVisible
+                          ? "bg-gold text-navy shadow-lg shadow-gold/30"
+                          : "bg-navy-dark text-gold border border-gold/50 hover:border-gold"
+                          }`}
                       >
                         {election.publicResultsVisible ? (
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

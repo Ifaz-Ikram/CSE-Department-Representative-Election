@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ const UpdateElectionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    await requireRole(["super_admin"]);
+    const session = await requireRole(["super_admin"]);
     const body = await request.json();
     const data = CreateElectionSchema.parse(body);
 
@@ -35,6 +36,18 @@ export async function POST(request: NextRequest) {
         startTime: new Date(data.startTime),
         endTime: new Date(data.endTime),
       },
+    });
+
+    // Log audit event
+    await logAuditEvent({
+      action: AuditActions.ELECTION_CREATED,
+      category: AuditCategories.ELECTION,
+      actorEmail: session.user.email || 'unknown',
+      actorRole: session.user.role,
+      targetType: 'Election',
+      targetId: election.id,
+      targetName: election.name,
+      details: { startTime: election.startTime, endTime: election.endTime },
     });
 
     return NextResponse.json({ success: true, election });
@@ -65,7 +78,7 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    await requireRole(["super_admin"]);
+    const session = await requireRole(["super_admin"]);
     const body = await request.json();
     const data = UpdateElectionSchema.parse(body);
 
@@ -80,6 +93,21 @@ export async function PATCH(request: NextRequest) {
     const election = await prisma.election.update({
       where: { id: data.id },
       data: updateData,
+    });
+
+    // Log audit event
+    const action = (data.resultsVisible !== undefined || data.publicResultsVisible !== undefined)
+      ? AuditActions.ELECTION_VISIBILITY_CHANGED
+      : AuditActions.ELECTION_UPDATED;
+    await logAuditEvent({
+      action,
+      category: AuditCategories.ELECTION,
+      actorEmail: session.user.email || 'unknown',
+      actorRole: session.user.role,
+      targetType: 'Election',
+      targetId: election.id,
+      targetName: election.name,
+      details: updateData,
     });
 
     return NextResponse.json({ success: true, election });
@@ -110,7 +138,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await requireRole(["super_admin"]);
+    const session = await requireRole(["super_admin"]);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -121,8 +149,22 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Get election name before deleting for audit log
+    const electionToDelete = await prisma.election.findUnique({ where: { id } });
+
     await prisma.election.delete({
       where: { id },
+    });
+
+    // Log audit event
+    await logAuditEvent({
+      action: AuditActions.ELECTION_DELETED,
+      category: AuditCategories.ELECTION,
+      actorEmail: session.user.email || 'unknown',
+      actorRole: session.user.role,
+      targetType: 'Election',
+      targetId: id,
+      targetName: electionToDelete?.name || 'Unknown',
     });
 
     return NextResponse.json({ success: true });

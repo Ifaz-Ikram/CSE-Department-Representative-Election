@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { logAnonymousVote } from "@/lib/auditLog";
 
 const SubmitBallotSchema = z.object({
   electionId: z.string(),
@@ -109,6 +110,9 @@ export async function POST(req: NextRequest) {
 
       return ballot;
     });
+
+    // Log anonymous vote (no voter identity)
+    await logAnonymousVote(electionId, election.name);
 
     return NextResponse.json({
       success: true,

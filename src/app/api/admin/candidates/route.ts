@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
 
 const CreateCandidateSchema = z.object({
   electionId: z.string(),
@@ -11,12 +12,14 @@ const CreateCandidateSchema = z.object({
   email: z.string().email().optional().or(z.literal("")),
   bio: z.string().optional(),
   photoUrl: z.string().url().optional().or(z.literal("")),
+  languages: z.array(z.enum(["English", "Sinhala", "Tamil"])).optional().default([]),
 });
 
 const UpdateCandidateSchema = z.object({
   id: z.string(),
   bio: z.string().nullable().optional(),
   photoUrl: z.string().url().nullable().optional().or(z.literal("")).or(z.null()),
+  languages: z.array(z.enum(["English", "Sinhala", "Tamil"])).optional(),
 });
 
 
@@ -73,7 +76,21 @@ export async function POST(request: NextRequest) {
         email: data.email && data.email.trim() !== "" ? data.email : null,
         bio: data.bio,
         photoUrl: data.photoUrl && data.photoUrl.trim() !== "" ? data.photoUrl : null,
+        languages: data.languages || [],
       },
+    });
+
+    // Log audit event
+    const session = await requireRole(["super_admin"]);
+    await logAuditEvent({
+      action: AuditActions.CANDIDATE_ADDED,
+      category: AuditCategories.CANDIDATE,
+      actorEmail: session.user.email || 'unknown',
+      actorRole: session.user.role,
+      targetType: 'Candidate',
+      targetId: candidate.id,
+      targetName: candidate.name,
+      details: { electionId: candidate.electionId, indexNumber: candidate.indexNumber },
     });
 
     return NextResponse.json({ success: true, candidate });
@@ -104,7 +121,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await requireRole(["super_admin"]);
+    const session = await requireRole(["super_admin"]);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -115,8 +132,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Get candidate info before deleting for audit log
+    const candidate = await prisma.candidate.findUnique({ where: { id } });
+
     await prisma.candidate.delete({
       where: { id },
+    });
+
+    // Log audit event
+    await logAuditEvent({
+      action: AuditActions.CANDIDATE_REMOVED,
+      category: AuditCategories.CANDIDATE,
+      actorEmail: session.user.email || 'unknown',
+      actorRole: session.user.role,
+      targetType: 'Candidate',
+      targetId: id,
+      targetName: candidate?.name || 'Unknown',
+      details: { electionId: candidate?.electionId },
     });
 
     return NextResponse.json({ success: true });
@@ -140,7 +172,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    await requireRole(["super_admin"]);
+    const session = await requireRole(["super_admin"]);
     const body = await request.json();
     const data = UpdateCandidateSchema.parse(body);
 
@@ -149,7 +181,20 @@ export async function PUT(request: NextRequest) {
       data: {
         bio: data.bio,
         photoUrl: data.photoUrl === "" ? null : data.photoUrl,
+        ...(data.languages !== undefined && { languages: data.languages }),
       },
+    });
+
+    // Log audit event
+    await logAuditEvent({
+      action: AuditActions.CANDIDATE_UPDATED,
+      category: AuditCategories.CANDIDATE,
+      actorEmail: session.user.email || 'unknown',
+      actorRole: session.user.role,
+      targetType: 'Candidate',
+      targetId: candidate.id,
+      targetName: candidate.name,
+      details: { bio: data.bio, photoUrl: data.photoUrl, languages: data.languages },
     });
 
     return NextResponse.json({ success: true, candidate });
