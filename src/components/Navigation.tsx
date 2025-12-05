@@ -29,9 +29,9 @@ export default function Navigation() {
             const end = new Date(election.endTime);
             return now >= start && now <= end;
           });
-          // Show results only if no active elections OR user is admin
-          const isAdmin = role === 'admin' || role === 'super_admin';
-          setShowResults(!hasActiveElection || isAdmin);
+          // Hide results during active elections, except for super_admin
+          const isSuperAdmin = role === 'super_admin';
+          setShowResults(!hasActiveElection || isSuperAdmin);
         }
       } catch (error) {
         console.error('Failed to check election status:', error);

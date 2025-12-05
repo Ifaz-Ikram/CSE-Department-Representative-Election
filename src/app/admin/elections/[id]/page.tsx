@@ -35,6 +35,20 @@ export default function ManageCandidatesPage() {
   const [editLanguages, setEditLanguages] = useState<string[]>([]);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
+  const [showWarningModal, setShowWarningModal] = useState<{ type: 'edit' | 'delete', candidate: Candidate } | null>(null);
+
+  // Computed election status
+  const isSuperAdmin = (session?.user as any)?.role === "super_admin";
+  const electionStatus = election ? (() => {
+    const now = new Date();
+    const start = new Date(election.startTime);
+    const end = new Date(election.endTime);
+    return {
+      isPending: now < start,
+      isActive: now >= start && now <= end,
+      isEnded: now > end
+    };
+  })() : { isPending: false, isActive: false, isEnded: false };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -44,15 +58,17 @@ export default function ManageCandidatesPage() {
 
     const role = (session?.user as any)?.role;
 
-    if (role && role !== "super_admin") {
-      router.push("/admin");
+    // Allow both admin and super_admin to access
+    if (role && role !== "super_admin" && role !== "admin") {
+      router.push("/vote");
     }
   }, [status, session, router]);
 
 
   useEffect(() => {
     const role = (session?.user as any)?.role;
-    if (role === "super_admin" && electionId) {
+    // Both admin and super_admin can fetch candidates
+    if ((role === "super_admin" || role === "admin") && electionId) {
       fetchCandidates();
       fetchElection();
     }
@@ -85,9 +101,8 @@ export default function ManageCandidatesPage() {
     fetchCandidates();
   };
 
-  const handleDeleteCandidate = async (candidateId: string) => {
-    if (!confirm("Are you sure you want to delete this candidate?")) return;
-
+  // Confirmed delete (after warning)
+  const handleDeleteCandidateConfirmed = async (candidateId: string) => {
     try {
       await fetch(`/api/admin/candidates?id=${candidateId}`, {
         method: "DELETE",
@@ -98,7 +113,27 @@ export default function ManageCandidatesPage() {
     }
   };
 
+  // Delete handler - shows warning during active election
+  const handleDeleteCandidate = (candidate: Candidate) => {
+    if (electionStatus.isActive) {
+      setShowWarningModal({ type: 'delete', candidate });
+    } else {
+      if (confirm("Are you sure you want to delete this candidate?")) {
+        handleDeleteCandidateConfirmed(candidate.id);
+      }
+    }
+  };
+
+  // Edit handler - shows warning during active election  
   const handleEditClick = (candidate: Candidate) => {
+    if (electionStatus.isActive) {
+      setShowWarningModal({ type: 'edit', candidate });
+    } else {
+      proceedToEdit(candidate);
+    }
+  };
+
+  const proceedToEdit = (candidate: Candidate) => {
     setEditingCandidate(candidate);
     setEditBio(candidate.bio || "");
     setEditPhotoUrl(candidate.photoUrl || "");
@@ -170,25 +205,44 @@ export default function ManageCandidatesPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-4">
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                  Manage <span className="text-gradient glow-text">Candidates</span>
+                  {(electionStatus.isEnded || !isSuperAdmin) ? 'View' : 'Manage'} <span className="text-gradient glow-text">Candidates</span>
                 </h1>
                 {election && (
                   <p className="text-gray-400 text-lg">{election.name}</p>
                 )}
               </div>
-              <button
-                onClick={() => setShowCandidateSelector(true)}
-                className="btn-primary animate-pulse-glow"
-              >
-                <span className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span>Add Candidate</span>
-                </span>
-              </button>
+              {/* Add button only for super_admin and not after election ends */}
+              {isSuperAdmin && !electionStatus.isEnded && (
+                <button
+                  onClick={() => setShowCandidateSelector(true)}
+                  className="btn-primary animate-pulse-glow"
+                >
+                  <span className="flex items-center space-x-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span>Add Candidate</span>
+                  </span>
+                </button>
+              )}
             </div>
           </div>
+
+          {/* Info Banner for view-only mode */}
+          {(electionStatus.isEnded || !isSuperAdmin) && (
+            <div className="glass-card bg-gray-500/10 border-gray-500/30 p-4 mb-6 animate-fade-in">
+              <div className="flex items-center space-x-3">
+                <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                <p className="text-gray-300">
+                  {electionStatus.isEnded
+                    ? "This election has ended. Candidates cannot be modified to preserve result integrity."
+                    : "You are viewing candidates in read-only mode. Only super admins can manage candidates."}
+                </p>
+              </div>
+            </div>
+          )}
 
           <GlowDivider className="mb-8" />
 
@@ -233,6 +287,65 @@ export default function ManageCandidatesPage() {
               onSuccess={handleCandidateAdded}
               onCancel={() => setShowCandidateSelector(false)}
             />
+          )}
+
+          {/* Warning Modal for Active Election */}
+          {showWarningModal && (
+            <div className="fixed inset-0 bg-navy-dark/90 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-fade-in">
+              <div className="card-premium max-w-md w-full border-2 border-gold/50">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gold/20 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gold">Active Election Warning</h3>
+                    <p className="text-gray-400 text-sm">Proceed with caution</p>
+                  </div>
+                </div>
+
+                <div className="bg-gold/10 border border-gold/30 rounded-lg p-4 mb-6">
+                  <p className="text-gray-200">
+                    This election is <span className="text-green-400 font-semibold">currently active</span>.
+                    {showWarningModal.type === 'edit'
+                      ? ' Editing candidate details may affect ongoing votes and voter trust.'
+                      : ' Deleting a candidate will remove all votes cast for them and cannot be undone.'}
+                  </p>
+                </div>
+
+                <p className="text-gray-400 text-sm mb-6">
+                  Are you sure you want to {showWarningModal.type === 'edit' ? 'edit' : 'delete'}{' '}
+                  <span className="text-white font-semibold">{showWarningModal.candidate.name}</span>?
+                </p>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowWarningModal(null)}
+                    className="flex-1 btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const { type, candidate } = showWarningModal;
+                      setShowWarningModal(null);
+                      if (type === 'edit') {
+                        proceedToEdit(candidate);
+                      } else {
+                        handleDeleteCandidateConfirmed(candidate.id);
+                      }
+                    }}
+                    className={`flex-1 font-bold py-2 px-4 rounded-lg transition-all ${showWarningModal.type === 'delete'
+                      ? 'bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/50'
+                      : 'bg-gold/20 hover:bg-gold text-gold hover:text-navy-dark border border-gold/50'
+                      }`}
+                  >
+                    {showWarningModal.type === 'edit' ? 'Edit Anyway' : 'Delete Anyway'}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Edit Candidate Modal */}
@@ -409,33 +522,46 @@ export default function ManageCandidatesPage() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-end mt-8 pt-6 border-t border-cyan/20">
-                  <button
-                    onClick={() => setEditingCandidate(null)}
-                    disabled={editSubmitting}
-                    className="btn-secondary order-2 sm:order-1"
-                  >
-                    Cancel
-                  </button>
+                  {electionStatus.isEnded ? (
+                    /* Read-only mode - just close button */
+                    <button
+                      onClick={() => setEditingCandidate(null)}
+                      className="btn-secondary"
+                    >
+                      Close
+                    </button>
+                  ) : (
+                    /* Edit mode - Cancel and Save */
+                    <>
+                      <button
+                        onClick={() => setEditingCandidate(null)}
+                        disabled={editSubmitting}
+                        className="btn-secondary order-2 sm:order-1"
+                      >
+                        Cancel
+                      </button>
 
-                  <button
-                    onClick={handleEditSave}
-                    disabled={editSubmitting}
-                    className="btn-primary order-1 sm:order-2 animate-pulse-glow"
-                  >
-                    {editSubmitting ? (
-                      <span className="flex items-center justify-center space-x-2">
-                        <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
-                        <span>Saving...</span>
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center space-x-2">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>Save Changes</span>
-                      </span>
-                    )}
-                  </button>
+                      <button
+                        onClick={handleEditSave}
+                        disabled={editSubmitting}
+                        className="btn-primary order-1 sm:order-2 animate-pulse-glow"
+                      >
+                        {editSubmitting ? (
+                          <span className="flex items-center justify-center space-x-2">
+                            <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                            <span>Saving...</span>
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center space-x-2">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Save Changes</span>
+                          </span>
+                        )}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -521,27 +647,46 @@ export default function ManageCandidatesPage() {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditClick(candidate)}
-                      className="flex-1 bg-cyan/20 hover:bg-cyan text-cyan hover:text-navy-dark font-bold py-2.5 px-3 rounded-lg transition-all duration-300 border border-cyan/50 hover:border-cyan flex items-center justify-center space-x-1.5"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      <span>Edit</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCandidate(candidate.id)}
-                      className="flex-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2.5 px-3 rounded-lg transition-all duration-300 border border-red-500/50 hover:border-red-500 flex items-center justify-center space-x-1.5"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      <span>Remove</span>
-                    </button>
-                  </div>
+                  {/* Action Buttons - only show for super_admin or after election ends */}
+                  {(isSuperAdmin || electionStatus.isEnded) && (
+                    <div className="flex gap-2">
+                      {electionStatus.isEnded ? (
+                        /* Read-only mode after election ends - for everyone */
+                        <button
+                          onClick={() => handleEditClick(candidate)}
+                          className="flex-1 bg-gray-600/20 text-gray-400 font-bold py-2.5 px-3 rounded-lg border border-gray-500/50 flex items-center justify-center space-x-1.5"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>View Details</span>
+                        </button>
+                      ) : (
+                        /* Editable mode: super_admin before/during election */
+                        <>
+                          <button
+                            onClick={() => handleEditClick(candidate)}
+                            className="flex-1 bg-cyan/20 hover:bg-cyan text-cyan hover:text-navy-dark font-bold py-2.5 px-3 rounded-lg transition-all duration-300 border border-cyan/50 hover:border-cyan flex items-center justify-center space-x-1.5"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCandidate(candidate)}
+                            className="flex-1 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2.5 px-3 rounded-lg transition-all duration-300 border border-red-500/50 hover:border-red-500 flex items-center justify-center space-x-1.5"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span>Remove</span>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

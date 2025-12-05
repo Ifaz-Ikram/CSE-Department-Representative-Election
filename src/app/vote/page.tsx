@@ -213,7 +213,7 @@ export default function VotePage() {
 
   // Show confirmation modal before submitting
   const handleShowConfirmation = () => {
-    if (!selectedElectionId || selectedCandidates.size === 0) return;
+    if (!selectedElectionId) return;
     setShowConfirmModal(true);
   };
 
@@ -801,7 +801,7 @@ export default function VotePage() {
               )}
 
               {/* Selection Summary & Submit */}
-              <div className="mb-8 p-6 sticky top-[88px] z-40 rounded-xl border border-cyan/30" style={{ backgroundColor: '#050a15', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.9)' }}>
+              <div className="mb-8 p-6 sticky top-[110px] z-40 rounded-xl border border-cyan/30" style={{ backgroundColor: '#050a15', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.9)' }}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="w-full md:w-auto">
                     <div className="flex items-center justify-between md:justify-start space-x-4 mb-3">
@@ -837,8 +837,8 @@ export default function VotePage() {
                   </div>
                   <button
                     onClick={handleShowConfirmation}
-                    disabled={submitting || !isElectionActive || selectedCandidates.size === 0}
-                    className={`btn-primary w-full md:w-auto px-8 py-3 text-lg flex items-center justify-center space-x-2 ${isElectionActive && selectedCandidates.size > 0 ? 'animate-pulse-glow' : ''
+                    disabled={submitting || !isElectionActive || (selectedCandidates.size === 0 && !ballot)}
+                    className={`btn-primary w-full md:w-auto px-8 py-3 text-lg flex items-center justify-center space-x-2 ${isElectionActive && (selectedCandidates.size > 0 || ballot) ? 'animate-pulse-glow' : ''
                       } disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none`}
                   >
                     {submitting ? (
