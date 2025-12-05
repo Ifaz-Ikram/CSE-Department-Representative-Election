@@ -35,7 +35,7 @@ export const authOptions: NextAuthOptions = {
       });
 
       if (!registry || !registry.isActive) {
-        // Not in our whitelist - deny access
+        // Not in our whitelist of 200 CSE23 students - deny access
         return "/?error=NotWhitelisted";
       }
 
