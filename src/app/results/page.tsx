@@ -73,8 +73,17 @@ function ResultsPageContent() {
   useEffect(() => {
     if (selectedElectionId) {
       fetchStatistics();
+
+      // For voters, poll every 10 seconds to check if access is still valid
+      if ((session?.user as any)?.role === 'voter') {
+        const interval = setInterval(() => {
+          fetchStatistics();
+        }, 10000); // Check every 10 seconds
+
+        return () => clearInterval(interval);
+      }
     }
-  }, [selectedElectionId]);
+  }, [selectedElectionId, session]);
 
   const fetchElections = async () => {
     try {
@@ -103,6 +112,11 @@ function ResultsPageContent() {
         setElection(data.election);
         setError(null);
       } else {
+        // If voter loses access (403), redirect to vote page
+        if (res.status === 403 && (session?.user as any)?.role === 'voter') {
+          router.push('/vote');
+          return;
+        }
         setError(data.error || "Failed to fetch statistics");
         setStats([]);
       }
