@@ -37,6 +37,15 @@ export default function ManageCandidatesPage() {
   const [editError, setEditError] = useState("");
   const [showWarningModal, setShowWarningModal] = useState<{ type: 'edit' | 'delete', candidate: Candidate } | null>(null);
 
+  // Preset functionality
+  const [showSavePresetModal, setShowSavePresetModal] = useState(false);
+  const [showLoadPresetModal, setShowLoadPresetModal] = useState(false);
+  const [presetName, setPresetName] = useState("");
+  const [presetDescription, setPresetDescription] = useState("");
+  const [availablePresets, setAvailablePresets] = useState<Array<{ id: string; name: string; candidateCount: number }>>([]);
+  const [presetLoading, setPresetLoading] = useState(false);
+  const [presetMessage, setPresetMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   // Computed election status
   const isSuperAdmin = (session?.user as any)?.role === "super_admin";
   const electionStatus = election ? (() => {
@@ -174,6 +183,93 @@ export default function ManageCandidatesPage() {
     }
   };
 
+  // Preset functions
+  const fetchPresets = async () => {
+    try {
+      const res = await fetch("/api/admin/presets");
+      const data = await res.json();
+      setAvailablePresets(data.presets || []);
+    } catch (error) {
+      console.error("Failed to fetch presets:", error);
+    }
+  };
+
+  const handleSavePreset = async () => {
+    if (!presetName.trim()) {
+      setPresetMessage({ type: 'error', text: 'Please enter a preset name' });
+      return;
+    }
+
+    setPresetLoading(true);
+    setPresetMessage(null);
+
+    try {
+      const res = await fetch("/api/admin/presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          electionId,
+          presetName: presetName.trim(),
+          description: presetDescription.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setPresetMessage({ type: 'success', text: `Saved ${data.preset.candidateCount} candidates as "${presetName}"` });
+        setTimeout(() => {
+          setShowSavePresetModal(false);
+          setPresetName("");
+          setPresetDescription("");
+          setPresetMessage(null);
+        }, 2000);
+      } else {
+        setPresetMessage({ type: 'error', text: data.error || 'Failed to save preset' });
+      }
+    } catch (error) {
+      setPresetMessage({ type: 'error', text: 'Failed to save preset' });
+    } finally {
+      setPresetLoading(false);
+    }
+  };
+
+  const handleLoadPreset = async (presetId: string) => {
+    setPresetLoading(true);
+    setPresetMessage(null);
+
+    try {
+      const res = await fetch("/api/admin/presets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ electionId, presetId }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setPresetMessage({ type: 'success', text: data.message });
+        fetchCandidates();
+        setTimeout(() => {
+          setShowLoadPresetModal(false);
+          setPresetMessage(null);
+        }, 2000);
+      } else {
+        setPresetMessage({ type: 'error', text: data.error || 'Failed to load preset' });
+      }
+    } catch (error) {
+      setPresetMessage({ type: 'error', text: 'Failed to load preset' });
+    } finally {
+      setPresetLoading(false);
+    }
+  };
+
+  const openLoadPresetModal = () => {
+    fetchPresets();
+    setShowLoadPresetModal(true);
+    setPresetMessage(null);
+  };
+
   if (loading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center circuit-bg">
@@ -211,19 +307,48 @@ export default function ManageCandidatesPage() {
                   <p className="text-gray-400 text-lg">{election.name}</p>
                 )}
               </div>
-              {/* Add button only for super_admin and not after election ends */}
+              {/* Action buttons for super_admin */}
               {isSuperAdmin && !electionStatus.isEnded && (
-                <button
-                  onClick={() => setShowCandidateSelector(true)}
-                  className="btn-primary animate-pulse-glow"
-                >
-                  <span className="flex items-center space-x-2">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span>Add Candidate</span>
-                  </span>
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => setShowCandidateSelector(true)}
+                    className="btn-primary animate-pulse-glow"
+                  >
+                    <span className="flex items-center space-x-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span>Add Candidate</span>
+                    </span>
+                  </button>
+
+                  {/* Preset Buttons */}
+                  <button
+                    onClick={() => { setShowSavePresetModal(true); setPresetMessage(null); }}
+                    className="bg-gold/20 hover:bg-gold text-gold hover:text-navy-dark font-bold py-2 px-4 rounded-lg transition-all duration-300 border border-gold/50 hover:border-gold"
+                    title="Save current candidates as a preset"
+                  >
+                    <span className="flex items-center space-x-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      <span>Save Preset</span>
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={openLoadPresetModal}
+                    className="bg-purple-500/20 hover:bg-purple-500 text-purple-400 hover:text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 border border-purple-500/50 hover:border-purple-500"
+                    title="Load candidates from a saved preset"
+                  >
+                    <span className="flex items-center space-x-2">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      <span>Load Preset</span>
+                    </span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -342,6 +467,169 @@ export default function ManageCandidatesPage() {
                       }`}
                   >
                     {showWarningModal.type === 'edit' ? 'Edit Anyway' : 'Delete Anyway'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Save Preset Modal */}
+          {showSavePresetModal && (
+            <div className="fixed inset-0 bg-navy-dark/90 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-fade-in">
+              <div className="card-premium max-w-md w-full border-2 border-gold/50">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-xl bg-gold/20 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Save as Preset</h3>
+                      <p className="text-gray-400 text-sm">Save {candidates.length} candidates</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setShowSavePresetModal(false); setPresetMessage(null); }}
+                    className="w-10 h-10 rounded-lg bg-navy-dark/50 hover:bg-red-500/20 flex items-center justify-center text-gray-400 hover:text-red-400 transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {presetMessage && (
+                  <div className={`p-4 rounded-lg mb-4 ${presetMessage.type === 'success' ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-red-500/20 border border-red-500/30 text-red-400'}`}>
+                    {presetMessage.text}
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-cyan text-sm font-semibold mb-2 uppercase tracking-wide">Preset Name *</label>
+                    <input
+                      type="text"
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
+                      placeholder="e.g., Mock Election 2025"
+                      className="input-field w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-cyan text-sm font-semibold mb-2 uppercase tracking-wide">Description (Optional)</label>
+                    <textarea
+                      value={presetDescription}
+                      onChange={(e) => setPresetDescription(e.target.value)}
+                      placeholder="Brief description of this preset..."
+                      className="input-field w-full"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => { setShowSavePresetModal(false); setPresetMessage(null); }}
+                    className="flex-1 btn-secondary"
+                    disabled={presetLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSavePreset}
+                    disabled={presetLoading || !presetName.trim()}
+                    className="flex-1 btn-primary animate-pulse-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {presetLoading ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-navy border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving...</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center space-x-2">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Save Preset</span>
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Load Preset Modal */}
+          {showLoadPresetModal && (
+            <div className="fixed inset-0 bg-navy-dark/90 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-fade-in">
+              <div className="card-premium max-w-md w-full border-2 border-purple-500/50">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Load Preset</h3>
+                      <p className="text-gray-400 text-sm">Add candidates from a saved preset</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setShowLoadPresetModal(false); setPresetMessage(null); }}
+                    className="w-10 h-10 rounded-lg bg-navy-dark/50 hover:bg-red-500/20 flex items-center justify-center text-gray-400 hover:text-red-400 transition-all"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {presetMessage && (
+                  <div className={`p-4 rounded-lg mb-4 ${presetMessage.type === 'success' ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-red-500/20 border border-red-500/30 text-red-400'}`}>
+                    {presetMessage.text}
+                  </div>
+                )}
+
+                <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  {availablePresets.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <svg className="w-12 h-12 mx-auto mb-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                      </svg>
+                      <p>No presets saved yet</p>
+                      <p className="text-sm mt-1">Save candidates from an election to create a preset</p>
+                    </div>
+                  ) : (
+                    availablePresets.map((preset) => (
+                      <button
+                        key={preset.id}
+                        onClick={() => handleLoadPreset(preset.id)}
+                        disabled={presetLoading}
+                        className="w-full text-left p-4 rounded-lg bg-navy-dark/50 border border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 transition-all group disabled:opacity-50"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-white font-semibold group-hover:text-purple-400 transition-colors">{preset.name}</div>
+                            <div className="text-gray-400 text-sm">{preset.candidateCount} candidates</div>
+                          </div>
+                          <svg className="w-5 h-5 text-gray-500 group-hover:text-purple-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => { setShowLoadPresetModal(false); setPresetMessage(null); }}
+                    className="flex-1 btn-secondary"
+                    disabled={presetLoading}
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -700,7 +988,7 @@ export default function ManageCandidatesPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
   );
 }

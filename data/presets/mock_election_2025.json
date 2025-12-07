@@ -1,0 +1,209 @@
+{
+  "name": "Mock Election 2025",
+  "description": "",
+  "createdAt": "2025-12-07T20:09:47.594Z",
+  "candidates": [
+    {
+      "name": "Sithija Seneviratne",
+      "indexNumber": "230601B",
+      "email": "sithijas.23@cse.mrt.ac.lk",
+      "symbol": "🧊",
+      "photoUrl": "https://drive.google.com/file/d/1KOE6H_PRt0ijYOW5MklKpANNFRK-k27O/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Teshan Perera",
+      "indexNumber": "230482H",
+      "email": "teshanp.23@cse.mrt.ac.lk",
+      "symbol": "📺",
+      "photoUrl": "https://drive.google.com/open?id=1xvbC3REYbsvz-cmwJvEx7cTTXyzQ9HN8",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Dhinanjaya Fernando",
+      "indexNumber": "230181J",
+      "email": "dhinanjayaf.23@cse.mrt.ac.lk",
+      "symbol": "∑",
+      "photoUrl": "https://drive.google.com/open?id=13gsw29EWYMwqA9xcaMUjgswlBzlMfXWI",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Ishakya Ranhiru",
+      "indexNumber": "230531J",
+      "email": "ranhiruugi.23@cse.mrt.ac.lk",
+      "symbol": "☕",
+      "photoUrl": "https://drive.google.com/file/d/1RqX8ZTpD1w5xLJ5TPduQnnTk5dpTeufj/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Umaya Jayasuriya",
+      "indexNumber": "230288T",
+      "email": "umayaj.23@cse.mrt.ac.lk",
+      "symbol": "😴",
+      "photoUrl": "https://drive.google.com/file/d/17ECpX3_DUGv643imxaPHUZETQWlKUOCs/view?usp=sharing",
+      "languages": [
+        "Sinhala",
+        "Tamil",
+        "English"
+      ]
+    },
+    {
+      "name": "Ruzaini Ahmedh",
+      "indexNumber": "230027U",
+      "email": "ruzainia.23@cse.mrt.ac.lk",
+      "symbol": "🔍",
+      "photoUrl": "https://drive.google.com/open?id=1XC6BfxYSy_TuHDnxXoHSSUc1dRax8_tW",
+      "languages": [
+        "English",
+        "Sinhala",
+        "Tamil"
+      ]
+    },
+    {
+      "name": "Hasini Lawanya",
+      "indexNumber": "230373B",
+      "email": "lawanyakkhg.23@cse.mrt.ac.lk",
+      "symbol": "🎤",
+      "photoUrl": "https://drive.google.com/file/d/1OvzqBxkLWAEiNlrp8kIatDlyR2nfCqmF/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Tharupahan Jayawardana",
+      "indexNumber": "230295L",
+      "email": "tharupahanj.23@cse.mrt.ac.lk",
+      "symbol": "🏭",
+      "photoUrl": "https://drive.google.com/open?id=1pGbGssRpdNMtKd8VzMiFnQ8w1egKSZv7",
+      "languages": [
+        "Sinhala",
+        "English"
+      ]
+    },
+    {
+      "name": "Anusan Krishnathas",
+      "indexNumber": "230048J",
+      "email": "anusank.23@cse.mrt.ac.lk",
+      "symbol": "🎉",
+      "photoUrl": "https://drive.google.com/file/d/1FuswFNFrp1m3VDsYFZkvYdA6_9ZwhQqb/view?usp=sharing",
+      "languages": [
+        "English",
+        "Tamil"
+      ]
+    },
+    {
+      "name": "Kalana Lakshan",
+      "indexNumber": "230365D",
+      "email": "kalanal.23@cse.mrt.ac.lk",
+      "symbol": "🛠️",
+      "photoUrl": "https://drive.google.com/file/d/1NVW1-y33iwrJZr5JhN-yUWoxqGf3R7c6/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Ruththiragayan Sutharsan",
+      "indexNumber": "230554G",
+      "email": "ruththiragayans.23@cse.mrt.ac.lk",
+      "symbol": "📢",
+      "photoUrl": "https://drive.google.com/open?id=1vmhGhzKDxGkYXBj61G1qjztNA3qgFvoi",
+      "languages": [
+        "English",
+        "Tamil"
+      ]
+    },
+    {
+      "name": "Sahithyan Kandathasan",
+      "indexNumber": "230557T",
+      "email": "sahithyank.23@cse.mrt.ac.lk",
+      "symbol": "🔥",
+      "photoUrl": "https://drive.google.com/open?id=1U-zWubq4xDlwwk01q7Hjdcn02m710sOS",
+      "languages": [
+        "English",
+        "Tamil"
+      ]
+    },
+    {
+      "name": "Himath Dhanapala",
+      "indexNumber": "230139N",
+      "email": "himathd.23@cse.mrt.ac.lk",
+      "symbol": "🗣️",
+      "photoUrl": "https://drive.google.com/open?id=16uGfGiBJT2Uzsk0mOSOMxqaQ73O8E2Db",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Saheththiyan Sri Baskaran",
+      "indexNumber": "230556N",
+      "email": "saheththiyans.23@cse.mrt.ac.lk",
+      "symbol": "🚽",
+      "photoUrl": "https://drive.google.com/file/d/1hviOg6bVRxD4Qyv38RxQNTbvpXO7ZfvF/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala",
+        "Tamil"
+      ]
+    },
+    {
+      "name": "Yohan Jayasinghe",
+      "indexNumber": "230283A",
+      "email": "yohanj.23@cse.mrt.ac.lk",
+      "symbol": "🔰",
+      "photoUrl": "https://drive.google.com/file/d/1vMMVMUEeXG6J18eVKUi2qsPiPvttcY6i/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Kusal Amantha",
+      "indexNumber": "230031C",
+      "email": "kusala.23@cse.mrt.ac.lk",
+      "symbol": "🛡️",
+      "photoUrl": "https://drive.google.com/file/d/1CWYo0gPhY1ynpfagmTD-bc3wQAB4OOQP/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Hasini Dikkumbura",
+      "indexNumber": "230143V",
+      "email": "hasinid.23@cse.mrt.ac.lk",
+      "symbol": "📡",
+      "photoUrl": "https://drive.google.com/file/d/1zCU9CsOd3FudpAMHCuHczN985KsRotmn/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala"
+      ]
+    },
+    {
+      "name": "Nidharshan Vigneshwaram",
+      "indexNumber": "230437C",
+      "email": "nidharshanv.23@cse.mrt.ac.lk",
+      "symbol": "⌫",
+      "photoUrl": "https://drive.google.com/file/d/1ao6n1bjhBZKAOomstk0mcMDJZmC3eJ83/view?usp=sharing",
+      "languages": [
+        "English",
+        "Sinhala",
+        "Tamil"
+      ]
+    }
+  ]
+}
