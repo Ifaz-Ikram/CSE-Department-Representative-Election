@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import DateTimePicker from "@/components/DateTimePicker";
 import Link from "next/link";
 import GlowDivider from "@/components/GlowDivider";
 
@@ -14,11 +15,16 @@ export default function AdminPage() {
   const [elections, setElections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    startTime: Date | null;
+    endTime: Date | null;
+  }>({
     name: "",
     description: "",
-    startTime: "",
-    endTime: "",
+    startTime: null,
+    endTime: null,
   });
 
   useEffect(() => {
@@ -53,13 +59,18 @@ export default function AdminPage() {
 
   const handleCreateElection = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.startTime || !formData.endTime) {
+      alert("Please select both start and end times");
+      return;
+    }
+
     try {
-      // Convert datetime-local format to ISO 8601
       const payload = {
         name: formData.name,
         description: formData.description,
-        startTime: new Date(formData.startTime).toISOString(),
-        endTime: new Date(formData.endTime).toISOString(),
+        startTime: formData.startTime.toISOString(),
+        endTime: formData.endTime.toISOString(),
       };
 
       const res = await fetch("/api/admin/elections", {
@@ -70,7 +81,7 @@ export default function AdminPage() {
 
       if (res.ok) {
         setShowCreateForm(false);
-        setFormData({ name: "", description: "", startTime: "", endTime: "" });
+        setFormData({ name: "", description: "", startTime: null, endTime: null });
         fetchElections();
       } else {
         const error = await res.json();
@@ -275,34 +286,19 @@ export default function AdminPage() {
                   />
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
-                      Start Time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.startTime}
-                      onChange={(e) =>
-                        setFormData({ ...formData, startTime: e.target.value })
-                      }
-                      className="input-field w-full"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
-                      End Time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.endTime}
-                      onChange={(e) =>
-                        setFormData({ ...formData, endTime: e.target.value })
-                      }
-                      className="input-field w-full"
-                      required
-                    />
-                  </div>
+                  <DateTimePicker
+                    label="Start Time"
+                    value={formData.startTime}
+                    onChange={(date) => setFormData({ ...formData, startTime: date })}
+                    required
+                  />
+                  <DateTimePicker
+                    label="End Time"
+                    value={formData.endTime}
+                    onChange={(date) => setFormData({ ...formData, endTime: date })}
+                    minDate={formData.startTime || undefined}
+                    required
+                  />
                 </div>
                 <button type="submit" className="btn-primary animate-pulse-glow">
                   Create Election
