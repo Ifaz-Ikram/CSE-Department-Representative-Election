@@ -15,7 +15,7 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
-  // Check if results should be visible (has ended elections or is super admin)
+  // Check if results should be visible based on ended elections and visibility toggles
   useEffect(() => {
     const checkElectionStatus = async () => {
       try {
@@ -23,14 +23,43 @@ export default function Navigation() {
         if (res.ok) {
           const data = await res.json();
           const now = new Date();
-          // Check if there are any ENDED elections
-          const hasEndedElection = data.elections?.some((election: any) => {
-            const end = new Date(election.endTime);
-            return now > end; // Election has ended
-          });
-          // Show results if there are ended elections OR user is super_admin
+
           const isSuperAdmin = role === 'super_admin';
-          setShowResults(hasEndedElection || isSuperAdmin);
+          const isAdmin = role === 'admin';
+          const isVoter = role === 'voter';
+
+          // Super admin always sees results if there are any ended elections
+          if (isSuperAdmin) {
+            const hasEndedElection = data.elections?.some((election: any) => {
+              const end = new Date(election.endTime);
+              return now > end;
+            });
+            setShowResults(hasEndedElection);
+            return;
+          }
+
+          // For admins: show if any ended election has resultsVisible=true
+          if (isAdmin) {
+            const hasVisibleResults = data.elections?.some((election: any) => {
+              const end = new Date(election.endTime);
+              return now > end && election.resultsVisible === true;
+            });
+            setShowResults(hasVisibleResults);
+            return;
+          }
+
+          // For voters: show if any ended election has publicResultsVisible=true
+          if (isVoter) {
+            const hasPublicResults = data.elections?.some((election: any) => {
+              const end = new Date(election.endTime);
+              return now > end && election.publicResultsVisible === true;
+            });
+            setShowResults(hasPublicResults);
+            return;
+          }
+
+          // Default: hide results
+          setShowResults(false);
         }
       } catch (error) {
         console.error('Failed to check election status:', error);
