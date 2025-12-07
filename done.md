@@ -2510,7 +2510,6 @@ You also need to **add a connection limit** to your DATABASE_URL in Vercel:
 2. Find `DATABASE_URL`
 3. Update it to:
 ```
-postgresql://postgres.yznygwgfegvmkrpegbdt:frTNX8uq0rScoVNY@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 ```
 
 The `&connection_limit=1` ensures Prisma never tries to exceed 1 connection per function.
