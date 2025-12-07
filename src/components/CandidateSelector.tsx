@@ -28,6 +28,7 @@ export default function CandidateSelector({
   onCancel,
 }: CandidateSelectorProps) {
   const [registry, setRegistry] = useState<VoterOption[]>([]);
+  const [filteredRegistry, setFilteredRegistry] = useState<VoterOption[]>([]);
   const [selectedVoter, setSelectedVoter] = useState<VoterOption | null>(null);
   const [bio, setBio] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
@@ -37,21 +38,37 @@ export default function CandidateSelector({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadRegistry() {
+    async function loadData() {
       try {
-        const res = await fetch("/api/registry");
-        if (!res.ok) throw new Error("Failed to load voter registry");
+        // Fetch voter registry
+        const registryRes = await fetch("/api/registry");
+        if (!registryRes.ok) throw new Error("Failed to load voter registry");
+        const registryData = await registryRes.json();
 
-        const data = await res.json();
+        // Fetch existing candidates for this election
+        const candidatesRes = await fetch(`/api/candidates?electionId=${electionId}`);
+        if (!candidatesRes.ok) throw new Error("Failed to load candidates");
+        const candidatesData = await candidatesRes.json();
+
+        // Get emails of existing candidates
+        const existingEmails = new Set(
+          candidatesData.candidates.map((c: any) => c.email).filter(Boolean)
+        );
 
         // Transform into react-select options
-        const options: VoterOption[] = data.map((voter: any) => ({
+        const allOptions: VoterOption[] = registryData.map((voter: any) => ({
           value: voter.email,
           label: `${voter.regNo} - ${voter.firstName} ${voter.lastName} - ${voter.email}`,
           data: voter,
         }));
 
-        setRegistry(options);
+        // Filter out already-added candidates
+        const availableOptions = allOptions.filter(
+          (option) => !existingEmails.has(option.value)
+        );
+
+        setRegistry(allOptions);
+        setFilteredRegistry(availableOptions);
       } catch (err) {
         setError("Failed to load student list");
         console.error(err);
@@ -60,8 +77,8 @@ export default function CandidateSelector({
       }
     }
 
-    loadRegistry();
-  }, []);
+    loadData();
+  }, [electionId]);
 
   const handleSubmit = async () => {
     if (!selectedVoter) {
@@ -235,7 +252,7 @@ export default function CandidateSelector({
             Select Student from Whitelist
           </label>
           <Select
-            options={registry}
+            options={filteredRegistry}
             value={selectedVoter}
             onChange={setSelectedVoter}
             placeholder="Search by name, reg number, or email..."
@@ -245,6 +262,7 @@ export default function CandidateSelector({
             className="text-sm"
             menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
             menuPosition="fixed"
+            noOptionsMessage={() => "All students have been added as candidates"}
           />
           <p className="text-gray-500 text-xs mt-2 flex items-center space-x-1">
             <svg className="w-4 h-4 text-cyan" fill="currentColor" viewBox="0 0 20 20">

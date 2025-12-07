@@ -15,7 +15,7 @@ export default defineConfig({
         adapter: async () => {
             const { PrismaPg } = await import('@prisma/adapter-pg')
             const { Pool } = await import('pg')
-            const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+            const pool = new Pool({ connectionString: process.env.DIRECT_URL })
             return new PrismaPg(pool)
         },
     },

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       const registryEntry = await prisma.voterRegistry.findUnique({
         where: { email: sanitizedEmail },
       });
@@ -82,6 +82,26 @@ export async function POST(request: NextRequest) {
         });
       }
       userId = user.id;
+    }
+
+    // Check for duplicate candidate (same user in same election)
+    if (userId) {
+      const existingCandidate = await prisma.candidate.findFirst({
+        where: {
+          electionId: data.electionId,
+          userId: userId,
+        },
+      });
+
+      if (existingCandidate) {
+        return NextResponse.json(
+          {
+            error: "Duplicate candidate",
+            details: "This person is already a candidate in this election",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const candidate = await prisma.candidate.create({

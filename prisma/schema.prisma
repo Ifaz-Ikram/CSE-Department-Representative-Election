@@ -110,6 +110,7 @@ model Candidate {
   user          User?         @relation(fields: [userId], references: [id])
   ballotChoices BallotChoice[]
 
+  @@unique([electionId, userId], name: "unique_candidate_per_election")
   @@index([electionId])
   @@index([userId])
   @@index([email])
