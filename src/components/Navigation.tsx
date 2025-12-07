@@ -15,7 +15,7 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
-  // Check if results should be visible (no active elections)
+  // Check if results should be visible (has ended elections or is super admin)
   useEffect(() => {
     const checkElectionStatus = async () => {
       try {
@@ -23,15 +23,14 @@ export default function Navigation() {
         if (res.ok) {
           const data = await res.json();
           const now = new Date();
-          // Check if any election is currently active
-          const hasActiveElection = data.elections?.some((election: any) => {
-            const start = new Date(election.startTime);
+          // Check if there are any ENDED elections
+          const hasEndedElection = data.elections?.some((election: any) => {
             const end = new Date(election.endTime);
-            return now >= start && now <= end;
+            return now > end; // Election has ended
           });
-          // Hide results during active elections, except for super_admin
+          // Show results if there are ended elections OR user is super_admin
           const isSuperAdmin = role === 'super_admin';
-          setShowResults(!hasActiveElection || isSuperAdmin);
+          setShowResults(hasEndedElection || isSuperAdmin);
         }
       } catch (error) {
         console.error('Failed to check election status:', error);
