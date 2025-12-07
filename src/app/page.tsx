@@ -25,7 +25,7 @@ function HomeContent() {
     const error = searchParams.get("error");
 
     if (error === "NotCSE23") {
-      setErrorMessage("Access denied. Only CSE23 batch accounts are allowed (.23@cse.mrt.ac.lk)");
+      setErrorMessage("Access denied. Only CSE 23 batch accounts are allowed (.23@cse.mrt.ac.lk)");
       setShowError(true);
 
       // Clean the URL after showing error
@@ -58,7 +58,7 @@ function HomeContent() {
       // Auto-hide after 7 seconds
       setTimeout(() => setShowError(false), 7000);
     } else if (error === "AccessDenied") {
-      setErrorMessage("Access denied. Only authorized CSE23 accounts are allowed.");
+      setErrorMessage("Access denied. Only authorized CSE 23 accounts are allowed.");
       setShowError(true);
 
       // Clean the URL
@@ -110,22 +110,10 @@ function HomeContent() {
         <div className="max-w-6xl mx-auto">
           {/* Hero Section */}
           <div className="text-center space-y-8 mb-16 animate-fade-in">
-            {/* Logo Banner */}
-            <div className="flex justify-center mb-8">
-              <div className="relative w-32 h-32 md:w-40 md:h-40 animate-float">
-                <Image
-                  src="/cse23logo.jpg"
-                  alt="CSE23 Logo"
-                  fill
-                  className="object-contain rounded-2xl glow-border-gold"
-                  priority
-                />
-              </div>
-            </div>
-
             {/* Main Title */}
             <div className="space-y-4">
-              <div className="text-6xl md:text-8xl font-bold mb-4">
+              {/* CSE 23 Logo Text */}
+              <div className="font-[family-name:var(--font-orbitron)] text-5xl md:text-6xl lg:text-7xl font-bold tracking-wide mb-6">
                 <span className="text-white">CSE </span>
                 <span className="text-gold glow-text-gold">23</span>
               </div>
@@ -180,7 +168,7 @@ function HomeContent() {
                 <span>Sign In with Google</span>
               </button>
               <p className="text-xs text-gray-500">
-                🔒 Only CSE23 students with official @cse.mrt.ac.lk emails can vote
+                🔒 Only CSE 23 students with official @cse.mrt.ac.lk emails can vote
               </p>
             </div>
           </div>

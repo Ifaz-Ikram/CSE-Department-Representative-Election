@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       if (!registryEntry || !registryEntry.isActive) {
         return NextResponse.json(
           {
-            error: "Candidate must be from the authorized CSE23 voter list",
+            error: "Candidate must be from the authorized CSE 23 voter list",
             details: "Only students from the 200-person whitelist can be candidates"
           },
           { status: 400 }

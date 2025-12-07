@@ -13,9 +13,9 @@ export function middleware(request: NextRequest) {
     // Only check CSRF for API routes
     if (request.nextUrl.pathname.startsWith('/api/')) {
       const baseUrl = process.env.NEXTAUTH_URL || `${request.nextUrl.protocol}//${host}`;
-      
+
       let isValidOrigin = false;
-      
+
       if (origin) {
         isValidOrigin = origin === baseUrl.replace(/\/$/, '');
       } else if (referer) {
@@ -28,11 +28,17 @@ export function middleware(request: NextRequest) {
         }
       }
 
-      if (!isValidOrigin) {
+      // In production, strictly enforce CSRF protection
+      if (!isValidOrigin && process.env.NODE_ENV === 'production') {
         return NextResponse.json(
           { error: 'Invalid request origin - CSRF protection' },
           { status: 403 }
         );
+      }
+
+      // In development, log a warning but allow the request
+      if (!isValidOrigin && process.env.NODE_ENV !== 'production') {
+        console.warn('CSRF warning: Origin mismatch in development mode - allowing request');
       }
     }
   }
@@ -41,9 +47,9 @@ export function middleware(request: NextRequest) {
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://va.vercel-scripts.com;
-    style-src 'self' 'unsafe-inline' https://accounts.google.com;
+    style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com;
     img-src 'self' blob: data: https://lh3.googleusercontent.com https://accounts.google.com;
-    font-src 'self' data:;
+    font-src 'self' data: https://fonts.gstatic.com;
     connect-src 'self' https://accounts.google.com https://*.sentry.io https://*.upstash.io https://*.supabase.co;
     frame-src 'self' https://accounts.google.com;
     object-src 'none';
@@ -60,7 +66,7 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
+
   // Strict Transport Security (HSTS) - only in production
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(

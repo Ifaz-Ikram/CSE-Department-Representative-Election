@@ -252,7 +252,7 @@ async function main() {
     count++;
   }
 
-  console.log(`✅ Seeded ${count} voters from CSE23 batch`);
+  console.log(`✅ Seeded ${count} voters from CSE 23 batch`);
 }
 
 main()

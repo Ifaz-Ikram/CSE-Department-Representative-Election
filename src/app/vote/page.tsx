@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
+import ElectionCard from "@/components/ElectionCard"; // New import
 import { normalizePhotoUrl, getInitials } from "@/lib/themeHelpers";
 
 interface Candidate {
@@ -24,6 +25,10 @@ interface Election {
   description?: string | null;
   startTime: string;
   endTime: string;
+  _count?: {
+    candidates: number;
+    ballots: number;
+  };
 }
 
 interface Ballot {
@@ -38,7 +43,7 @@ interface Ballot {
 export default function VotePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [elections, setElections] = useState<any[]>([]);
+  const [elections, setElections] = useState<Election[]>([]);
   const [selectedElectionId, setSelectedElectionId] = useState<string>("");
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(
@@ -126,20 +131,7 @@ export default function VotePage() {
       const data = await res.json();
       setElections(data.elections);
 
-      // Auto-select active election
-      const now = new Date();
-      const activeElection = data.elections.find((e: any) => {
-        const start = new Date(e.startTime);
-        const end = new Date(e.endTime);
-        return now >= start && now <= end;
-      });
-
-      if (activeElection) {
-        setSelectedElectionId(activeElection.id);
-      } else if (data.elections.length > 0) {
-        setSelectedElectionId(data.elections[0].id);
-      }
-
+      // Removed auto-select logic to start with selection view as requested
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch elections:", error);
@@ -264,6 +256,16 @@ export default function VotePage() {
     return candidates.filter(c => selectedCandidates.has(c.id));
   };
 
+  const handleElectionSelect = (id: string) => {
+    setSelectedElectionId(id);
+    setShowGuidelinesModal(true); // Reset guidelines for new election
+  };
+
+  const handleBackToElections = () => {
+    setSelectedElectionId("");
+    setMessage(null);
+  };
+
   if (loading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center circuit-bg">
@@ -283,6 +285,53 @@ export default function VotePage() {
   const isElectionEnded =
     selectedElection && new Date() > new Date(selectedElection.endTime);
   const progressPercent = (selectedCandidates.size / 10) * 100;
+
+  // If no election selected, show election selection view
+  if (!selectedElectionId) {
+    return (
+      <div className="min-h-screen circuit-bg">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-8 animate-fade-in text-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Cast Your <span className="text-gradient glow-text">Vote</span>
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Select an election below to verify your eligibility and cast your ballot.
+              </p>
+            </div>
+
+            <GlowDivider className="mb-12" />
+
+            {/* Elections Grid */}
+            {elections.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {elections.map((election, index) => (
+                  <div key={election.id} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+                    <ElectionCard
+                      election={election}
+                      type="vote"
+                      onClick={handleElectionSelect}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="glass-card text-center p-12 animate-fade-in max-w-2xl mx-auto">
+                <svg className="w-16 h-16 mx-auto text-cyan/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 className="text-2xl font-bold text-white mb-2">No Active Elections</h3>
+                <p className="text-gray-400">There are currently no elections available for voting.</p>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen circuit-bg">
@@ -509,6 +558,17 @@ export default function VotePage() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
+          {/* Back Button */}
+          <button
+            onClick={handleBackToElections}
+            className="mb-6 flex items-center space-x-2 text-gray-400 hover:text-cyan transition-colors group"
+          >
+            <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Back to Elections</span>
+          </button>
+
           {/* Welcome Message */}
           <div className="mb-6 animate-fade-in">
             <p className="text-gray-400 text-lg">
@@ -536,26 +596,6 @@ export default function VotePage() {
           </div>
 
           <GlowDivider className="mb-8" />
-
-          {/* Election Selector */}
-          {elections.length > 1 && (
-            <div className="glass-card p-6 mb-6 animate-slide-up">
-              <label className="block text-sm font-bold text-cyan mb-3 uppercase tracking-wide">
-                Select Election
-              </label>
-              <select
-                value={selectedElectionId}
-                onChange={(e) => setSelectedElectionId(e.target.value)}
-                className="input-field w-full md:w-96"
-              >
-                {elections.map((election) => (
-                  <option key={election.id} value={election.id}>
-                    {election.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {selectedElection && (
             <>

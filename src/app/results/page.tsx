@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
+import ElectionCard from "@/components/ElectionCard"; // New import
 import { normalizePhotoUrl, getInitials } from "@/lib/themeHelpers";
 
 interface CandidateStats {
@@ -14,6 +15,18 @@ interface CandidateStats {
   email: string;
   photoUrl?: string | null;
   voteCount: number;
+}
+
+interface Election {
+  id: string;
+  name: string;
+  description?: string | null;
+  startTime: string;
+  endTime: string;
+  _count?: {
+    candidates: number;
+    ballots: number;
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -30,7 +43,7 @@ function ResultsPageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [elections, setElections] = useState<any[]>([]);
+  const [elections, setElections] = useState<Election[]>([]);
   const [selectedElectionId, setSelectedElectionId] = useState<string>("");
   const [stats, setStats] = useState<CandidateStats[]>([]);
   const [totalBallots, setTotalBallots] = useState(0);
@@ -69,10 +82,7 @@ function ResultsPageContent() {
       const data = await res.json();
       setElections(data.elections);
 
-      if (!selectedElectionId && data.elections.length > 0) {
-        setSelectedElectionId(data.elections[0].id);
-      }
-
+      // Removed auto-select logic to start with selection view
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch elections:", error);
@@ -102,6 +112,18 @@ function ResultsPageContent() {
     }
   };
 
+  const handleElectionSelect = (id: string) => {
+    setSelectedElectionId(id);
+  };
+
+  const handleBackToElections = () => {
+    setSelectedElectionId("");
+    setError(null);
+    setElection(null);
+    // Optionally clear URL param if we want to be clean, but local state is enough for UI
+    router.replace("/results");
+  };
+
   if (loading || status === "loading") {
     return <FullPageLoader />;
   }
@@ -109,12 +131,70 @@ function ResultsPageContent() {
   const maxVotes = Math.max(...stats.map((s) => s.voteCount), 1);
   const winner = stats.length > 0 ? stats[0] : null;
 
+  // If no election selected, show election selection view
+  if (!selectedElectionId) {
+    return (
+      <div className="min-h-screen circuit-bg">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-8 animate-fade-in text-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                Election <span className="text-gradient glow-text">Results</span>
+              </h1>
+              <p className="text-gray-400 text-lg">
+                Select an election to view detailed statistics and winners.
+              </p>
+            </div>
+
+            <GlowDivider className="mb-12" />
+
+            {/* Elections Grid */}
+            {elections.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {elections.map((election, index) => (
+                  <div key={election.id} className="animate-slide-up" style={{ animationDelay: `${index * 100}ms` }}>
+                    <ElectionCard
+                      election={election}
+                      type="result"
+                      onClick={handleElectionSelect}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="glass-card text-center p-12 animate-fade-in max-w-2xl mx-auto">
+                <svg className="w-16 h-16 mx-auto text-cyan/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h3 className="text-2xl font-bold text-white mb-2">No Election Results</h3>
+                <p className="text-gray-400">There are currently no election results available to view.</p>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen circuit-bg">
       <Navigation />
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+          {/* Back Button */}
+          <button
+            onClick={handleBackToElections}
+            className="mb-6 flex items-center space-x-2 text-gray-400 hover:text-cyan transition-colors group"
+          >
+            <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Back to Elections</span>
+          </button>
+
           {/* Header */}
           <div className="mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
@@ -126,26 +206,6 @@ function ResultsPageContent() {
           </div>
 
           <GlowDivider className="mb-8" />
-
-          {/* Election Selector */}
-          {elections.length > 1 && (
-            <div className="glass-card p-6 mb-6 animate-slide-up">
-              <label className="block text-sm font-bold text-cyan mb-3 uppercase tracking-wide">
-                Select Election
-              </label>
-              <select
-                value={selectedElectionId}
-                onChange={(e) => setSelectedElectionId(e.target.value)}
-                className="input-field w-full md:w-96"
-              >
-                {elections.map((election) => (
-                  <option key={election.id} value={election.id}>
-                    {election.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {error && (
             <div className="glass-card border-yellow-500 bg-yellow-500/10 p-6 mb-6 animate-fade-in">
@@ -401,15 +461,6 @@ function ResultsPageContent() {
                 )}
               </div>
             </>
-          )}
-
-          {!selectedElectionId && elections.length === 0 && (
-            <div className="glass-card text-center p-12 animate-fade-in">
-              <svg className="w-16 h-16 mx-auto text-cyan/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <p className="text-gray-400 text-lg">No elections available.</p>
-            </div>
           )}
         </div>
       </main>

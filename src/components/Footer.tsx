@@ -3,14 +3,14 @@ export default function Footer() {
         <footer className="border-t border-cyan/20 mt-auto py-10 bg-navy-dark/50 backdrop-blur-sm">
             <div className="container mx-auto px-4">
                 <div className="text-center space-y-6">
-                    {/* Logo & Title */}
-                    <div className="flex justify-center items-center space-x-2">
-                        <div className="text-2xl font-bold">
-                            <span className="text-white">CSE</span>
+                    {/* CSE 23 | Department Representative Elections - One Line */}
+                    <div className="flex justify-center items-center space-x-3">
+                        <span className="font-[family-name:var(--font-orbitron)] text-lg font-bold tracking-wide">
+                            <span className="text-white">CSE </span>
                             <span className="text-gold glow-text-gold">23</span>
-                        </div>
-                        <span className="text-cyan">|</span>
-                        <p className="text-gray-400">Department Representative Elections</p>
+                        </span>
+                        <span className="text-cyan/50">|</span>
+                        <span className="text-gray-400 text-sm font-medium">Department Representative Elections</span>
                     </div>
 
                     {/* Social Links */}

@@ -50,28 +50,18 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="border-b border-cyan/20 bg-navy-dark sticky top-0 z-50 shadow-lg">
-        {/* Extended background to cover the gap below nav */}
-        <div className="absolute left-0 right-0 top-full h-4 bg-navy-dark z-50" style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)' }}></div>
-        <div className="container mx-auto px-4 py-3">
+      <nav className="border-b border-cyan/20 bg-navy-dark sticky top-0 z-50 shadow-lg mb-8">
+
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Logo Section */}
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <Image
-                  src="/cse23logo.jpg"
-                  alt="CSE23 Logo"
-                  fill
-                  className="object-contain rounded-lg glow-border-gold"
-                  priority
-                />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  <span className="text-white">CSE</span>
+            <Link href="/" className="flex items-center group py-1">
+              <div className="font-[family-name:var(--font-orbitron)] flex flex-col justify-center">
+                <div className="text-xl font-bold tracking-wide leading-none">
+                  <span className="text-white">CSE </span>
                   <span className="text-gold glow-text-gold">23</span>
                 </div>
-                <div className="hidden md:block text-cyan text-xs tracking-wide uppercase">
+                <div className="hidden md:block text-cyan text-xs tracking-wide uppercase leading-none mt-1.5">
                   Department Elections
                 </div>
               </div>
