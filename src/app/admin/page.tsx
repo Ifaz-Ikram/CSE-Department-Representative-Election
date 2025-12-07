@@ -42,6 +42,15 @@ export default function AdminPage() {
     const role = (session?.user as any)?.role;
     if (role === "super_admin" || role === "admin") {
       fetchElections();
+
+      // For super admin, poll every 10 seconds to keep toggles updated
+      if (role === "super_admin") {
+        const interval = setInterval(() => {
+          fetchElections();
+        }, 10000);
+
+        return () => clearInterval(interval);
+      }
     }
   }, [session]);
 
