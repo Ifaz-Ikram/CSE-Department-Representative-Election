@@ -38,17 +38,17 @@ export default function Navigation() {
             return;
           }
 
-          // For admins: show if any ended election has resultsVisible=true
+          // For admins: show if any election has ended (auto-enable on access)
           if (isAdmin) {
-            const hasVisibleResults = data.elections?.some((election: any) => {
+            const hasEndedElection = data.elections?.some((election: any) => {
               const end = new Date(election.endTime);
-              return now > end && election.resultsVisible === true;
+              return now > end;
             });
-            setShowResults(hasVisibleResults);
+            setShowResults(hasEndedElection);
             return;
           }
 
-          // For voters: show if any ended election has publicResultsVisible=true
+          // For voters: show only if manually enabled via publicResultsVisible
           if (isVoter) {
             const hasPublicResults = data.elections?.some((election: any) => {
               const end = new Date(election.endTime);

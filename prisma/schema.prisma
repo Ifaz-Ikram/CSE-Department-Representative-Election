@@ -86,6 +86,7 @@ model Election {
   endTime              DateTime
   resultsVisible       Boolean   @default(false)
   publicResultsVisible Boolean   @default(false)
+  resultsAutoEnabled   Boolean   @default(false)
   createdAt            DateTime  @default(now())
 
   candidates Candidate[]

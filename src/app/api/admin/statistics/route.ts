@@ -51,8 +51,20 @@ export async function GET(req: NextRequest) {
       if (isSuperAdmin) {
         // Super admin can always see results
       } else if (isAdmin) {
-        // Admins can see if resultsVisible is true
-        if (!election.resultsVisible) {
+        // Auto-enable resultsVisible for admins ONLY ONCE (on first access)
+        if (!election.resultsVisible && !election.resultsAutoEnabled) {
+          await prisma.election.update({
+            where: { id: electionId },
+            data: {
+              resultsVisible: true,
+              resultsAutoEnabled: true, // Mark as auto-enabled
+            },
+          });
+          election.resultsVisible = true;
+          election.resultsAutoEnabled = true;
+        } else if (!election.resultsVisible) {
+          // If resultsVisible is false but resultsAutoEnabled is true,
+          // it means super admin manually disabled it - don't re-enable
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
       } else if (isVoter) {
