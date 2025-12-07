@@ -541,8 +541,8 @@ export default function VotePage() {
 
                         {/* X Selection Box */}
                         <div className="flex-shrink-0">
-                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg border-2 border-cyan bg-cyan/20 flex items-center justify-center shadow-lg shadow-cyan/50">
-                            <span className="text-2xl md:text-3xl font-bold text-cyan">✗</span>
+                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg border-2 border-green-500 bg-green-500/20 flex items-center justify-center shadow-lg shadow-green-500/20">
+                            <span className="text-2xl md:text-3xl font-bold text-green-400">✗</span>
                           </div>
                         </div>
                       </div>
@@ -1018,12 +1018,12 @@ export default function VotePage() {
                         <div className="flex-shrink-0">
                           <div
                             className={`w-14 h-14 md:w-16 md:h-16 rounded-lg border-3 flex items-center justify-center transition-all ${isSelected
-                              ? "border-cyan bg-cyan/20 shadow-lg shadow-cyan/50"
-                              : "border-gray-500 bg-navy-dark/50 hover:border-cyan/50"
+                              ? "border-green-500 bg-green-500/20 shadow-lg shadow-green-500/20"
+                              : "border-gray-500 bg-navy-dark/50 hover:border-green-500/50"
                               }`}
                           >
                             {isSelected && (
-                              <span className="text-3xl md:text-4xl font-bold text-cyan">✗</span>
+                              <span className="text-3xl md:text-4xl font-bold text-green-400">✗</span>
                             )}
                           </div>
                         </div>

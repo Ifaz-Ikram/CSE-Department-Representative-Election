@@ -271,7 +271,7 @@ function MyVotesContent() {
 
                                                 {/* Selection Mark */}
                                                 <div className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-green-500 bg-green-500/20 flex items-center justify-center shadow-lg shadow-green-500/20">
-                                                    <span className="text-3xl font-bold text-green-400">✓</span>
+                                                    <span className="text-3xl font-bold text-green-400">✗</span>
                                                 </div>
                                             </div>
                                         );
