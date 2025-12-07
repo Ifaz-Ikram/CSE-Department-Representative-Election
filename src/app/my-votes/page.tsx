@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
 import ElectionCard from "@/components/ElectionCard";
@@ -34,7 +34,7 @@ interface Ballot {
     };
 }
 
-export default function MyVotesPage() {
+function MyVotesContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -262,5 +262,17 @@ export default function MyVotesPage() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function MyVotesPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center circuit-bg">
+                <div className="loading-spinner" />
+            </div>
+        }>
+            <MyVotesContent />
+        </Suspense>
     );
 }
