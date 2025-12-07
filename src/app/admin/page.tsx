@@ -15,6 +15,9 @@ export default function AdminPage() {
   const [elections, setElections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showExtendModal, setShowExtendModal] = useState(false);
+  const [selectedElection, setSelectedElection] = useState<any | null>(null);
+  const [newEndTime, setNewEndTime] = useState<Date | null>(null);
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -100,6 +103,36 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Failed to create election:", error);
       alert("Failed to create election. Please try again.");
+    }
+  };
+
+  const handleExtendElection = async () => {
+    if (!selectedElection || !newEndTime) {
+      alert("Please select a new end time");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/elections/${selectedElection.id}/extend`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newEndTime: newEndTime.toISOString() }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Election extended successfully!");
+        setShowExtendModal(false);
+        setSelectedElection(null);
+        setNewEndTime(null);
+        fetchElections();
+      } else {
+        alert(`Failed to extend election: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Failed to extend election:", error);
+      alert("Failed to extend election");
     }
   };
 
@@ -523,6 +556,24 @@ export default function AdminPage() {
 
                     {isSuperAdmin && (
                       <button
+                        onClick={() => {
+                          setSelectedElection(election);
+                          setNewEndTime(new Date(election.endTime));
+                          setShowExtendModal(true);
+                        }}
+                        className="bg-gold/20 hover:bg-gold text-gold hover:text-navy font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300 border border-gold/50 hover:border-gold"
+                      >
+                        <span className="flex items-center space-x-2">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>Extend</span>
+                        </span>
+                      </button>
+                    )}
+
+                    {isSuperAdmin && (
+                      <button
                         onClick={() => handleDeleteElection(election.id)}
                         className="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white font-bold py-2 px-4 rounded-lg text-sm transition-all duration-300 border border-red-500/50 hover:border-red-500"
                       >
@@ -550,6 +601,73 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+
+        {/* Extension Modal */}
+        {showExtendModal && selectedElection && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="card-premium max-w-md w-full animate-slide-up">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-gold/20 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Extend Election</h2>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowExtendModal(false);
+                    setSelectedElection(null);
+                    setNewEndTime(null);
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <p className="text-gray-400 text-sm mb-2">Election:</p>
+                  <p className="text-white font-semibold">{selectedElection.name}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm mb-2">Current End Time:</p>
+                  <p className="text-cyan">{new Date(selectedElection.endTime).toLocaleString()}</p>
+                </div>
+                <DateTimePicker
+                  label="New End Time"
+                  value={newEndTime}
+                  onChange={(date) => setNewEndTime(date)}
+                  minDate={new Date()}
+                  required
+                />
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setShowExtendModal(false);
+                    setSelectedElection(null);
+                    setNewEndTime(null);
+                  }}
+                  className="flex-1 bg-navy-dark hover:bg-navy-light text-gray-300 hover:text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 border border-gray-600 hover:border-gray-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExtendElection}
+                  className="flex-1 btn-primary animate-pulse-glow"
+                >
+                  Extend Election
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

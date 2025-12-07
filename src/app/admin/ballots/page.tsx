@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
 import Link from "next/link";
+import Select from "react-select";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,8 @@ function AdminBallotsContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isElectionActive, setIsElectionActive] = useState(false);
+  const [selectedVoter, setSelectedVoter] = useState<any>(null);
+  const [filteredBallots, setFilteredBallots] = useState<any[]>([]);
 
   const userRole = (session?.user as any)?.role;
   const isSuperAdmin = userRole === "super_admin";
@@ -76,6 +79,22 @@ function AdminBallotsContent() {
       setLoading(false);
     }
   };
+
+  // Extract unique voters for dropdown
+  const voterOptions = ballots.map(ballot => ({
+    value: ballot.voter.email,
+    label: `${ballot.voter.name} (${ballot.voter.indexNumber})`,
+    voter: ballot.voter
+  }));
+
+  // Filter ballots based on selected voter
+  useEffect(() => {
+    if (selectedVoter) {
+      setFilteredBallots(ballots.filter(b => b.voter.email === selectedVoter.value));
+    } else {
+      setFilteredBallots(ballots);
+    }
+  }, [selectedVoter, ballots]);
 
   if (loading || status === "loading") {
     return <FullPageLoader />;
@@ -195,9 +214,92 @@ function AdminBallotsContent() {
                 </div>
               </div>
 
+              {/* Voter Filter */}
+              <div className="glass-card p-6 mb-6 animate-slide-up" style={{ position: 'relative', zIndex: 10 }}>
+                <div className="flex flex-col md:flex-row md:items-end gap-4">
+                  <div className="flex-1">
+                    <label className="block text-cyan text-sm font-bold mb-2 uppercase tracking-wide">
+                      Filter by Voter
+                    </label>
+                    <Select
+                      options={voterOptions}
+                      value={selectedVoter}
+                      onChange={setSelectedVoter}
+                      isClearable
+                      placeholder="Search by name, index number, or email..."
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                      styles={{
+                        control: (base, state) => ({
+                          ...base,
+                          backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                          borderColor: state.isFocused ? '#06b6d4' : 'rgba(6, 182, 212, 0.3)',
+                          borderWidth: '2px',
+                          borderRadius: '0.75rem',
+                          padding: '0.25rem',
+                          boxShadow: state.isFocused ? '0 0 0 3px rgba(6, 182, 212, 0.1)' : 'none',
+                          '&:hover': {
+                            borderColor: '#06b6d4'
+                          }
+                        }),
+                        valueContainer: (base) => ({
+                          ...base,
+                        }),
+                        menu: (base) => ({
+                          ...base,
+                          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                          border: '2px solid rgba(6, 182, 212, 0.3)',
+                          borderRadius: '0.75rem',
+                          backdropFilter: 'blur(12px)',
+                          zIndex: 9999
+                        }),
+                        menuList: (base) => ({
+                          ...base,
+                        }),
+                        menuPortal: (base) => ({
+                          ...base,
+                        }),
+                        option: (base, state) => ({
+                          ...base,
+                          backgroundColor: state.isFocused ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
+                          color: state.isSelected ? '#06b6d4' : '#e5e7eb',
+                          cursor: 'pointer',
+                          '&:active': {
+                            backgroundColor: 'rgba(6, 182, 212, 0.3)'
+                          }
+                        }),
+                        singleValue: (base) => ({
+                          ...base,
+                          color: '#e5e7eb',
+                        }),
+                        input: (base) => ({
+                          ...base,
+                          color: '#e5e7eb',
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          color: '#9ca3af',
+                        })
+                      }}
+                    />
+                  </div>
+                  {selectedVoter && (
+                    <button
+                      onClick={() => setSelectedVoter(null)}
+                      className="btn-secondary whitespace-nowrap"
+                    >
+                      Clear Filter
+                    </button>
+                  )}
+                </div>
+                <div className="mt-4 text-sm text-gray-400">
+                  Showing <span className="text-cyan font-bold">{filteredBallots.length}</span> of <span className="text-cyan font-bold">{ballots.length}</span> ballots
+                </div>
+              </div>
+
               {/* Ballots List */}
               <div className="space-y-4">
-                {ballots.map((ballot, index) => (
+                {filteredBallots.map((ballot, index) => (
                   <div
                     key={ballot.id}
                     className="glass-card p-6 animate-slide-up hover:border-cyan/50 transition-all duration-300"
@@ -278,6 +380,16 @@ function AdminBallotsContent() {
                   </div>
                 ))}
               </div>
+
+              {filteredBallots.length === 0 && ballots.length > 0 && (
+                <div className="glass-card text-center p-12 animate-fade-in">
+                  <svg className="w-16 h-16 mx-auto text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <p className="text-gray-400 text-lg">No ballots match the selected filter.</p>
+                  <p className="text-gray-500 text-sm mt-2">Try selecting a different voter or clear the filter.</p>
+                </div>
+              )}
 
               {ballots.length === 0 && (
                 <div className="glass-card text-center p-12 animate-fade-in">
