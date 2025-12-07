@@ -192,7 +192,14 @@ export default function AuditLogPage() {
             case "CANDIDATE_REMOVED":
                 return "Removed";
             case "VOTE_CAST":
-                return d.anonymized ? "Anonymous Vote" : "Vote Recorded";
+                // New format: shows actual candidates selected
+                if (d.candidatesSelected && Array.isArray(d.candidatesSelected)) {
+                    const names = d.candidatesSelected.slice(0, 3).join(", ");
+                    const extra = d.candidatesSelected.length > 3 ? ` +${d.candidatesSelected.length - 3} more` : "";
+                    return `Voted: ${names}${extra} (${d.candidateCount})`;
+                }
+                // Old format: anonymous
+                return d.anonymized ? "Anonymous Vote (Legacy)" : "Vote Recorded";
             case "ELECTION_CREATED":
                 return d.electionName || "Created";
             case "ELECTION_UPDATED":
