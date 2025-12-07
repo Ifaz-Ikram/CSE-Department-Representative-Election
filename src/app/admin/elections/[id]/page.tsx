@@ -80,6 +80,13 @@ export default function ManageCandidatesPage() {
     if ((role === "super_admin" || role === "admin") && electionId) {
       fetchCandidates();
       fetchElection();
+
+      // Poll election data every 5 seconds to catch extensions
+      const interval = setInterval(() => {
+        fetchElection();
+      }, 1000);
+
+      return () => clearInterval(interval);
     }
   }, [session, electionId]);
 

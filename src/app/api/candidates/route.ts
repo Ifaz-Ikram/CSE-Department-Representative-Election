@@ -18,16 +18,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Cache election data for 5 minutes
-    const election = await getOrSetCached(
-      CacheKeys.ELECTION(electionId),
-      async () => {
-        return await prisma.election.findUnique({
-          where: { id: electionId },
-        });
-      },
-      CacheTTL.MEDIUM
-    );
+    // Fetch election data directly (no cache) - election status is critical for UI
+    // and must always reflect the latest endTime (especially after extensions)
+    const election = await prisma.election.findUnique({
+      where: { id: electionId },
+    });
 
     if (!election) {
       return NextResponse.json(

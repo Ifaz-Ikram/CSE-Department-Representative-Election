@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { invalidateElectionCache } from "@/lib/cache";
 
 export async function PATCH(
   req: NextRequest,
@@ -65,6 +66,9 @@ export async function PATCH(
       where: { id },
       data: { endTime: newEndDate },
     });
+
+    // IMPORTANT: Invalidate cache so the new endTime is immediately available
+    await invalidateElectionCache(id);
 
     return NextResponse.json({
       message: "Election extended successfully",
