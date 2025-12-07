@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           });
           election.resultsVisible = true;
           election.resultsAutoEnabled = true;
-        } else if (!election.resultsVisible) {
+        } else if (!election.resultsVisible && !election.publicResultsVisible) {
           // If resultsVisible is false but resultsAutoEnabled is true,
           // it means super admin manually disabled it - don't re-enable
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });

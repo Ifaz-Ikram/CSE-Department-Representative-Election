@@ -74,11 +74,11 @@ function ResultsPageContent() {
     if (selectedElectionId) {
       fetchStatistics();
 
-      // For voters, poll every 10 seconds to check if access is still valid
+      // For voters, poll every 1 seconds to check if access is still valid
       if ((session?.user as any)?.role === 'voter') {
         const interval = setInterval(() => {
           fetchStatistics();
-        }, 10000); // Check every 10 seconds
+        }, 1000); // Check every 1 seconds
 
         return () => clearInterval(interval);
       }
