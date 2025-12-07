@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 
 interface Election {
@@ -28,11 +28,12 @@ export default function ElectionCard({ election, type, onClick }: ElectionCardPr
         seconds: number;
     } | null>(null);
 
-    const start = new Date(election.startTime);
-    const end = new Date(election.endTime);
-    const now = new Date();
+    // Memoize date objects to prevent infinite re-renders
+    const start = useMemo(() => new Date(election.startTime), [election.startTime]);
+    const end = useMemo(() => new Date(election.endTime), [election.endTime]);
 
-    // Determine status
+    // Determine status (calculate once per render)
+    const now = new Date();
     const isActive = now >= start && now <= end;
     const isEnded = now > end;
     const isUpcoming = now < start;
@@ -112,7 +113,7 @@ export default function ElectionCard({ election, type, onClick }: ElectionCardPr
             </span>
         );
         btnConfig = {
-            text: timeRemaining ? `Starts in ${timeRemaining.hours}h ${timeRemaining.minutes}m` : "Upcoming",
+            text: timeRemaining ? `Starts in ${timeRemaining.hours}h ${timeRemaining.minutes}m ${timeRemaining.seconds}s` : "Upcoming",
             style: "bg-yellow-500/5 border-yellow-500/30 text-yellow-500 cursor-not-allowed opacity-80"
         };
     } else if (isEnded) {
@@ -160,7 +161,7 @@ export default function ElectionCard({ election, type, onClick }: ElectionCardPr
                     {badge}
                     {isActive && timeRemaining && (
                         <span className="text-cyan font-mono text-sm">
-                            Ends in {timeRemaining.hours}h {timeRemaining.minutes}m
+                            Ends in {timeRemaining.hours}h {timeRemaining.minutes}m {timeRemaining.seconds}s
                         </span>
                     )}
                     {isUpcoming && (

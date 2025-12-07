@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
@@ -37,6 +37,7 @@ interface Ballot {
 export default function MyVotesPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [ballots, setBallots] = useState<Ballot[]>([]);
     const [selectedBallotId, setSelectedBallotId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -59,6 +60,15 @@ export default function MyVotesPage() {
             const data = await res.json();
             if (data.ballots) {
                 setBallots(data.ballots);
+
+                // Auto-select ballot if electionId is in URL
+                const electionId = searchParams.get("electionId");
+                if (electionId) {
+                    const ballot = data.ballots.find((b: Ballot) => b.election.id === electionId);
+                    if (ballot) {
+                        setSelectedBallotId(ballot.id);
+                    }
+                }
             }
             setLoading(false);
         } catch (error) {

@@ -824,7 +824,7 @@ export default function VotePage() {
                     </div>
                     {message.type === "success" && (
                       <Link
-                        href="/my-votes"
+                        href={`/my-votes?electionId=${selectedElectionId}`}
                         className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-cyan/20 border border-cyan/50 text-cyan hover:bg-cyan/30 transition-all text-sm font-medium"
                       >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

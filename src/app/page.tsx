@@ -173,6 +173,54 @@ function HomeContent() {
             </div>
           </div>
 
+
+          {/* How It Works Section */}
+          <div className="mb-16">
+            <div className="card-premium text-left max-w-3xl mx-auto">
+              <h3 className="text-3xl font-bold text-gradient mb-6 text-center">How It Works</h3>
+              <ol className="space-y-5">
+                <li className="flex items-start group">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                    1
+                  </span>
+                  <div className="flex-1 pt-1">
+                    <p className="text-white font-semibold mb-1">Sign in with your CSE Gmail account</p>
+                    <p className="text-gray-400 text-sm">Use your official @cse.mrt.ac.lk email to access the voting platform</p>
+                  </div>
+                </li>
+                <li className="flex items-start group">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                    2
+                  </span>
+                  <div className="flex-1 pt-1">
+                    <p className="text-white font-semibold mb-1">Select up to 10 candidates</p>
+                    <p className="text-gray-400 text-sm">Review candidate profiles and choose your preferred representatives</p>
+                  </div>
+                </li>
+                <li className="flex items-start group">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                    3
+                  </span>
+                  <div className="flex-1 pt-1">
+                    <p className="text-white font-semibold mb-1">Submit your ballot</p>
+                    <p className="text-gray-400 text-sm">Confirm your choices and submit (you can modify before the deadline)</p>
+                  </div>
+                </li>
+                {/* <li className="flex items-start group">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                    4
+                  </span>
+                  <div className="flex-1 pt-1">
+                    <p className="text-white font-semibold mb-1">View results after election ends</p>
+                    <p className="text-gray-400 text-sm">Check real-time results once the voting period concludes</p>
+                  </div>
+                </li> */}
+              </ol>
+            </div>
+          </div>
+
+          <GlowDivider variant="gold" className="my-12" />
+
           {/* Features Section */}
           <div className="mb-16">
             <h3 className="text-3xl font-bold text-white text-center mb-10">
@@ -201,51 +249,6 @@ function HomeContent() {
                 </p>
               </div>
             </div>
-          </div>
-
-          <GlowDivider variant="gold" className="my-12" />
-
-          {/* How It Works Section */}
-          <div className="card-premium text-left max-w-3xl mx-auto">
-            <h3 className="text-3xl font-bold text-gradient mb-6 text-center">How It Works</h3>
-            <ol className="space-y-5">
-              <li className="flex items-start group">
-                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
-                  1
-                </span>
-                <div className="flex-1 pt-1">
-                  <p className="text-white font-semibold mb-1">Sign in with your CSE Gmail account</p>
-                  <p className="text-gray-400 text-sm">Use your official @cse.mrt.ac.lk email to access the voting platform</p>
-                </div>
-              </li>
-              <li className="flex items-start group">
-                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
-                  2
-                </span>
-                <div className="flex-1 pt-1">
-                  <p className="text-white font-semibold mb-1">Select up to 10 candidates</p>
-                  <p className="text-gray-400 text-sm">Review candidate profiles and choose your preferred representatives</p>
-                </div>
-              </li>
-              <li className="flex items-start group">
-                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
-                  3
-                </span>
-                <div className="flex-1 pt-1">
-                  <p className="text-white font-semibold mb-1">Submit your ballot</p>
-                  <p className="text-gray-400 text-sm">Confirm your choices and submit (you can modify before the deadline)</p>
-                </div>
-              </li>
-              {/* <li className="flex items-start group">
-                <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
-                  4
-                </span>
-                <div className="flex-1 pt-1">
-                  <p className="text-white font-semibold mb-1">View results after election ends</p>
-                  <p className="text-gray-400 text-sm">Check real-time results once the voting period concludes</p>
-                </div>
-              </li> */}
-            </ol>
           </div>
         </div>
       </main>

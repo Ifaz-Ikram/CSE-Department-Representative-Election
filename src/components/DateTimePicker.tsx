@@ -54,6 +54,18 @@ export default function DateTimePicker({
                 wrapperClassName="w-full"
                 placeholderText="Select date and time..."
             />
+            {value && (
+                <div className="mt-2 text-sm text-cyan/80 font-mono">
+                    Selected: {value.toLocaleString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    })}
+                </div>
+            )}
         </div>
     );
 }
