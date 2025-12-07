@@ -14,7 +14,7 @@ interface Candidate {
   name: string;
   indexNumber: string;
   email: string;
-  bio?: string | null;
+  symbol?: string | null;
   photoUrl?: string | null;
   languages?: string[];
 }
@@ -30,7 +30,7 @@ export default function ManageCandidatesPage() {
   const [loading, setLoading] = useState(true);
   const [showCandidateSelector, setShowCandidateSelector] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
-  const [editBio, setEditBio] = useState("");
+  const [editSymbol, setEditSymbol] = useState("");
   const [editPhotoUrl, setEditPhotoUrl] = useState("");
   const [editLanguages, setEditLanguages] = useState<string[]>([]);
   const [editSubmitting, setEditSubmitting] = useState(false);
@@ -135,7 +135,7 @@ export default function ManageCandidatesPage() {
 
   const proceedToEdit = (candidate: Candidate) => {
     setEditingCandidate(candidate);
-    setEditBio(candidate.bio || "");
+    setEditSymbol(candidate.symbol || "");
     setEditPhotoUrl(candidate.photoUrl || "");
     setEditLanguages(candidate.languages || []);
     setEditError("");
@@ -153,7 +153,7 @@ export default function ManageCandidatesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: editingCandidate.id,
-          bio: editBio.trim() || null,
+          symbol: editSymbol.trim() || null,
           photoUrl: editPhotoUrl.trim() || null,
           languages: editLanguages,
         }),
@@ -451,11 +451,11 @@ export default function ManageCandidatesPage() {
                 <div className="space-y-5">
                   <div>
                     <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
-                      Candidate Manifesto / Bio
+                      Candidate Symbol (Emoji)
                     </label>
                     <textarea
-                      value={editBio}
-                      onChange={(e) => setEditBio(e.target.value)}
+                      value={editSymbol}
+                      onChange={(e) => setEditSymbol(e.target.value)}
                       placeholder="Enter candidate's manifesto, vision, and qualifications..."
                       className="input-field w-full min-h-[120px] resize-y"
                     />
@@ -622,11 +622,9 @@ export default function ManageCandidatesPage() {
                     </p>
                   </div>
 
-                  {candidate.bio && (
-                    <div className="bg-navy-dark/50 p-3 rounded-lg mb-4">
-                      <p className="text-gray-300 text-sm line-clamp-3">
-                        {candidate.bio}
-                      </p>
+                  {candidate.symbol && (
+                    <div className="flex items-center justify-center mb-4">
+                      <span className="text-4xl">{candidate.symbol}</span>
                     </div>
                   )}
 

@@ -14,7 +14,7 @@ interface Candidate {
   name: string;
   indexNumber: string;
   email: string;
-  bio?: string | null;
+  symbol?: string | null;
   photoUrl?: string | null;
   languages?: string[];
 }
@@ -485,35 +485,66 @@ export default function VotePage() {
                     return (
                       <div
                         key={candidate.id}
-                        className="flex items-center space-x-3 p-3 rounded-lg bg-navy-darker/70 border border-cyan/20 hover:border-cyan/40 transition-all duration-200"
+                        className="glass-card p-3 md:p-4 flex items-center gap-3 md:gap-4 bg-cyan/10 border border-cyan/50 animate-slide-up"
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
-
                         {/* Candidate Photo */}
-                        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/40 flex-shrink-0">
+                        <div className="flex-shrink-0">
                           {photoUrl ? (
-                            <img
-                              src={photoUrl}
-                              alt={candidate.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.nextElementSibling?.classList.remove('hidden');
-                              }}
-                            />
-                          ) : null}
-                          <div className={`w-full h-full bg-gradient-to-br from-cyan/30 to-cyan-light/20 flex items-center justify-center text-cyan font-bold text-sm ${photoUrl ? 'hidden' : ''}`}>
-                            {getInitials(candidate.name)}
+                            <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden border-2 border-cyan shadow-lg shadow-cyan/30">
+                              <img
+                                src={photoUrl}
+                                alt={candidate.name}
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  setTimeout(() => {
+                                    const img = e.target as HTMLImageElement;
+                                    if (img.naturalWidth === 0) {
+                                      img.style.display = 'none';
+                                      img.nextElementSibling?.classList.remove('hidden');
+                                    }
+                                  }, 100);
+                                }}
+                              />
+                              <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
+                                <span className="text-lg font-bold text-cyan">{getInitials(candidate.name)}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 border-cyan flex items-center justify-center shadow-lg shadow-cyan/30">
+                              <span className="text-lg font-bold text-cyan">{getInitials(candidate.name)}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Name + Index */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base md:text-lg font-bold text-cyan truncate">
+                            {candidate.name}
+                          </h3>
+                          <p className="text-gold text-xs md:text-sm font-semibold">
+                            {candidate.indexNumber}
+                          </p>
+                        </div>
+
+                        {/* Symbol */}
+                        <div className="flex-shrink-0 w-12 md:w-16 flex items-center justify-center">
+                          {candidate.symbol ? (
+                            <span className="text-2xl md:text-4xl">{candidate.symbol}</span>
+                          ) : (
+                            <div className="w-8 h-8 rounded-full border-2 border-gray-600 border-dashed flex items-center justify-center">
+                              <span className="text-gray-500 text-xs">—</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* X Selection Box */}
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg border-2 border-cyan bg-cyan/20 flex items-center justify-center shadow-lg shadow-cyan/50">
+                            <span className="text-2xl md:text-3xl font-bold text-cyan">✗</span>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white font-semibold truncate">{candidate.name}</p>
-                          <p className="text-cyan text-xs">{candidate.indexNumber}</p>
-                        </div>
-                        <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
                       </div>
                     );
                   })}
@@ -896,8 +927,8 @@ export default function VotePage() {
                 </div>
               </div>
 
-              {/* Candidates Grid */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Ballot Paper Rows */}
+              <div className="space-y-3">
                 {candidates.map((candidate, index) => {
                   const isSelected = selectedCandidates.has(candidate.id);
                   const photoUrl = normalizePhotoUrl(candidate.photoUrl);
@@ -906,90 +937,96 @@ export default function VotePage() {
                     <div
                       key={candidate.id}
                       onClick={() => handleCandidateToggle(candidate.id)}
-                      className={`glass-card cursor-pointer transition-all duration-300 p-5 animate-slide-up ${isSelected
-                        ? "border-cyan glow-border bg-cyan/10 scale-[1.02]"
-                        : "hover:border-cyan/60 hover:scale-[1.01]"
+                      className={`glass-card cursor-pointer transition-all duration-300 p-4 animate-slide-up ${isSelected
+                        ? "border-cyan glow-border bg-cyan/10"
+                        : "hover:border-cyan/60"
                         }`}
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      {/* Selection Indicator */}
-                      <div className="absolute top-3 right-3">
-                        <div
-                          className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${isSelected
-                            ? "border-cyan bg-cyan shadow-lg shadow-cyan/50"
-                            : "border-gray-500 bg-navy-dark/50"
-                            }`}
-                        >
-                          {isSelected && (
-                            <svg className="w-4 h-4 text-navy" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
+                      <div className="flex items-center gap-4">
+                        {/* Candidate Photo */}
+                        <div className="flex-shrink-0">
+                          {photoUrl ? (
+                            <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
+                              }`}>
+                              <img
+                                src={photoUrl}
+                                alt={candidate.name}
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                  setTimeout(() => {
+                                    const img = e.target as HTMLImageElement;
+                                    if (img.naturalWidth === 0) {
+                                      img.style.display = 'none';
+                                      img.nextElementSibling?.classList.remove('hidden');
+                                    }
+                                  }, 100);
+                                }}
+                              />
+                              <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
+                                <span className="text-xl font-bold text-cyan">{getInitials(candidate.name)}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={`w-16 h-16 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 flex items-center justify-center transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
+                              }`}>
+                              <span className="text-xl font-bold text-cyan">{getInitials(candidate.name)}</span>
+                            </div>
                           )}
                         </div>
-                      </div>
 
-                      {/* Candidate Photo */}
-                      <div className="flex justify-center mb-4">
-                        {photoUrl ? (
-                          <div className={`relative w-24 h-24 rounded-xl overflow-hidden border-2 transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
+                        {/* Name + Index + Languages */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`text-lg md:text-xl font-bold transition-colors truncate ${isSelected ? 'text-cyan' : 'text-white'
                             }`}>
-                            <img
-                              src={photoUrl}
-                              alt={candidate.name}
-                              className="w-full h-full object-cover"
-                              referrerPolicy="no-referrer"
-                              onError={(e) => {
-                                setTimeout(() => {
-                                  const img = e.target as HTMLImageElement;
-                                  if (img.naturalWidth === 0) {
-                                    img.style.display = 'none';
-                                    img.nextElementSibling?.classList.remove('hidden');
-                                  }
-                                }, 100);
-                              }}
-                            />
-                            <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
-                              <span className="text-2xl font-bold text-cyan">{getInitials(candidate.name)}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className={`w-24 h-24 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 flex items-center justify-center transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
-                            }`}>
-                            <span className="text-2xl font-bold text-cyan">{getInitials(candidate.name)}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Candidate Info */}
-                      <div className="text-center">
-                        <h3 className={`text-lg font-bold mb-1 transition-colors ${isSelected ? 'text-cyan' : 'text-white'
-                          }`}>
-                          {candidate.name}
-                        </h3>
-                        <p className="text-gold text-sm font-semibold mb-2">
-                          {candidate.indexNumber}
-                        </p>
-                        {/* Language Badges */}
-                        {candidate.languages && candidate.languages.length > 0 && (
-                          <div className="flex flex-wrap gap-1 justify-center mb-3">
-                            {["English", "Sinhala", "Tamil"].filter(lang => candidate.languages?.includes(lang)).map((lang) => (
-                              <span
-                                key={lang}
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${lang === "English" ? "bg-cyan/10 text-cyan border-cyan/30"
-                                  : lang === "Sinhala" ? "bg-gold/10 text-gold border-gold/30"
-                                    : "bg-purple-500/10 text-purple-400 border-purple-500/30"
-                                  }`}
-                              >
-                                {lang}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        {candidate.bio && (
-                          <p className="text-gray-300 text-sm line-clamp-3 text-left bg-navy-dark/50 p-3 rounded-lg">
-                            {candidate.bio}
+                            {candidate.name}
+                          </h3>
+                          <p className="text-gold text-sm font-semibold mb-1">
+                            {candidate.indexNumber}
                           </p>
-                        )}
+                          {/* Language Badges */}
+                          {candidate.languages && candidate.languages.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {["English", "Sinhala", "Tamil"].filter(lang => candidate.languages?.includes(lang)).map((lang) => (
+                                <span
+                                  key={lang}
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${lang === "English" ? "bg-cyan/10 text-cyan border-cyan/30"
+                                    : lang === "Sinhala" ? "bg-gold/10 text-gold border-gold/30"
+                                      : "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                                    }`}
+                                >
+                                  {lang}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Symbol */}
+                        <div className="flex-shrink-0 w-16 md:w-20 flex items-center justify-center">
+                          {candidate.symbol ? (
+                            <span className="text-4xl md:text-5xl">{candidate.symbol}</span>
+                          ) : (
+                            <div className="w-12 h-12 rounded-full border-2 border-gray-600 border-dashed flex items-center justify-center">
+                              <span className="text-gray-500 text-xs">—</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* X Selection Box */}
+                        <div className="flex-shrink-0">
+                          <div
+                            className={`w-14 h-14 md:w-16 md:h-16 rounded-lg border-3 flex items-center justify-center transition-all ${isSelected
+                              ? "border-cyan bg-cyan/20 shadow-lg shadow-cyan/50"
+                              : "border-gray-500 bg-navy-dark/50 hover:border-cyan/50"
+                              }`}
+                          >
+                            {isSelected && (
+                              <span className="text-3xl md:text-4xl font-bold text-cyan">✗</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );

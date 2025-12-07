@@ -14,7 +14,7 @@ interface Candidate {
     name: string;
     indexNumber: string;
     email: string;
-    bio?: string | null;
+    symbol?: string | null;
     photoUrl?: string | null;
     languages?: string[];
 }
@@ -219,39 +219,60 @@ function MyVotesContent() {
 
                             {/* Candidates List */}
                             <div className="p-6">
-                                <div className="grid sm:grid-cols-2 gap-3">
+                                <div className="space-y-3">
                                     {selectedBallot.choices.map((choice) => {
                                         const photoUrl = normalizePhotoUrl(choice.candidate.photoUrl);
                                         return (
                                             <div
                                                 key={choice.candidate.id}
-                                                className="flex items-center space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-cyan/20 hover:border-cyan/40 transition-all duration-200"
+                                                className="glass-card p-4 flex items-center gap-4 bg-navy-darker/50 border border-green-500/30"
                                             >
-
-                                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-cyan/40 flex-shrink-0">
+                                                {/* Photo */}
+                                                <div className="flex-shrink-0">
                                                     {photoUrl ? (
-                                                        <img
-                                                            src={photoUrl}
-                                                            alt={choice.candidate.name}
-                                                            className="w-full h-full object-cover"
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement;
-                                                                target.style.display = 'none';
-                                                                target.nextElementSibling?.classList.remove('hidden');
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <div className={`w-full h-full bg-gradient-to-br from-cyan/30 to-cyan-light/20 flex items-center justify-center text-cyan font-bold text-sm ${photoUrl ? 'hidden' : ''}`}>
-                                                        {getInitials(choice.candidate.name)}
-                                                    </div>
+                                                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-green-500/30 shadow-lg shadow-green-500/10">
+                                                            <img
+                                                                src={photoUrl}
+                                                                alt={choice.candidate.name}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.style.display = 'none';
+                                                                    target.nextElementSibling?.classList.remove('hidden');
+                                                                }}
+                                                            />
+                                                            <div className="hidden w-full h-full bg-gradient-to-br from-green-500/20 to-navy-light flex items-center justify-center">
+                                                                <span className="text-xl font-bold text-green-400">{getInitials(choice.candidate.name)}</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 border-green-500/30 flex items-center justify-center shadow-lg shadow-green-500/10">
+                                                            <span className="text-xl font-bold text-green-400">{getInitials(choice.candidate.name)}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
+
+                                                {/* Info */}
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-white font-semibold truncate">{choice.candidate.name}</p>
-                                                    <p className="text-cyan text-xs">{choice.candidate.indexNumber}</p>
+                                                    <h3 className="text-lg font-bold text-white truncate">
+                                                        {choice.candidate.name}
+                                                    </h3>
+                                                    <p className="text-green-400 text-sm font-semibold">
+                                                        {choice.candidate.indexNumber}
+                                                    </p>
                                                 </div>
-                                                <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                </svg>
+
+                                                {/* Symbol */}
+                                                {choice.candidate.symbol && (
+                                                    <div className="flex-shrink-0 w-16 flex items-center justify-center">
+                                                        <span className="text-4xl">{choice.candidate.symbol}</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Selection Mark */}
+                                                <div className="flex-shrink-0 w-12 h-12 rounded-lg border-2 border-green-500 bg-green-500/20 flex items-center justify-center shadow-lg shadow-green-500/20">
+                                                    <span className="text-3xl font-bold text-green-400">✓</span>
+                                                </div>
                                             </div>
                                         );
                                     })}

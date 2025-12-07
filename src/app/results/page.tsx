@@ -14,6 +14,7 @@ interface CandidateStats {
   indexNumber: string;
   email: string;
   photoUrl?: string | null;
+  symbol?: string | null;
   voteCount: number;
 }
 
@@ -412,8 +413,9 @@ function ResultsPageContent() {
 
                         {/* Candidate Info */}
                         <div className="flex-1">
-                          <h4 className="text-lg font-bold text-white">
+                          <h4 className="text-lg font-bold text-white flex items-center gap-2">
                             {candidate.name}
+                            {candidate.symbol && <span className="text-xl">{candidate.symbol}</span>}
                           </h4>
                           <p className={`text-sm ${index === 0 ? 'text-gold' :
                             index === 1 ? 'text-gray-400' :

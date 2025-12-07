@@ -103,7 +103,7 @@ model Candidate {
   name         String
   indexNumber  String
   email        String?
-  bio          String?
+  symbol       String?       // Ballot paper symbol (emoji like 🌙, ⭐, etc.)
   photoUrl     String?
   languages    String[]      @default([])
 

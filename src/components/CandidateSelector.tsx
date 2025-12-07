@@ -30,7 +30,7 @@ export default function CandidateSelector({
   const [registry, setRegistry] = useState<VoterOption[]>([]);
   const [filteredRegistry, setFilteredRegistry] = useState<VoterOption[]>([]);
   const [selectedVoter, setSelectedVoter] = useState<VoterOption | null>(null);
-  const [bio, setBio] = useState("");
+  const [symbol, setSymbol] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +98,7 @@ export default function CandidateSelector({
           name: `${selectedVoter.data.firstName} ${selectedVoter.data.lastName}`,
           email: selectedVoter.data.email,
           indexNumber: selectedVoter.data.regNo,
-          bio: bio.trim() || undefined,
+          symbol: symbol.trim() || undefined,
           photoUrl: photoUrl.trim() || undefined,
           languages: languages,
         }),
@@ -338,13 +338,15 @@ export default function CandidateSelector({
           <div className="space-y-5 animate-slide-up">
             <div>
               <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
-                Candidate Manifesto / Bio
+                Candidate Symbol (Emoji)
               </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Enter candidate's manifesto, vision, and qualifications..."
-                className="input-field w-full min-h-[120px] resize-y"
+              <input
+                type="text"
+                value={symbol}
+                onChange={(e) => setSymbol(e.target.value)}
+                placeholder="Enter ballot symbol (e.g. 🌙, ⭐, 🏠, ●)"
+                className="input-field w-full text-2xl"
+                maxLength={4}
               />
             </div>
 

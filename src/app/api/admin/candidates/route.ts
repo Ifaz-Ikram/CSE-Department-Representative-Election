@@ -12,14 +12,14 @@ const CreateCandidateSchema = z.object({
   name: z.string().min(1),
   indexNumber: z.string().min(1),
   email: z.string().email().optional().or(z.literal("")),
-  bio: z.string().optional(),
+  symbol: z.string().optional(),
   photoUrl: z.string().url().optional().or(z.literal("")),
   languages: z.array(z.enum(["English", "Sinhala", "Tamil"])).optional().default([]),
 });
 
 const UpdateCandidateSchema = z.object({
   id: z.string(),
-  bio: z.string().nullable().optional(),
+  symbol: z.string().nullable().optional(),
   photoUrl: z.string().url().nullable().optional().or(z.literal("")).or(z.null()),
   languages: z.array(z.enum(["English", "Sinhala", "Tamil"])).optional(),
 });
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const sanitizedName = sanitizeInput(data.name, 100);
     const sanitizedIndexNumber = sanitizeInput(data.indexNumber, 20);
     const sanitizedEmail = data.email ? sanitizeEmail(data.email) : null;
-    const sanitizedBio = data.bio ? sanitizeHtml(data.bio) : undefined;
+    const sanitizedSymbol = data.symbol ? sanitizeHtml(data.symbol) : undefined;
     const sanitizedPhotoUrl = data.photoUrl ? sanitizeUrl(data.photoUrl) : null;
 
     // Find or create user for the candidate (only if email is provided)
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         name: sanitizedName,
         indexNumber: sanitizedIndexNumber,
         email: sanitizedEmail,
-        bio: sanitizedBio,
+        symbol: sanitizedSymbol,
         photoUrl: sanitizedPhotoUrl,
         languages: data.languages || [],
       },
@@ -224,7 +224,7 @@ export async function PUT(request: NextRequest) {
     const candidate = await prisma.candidate.update({
       where: { id: data.id },
       data: {
-        bio: data.bio,
+        symbol: data.symbol,
         photoUrl: data.photoUrl === "" ? null : data.photoUrl,
         ...(data.languages !== undefined && { languages: data.languages }),
       },
@@ -239,7 +239,7 @@ export async function PUT(request: NextRequest) {
       targetType: 'Candidate',
       targetId: candidate.id,
       targetName: candidate.name,
-      details: { bio: data.bio, photoUrl: data.photoUrl, languages: data.languages },
+      details: { symbol: data.symbol, photoUrl: data.photoUrl, languages: data.languages },
     });
 
     // Invalidate candidate cache for this election

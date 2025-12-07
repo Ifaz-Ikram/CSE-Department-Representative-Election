@@ -98,6 +98,7 @@ export async function GET(req: NextRequest) {
     const stats = candidates.map((candidate) => ({
       candidateId: candidate.id,
       name: candidate.name,
+      symbol: candidate.symbol,
       indexNumber: candidate.indexNumber,
       email: candidate.email,
       photoUrl: candidate.photoUrl,
