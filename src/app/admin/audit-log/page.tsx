@@ -2,10 +2,11 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
 import GlowDivider from "@/components/GlowDivider";
+import SearchableDropdown from "@/components/SearchableDropdown";
 
 interface AuditLog {
     id: string;
@@ -25,6 +26,13 @@ interface Pagination {
     limit: number;
     total: number;
     totalPages: number;
+}
+
+interface DistinctValues {
+    actions: string[];
+    categories: string[];
+    actors: string[];
+    targets: string[];
 }
 
 const categoryColors: Record<string, string> = {
@@ -56,9 +64,19 @@ export default function AuditLogPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Filters
-    const [category, setCategory] = useState("");
-    const [actor, setActor] = useState("");
+    // Distinct values for dropdowns (fetched once from API)
+    const [distinctValues, setDistinctValues] = useState<DistinctValues>({
+        actions: [],
+        categories: [],
+        actors: [],
+        targets: [],
+    });
+
+    // Server-side filters
+    const [filterAction, setFilterAction] = useState("");
+    const [filterCategory, setFilterCategory] = useState("");
+    const [filterActor, setFilterActor] = useState("");
+    const [filterTarget, setFilterTarget] = useState("");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [page, setPage] = useState(1);
@@ -69,7 +87,6 @@ export default function AuditLogPage() {
             router.push("/");
         } else if (session) {
             const role = (session.user as any)?.role;
-            // Both admin and super_admin can access
             if (role !== "super_admin" && role !== "admin") {
                 router.push("/admin");
             }
@@ -77,24 +94,39 @@ export default function AuditLogPage() {
     }, [status, session, router]);
 
     const userRole = (session?.user as any)?.role;
-    const isSuperAdmin = userRole === "super_admin";
 
-    // Fetch logs
+    // Fetch distinct values for dropdowns (once on mount)
     useEffect(() => {
         if (userRole === "super_admin" || userRole === "admin") {
-            fetchLogs();
+            fetchDistinctValues();
         }
-    }, [session, category, actor, startDate, endDate, page]);
+    }, [userRole]);
 
-    const fetchLogs = async () => {
+    const fetchDistinctValues = async () => {
+        try {
+            const res = await fetch("/api/admin/audit-logs?distinctValues=true");
+            if (res.ok) {
+                const data = await res.json();
+                setDistinctValues(data.distinctValues);
+            }
+        } catch (err) {
+            console.error("Failed to fetch distinct values:", err);
+        }
+    };
+
+    // Fetch logs with filters
+    const fetchLogs = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams();
-            if (category) params.append("category", category);
-            if (actor) params.append("actor", actor);
+            if (filterAction) params.append("action", filterAction);
+            if (filterCategory) params.append("category", filterCategory);
+            if (filterActor) params.append("actor", filterActor);
+            if (filterTarget) params.append("targetName", filterTarget);
             if (startDate) params.append("startDate", startDate);
             if (endDate) params.append("endDate", endDate);
             params.append("page", page.toString());
+            params.append("limit", "50");
 
             const res = await fetch(`/api/admin/audit-logs?${params}`);
             if (!res.ok) {
@@ -110,14 +142,78 @@ export default function AuditLogPage() {
         } finally {
             setLoading(false);
         }
+    }, [filterAction, filterCategory, filterActor, filterTarget, startDate, endDate, page]);
+
+    // Fetch logs when filters change
+    useEffect(() => {
+        if (userRole === "super_admin" || userRole === "admin") {
+            fetchLogs();
+        }
+    }, [userRole, fetchLogs]);
+
+    // Reset page when filters change
+    const handleFilterChange = (setter: (val: string) => void) => (value: string) => {
+        setter(value);
+        setPage(1);
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString();
+        return new Date(dateString).toLocaleString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     };
 
     const formatAction = (action: string) => {
         return action.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
+    };
+
+    // Parse details JSON for meaningful display
+    const formatDetails = (log: AuditLog): string => {
+        if (!log.details) return "-";
+
+        const d = log.details;
+
+        switch (log.action) {
+            case "USER_ROLE_CHANGED":
+                return `${d.oldRole || "?"} → ${d.newRole || "?"}`;
+            case "CANDIDATE_UPDATED":
+                const updatedFields: string[] = [];
+                if (d.symbol !== undefined) updatedFields.push("Symbol");
+                if (d.bio !== undefined) updatedFields.push("Bio");
+                if (d.photoUrl !== undefined) updatedFields.push("Photo");
+                if (d.languages !== undefined) updatedFields.push("Languages");
+                return updatedFields.length > 0 ? `Updated: ${updatedFields.join(", ")}` : "Updated";
+            case "CANDIDATE_ADDED":
+                return d.indexNumber ? `Index: ${d.indexNumber}` : "Added";
+            case "CANDIDATE_REMOVED":
+                return "Removed";
+            case "VOTE_CAST":
+                return d.anonymized ? "Anonymous Vote" : "Vote Recorded";
+            case "ELECTION_CREATED":
+                return d.electionName || "Created";
+            case "ELECTION_UPDATED":
+                const changes: string[] = [];
+                if (d.name) changes.push("Name");
+                if (d.startTime) changes.push("Start Time");
+                if (d.endTime) changes.push("End Time");
+                return changes.length > 0 ? `Changed: ${changes.join(", ")}` : "Updated";
+            case "ELECTION_VISIBILITY_CHANGED":
+                if (d.resultsVisible !== undefined) {
+                    return `Results: ${d.resultsVisible ? "Visible" : "Hidden"}`;
+                }
+                if (d.isPublic !== undefined) {
+                    return `Voting: ${d.isPublic ? "Public" : "Private"}`;
+                }
+                return "Visibility Changed";
+            default:
+                const keys = Object.keys(d).slice(0, 2);
+                if (keys.length === 0) return "-";
+                return keys.map(k => `${k}: ${String(d[k]).slice(0, 20)}`).join(", ");
+        }
     };
 
     if (status === "loading" || (session && userRole !== "super_admin" && userRole !== "admin")) {
@@ -159,41 +255,15 @@ export default function AuditLogPage() {
 
                     <GlowDivider className="mb-8" />
 
-                    {/* Filters */}
+                    {/* Date Range Filters */}
                     <div className="glass-card p-6 mb-8 animate-slide-up">
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                             <svg className="w-5 h-5 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span>Filters</span>
+                            <span>Date Range</span>
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <label className="block text-cyan text-sm font-bold mb-2">Category</label>
-                                <select
-                                    value={category}
-                                    onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-                                    className="input-field w-full"
-                                >
-                                    <option value="">All Categories</option>
-                                    <option value="ELECTION">Election</option>
-                                    <option value="CANDIDATE">Candidate</option>
-                                    <option value="USER">User</option>
-                                    {/* Only super_admin can filter by Vote category */}
-                                    {isSuperAdmin && <option value="VOTE">Vote</option>}
-                                    <option value="AUTH">Auth</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-cyan text-sm font-bold mb-2">Actor Email</label>
-                                <input
-                                    type="text"
-                                    value={actor}
-                                    onChange={(e) => { setActor(e.target.value); setPage(1); }}
-                                    placeholder="Search by email..."
-                                    className="input-field w-full"
-                                />
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-cyan text-sm font-bold mb-2">Start Date</label>
                                 <input
@@ -244,36 +314,67 @@ export default function AuditLogPage() {
 
                     {/* Logs Table */}
                     {!loading && !error && (
-                        <div className="glass-card overflow-hidden animate-slide-up">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
+                        <div className="glass-card overflow-visible animate-slide-up">
+                            <div className="overflow-x-auto min-h-[500px]">
+                                <table className="w-full border-separate border-spacing-0" style={{ minWidth: "1000px" }}>
                                     <thead>
-                                        <tr className="border-b border-cyan/20 bg-navy-dark/50">
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Timestamp
+                                        <tr className="bg-navy-dark/50">
+                                            <th className="px-4 py-4 text-left align-top" style={{ width: "140px" }}>
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Timestamp</div>
                                             </th>
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Action
+                                            <th className="px-4 py-4 text-left align-top" style={{ width: "180px" }}>
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Action</div>
+                                                <SearchableDropdown
+                                                    options={distinctValues.actions}
+                                                    value={filterAction}
+                                                    onChange={handleFilterChange(setFilterAction)}
+                                                    placeholder="Filter..."
+                                                    className="w-full"
+                                                />
                                             </th>
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Category
+                                            <th className="px-4 py-4 text-left align-top" style={{ width: "120px" }}>
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Category</div>
+                                                <SearchableDropdown
+                                                    options={distinctValues.categories}
+                                                    value={filterCategory}
+                                                    onChange={handleFilterChange(setFilterCategory)}
+                                                    placeholder="Filter..."
+                                                    className="w-full"
+                                                />
                                             </th>
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Actor
+                                            <th className="px-4 py-4 text-left align-top" style={{ width: "200px" }}>
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Actor</div>
+                                                <SearchableDropdown
+                                                    options={distinctValues.actors}
+                                                    value={filterActor}
+                                                    onChange={handleFilterChange(setFilterActor)}
+                                                    placeholder="Filter..."
+                                                    className="w-full"
+                                                />
                                             </th>
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Target
+                                            <th className="px-4 py-4 text-left align-top" style={{ width: "150px" }}>
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Target</div>
+                                                <SearchableDropdown
+                                                    options={distinctValues.targets}
+                                                    value={filterTarget}
+                                                    onChange={handleFilterChange(setFilterTarget)}
+                                                    placeholder="Filter..."
+                                                    className="w-full"
+                                                />
+                                            </th>
+                                            <th className="px-4 py-4 text-left align-top" style={{ width: "200px" }}>
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide">Details</div>
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {logs.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
+                                                <td colSpan={6} className="px-6 py-12 text-center text-gray-400 border-t border-cyan/20">
                                                     <svg className="w-12 h-12 mx-auto mb-4 text-cyan/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                     </svg>
-                                                    No audit logs found
+                                                    No audit logs found matching filters
                                                 </td>
                                             </tr>
                                         ) : (
@@ -282,33 +383,46 @@ export default function AuditLogPage() {
                                                     key={log.id}
                                                     className="border-b border-cyan/10 hover:bg-cyan/5 transition-colors"
                                                 >
-                                                    <td className="px-6 py-4 text-gray-300 text-sm whitespace-nowrap">
+                                                    <td className="px-4 py-3 text-gray-300 text-xs whitespace-nowrap">
                                                         {formatDate(log.timestamp)}
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-3">
                                                         <div className="flex items-center space-x-2">
                                                             <span className="text-lg">{actionIcons[log.action] || "📋"}</span>
-                                                            <span className="text-white font-medium">
+                                                            <span className="text-white text-sm font-medium">
                                                                 {formatAction(log.action)}
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-3">
                                                         <span
-                                                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${categoryColors[log.category] || "bg-gray-500/20 text-gray-400"
+                                                            className={`px-2 py-1 rounded-full text-xs font-semibold border ${categoryColors[log.category] || "bg-gray-500/20 text-gray-400"
                                                                 }`}
                                                         >
                                                             {log.category}
                                                         </span>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-4 py-3">
                                                         <div>
-                                                            <p className="text-white text-sm">{log.actorEmail}</p>
+                                                            <p className="text-white text-sm truncate max-w-[180px]" title={log.actorEmail}>
+                                                                {log.actorEmail === "ANONYMOUS" ? (
+                                                                    <span className="text-gray-500 italic">Anonymous</span>
+                                                                ) : (
+                                                                    log.actorEmail.split("@")[0]
+                                                                )}
+                                                            </p>
                                                             <p className="text-gray-500 text-xs">{log.actorRole}</p>
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-gray-300 text-sm">
-                                                        {log.targetName || log.targetType || "-"}
+                                                    <td className="px-4 py-3 text-gray-300 text-sm">
+                                                        <span className="truncate max-w-[140px] block" title={log.targetName || "-"}>
+                                                            {log.targetName || log.targetType || "-"}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-cyan text-sm">
+                                                        <span className="truncate max-w-[190px] block" title={formatDetails(log)}>
+                                                            {formatDetails(log)}
+                                                        </span>
                                                     </td>
                                                 </tr>
                                             ))

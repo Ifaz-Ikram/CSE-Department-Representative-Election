@@ -85,3 +85,31 @@ export async function logAnonymousVote(electionId: string, electionName: string)
         details: { anonymized: true },
     });
 }
+
+/**
+ * Log a vote event WITH full details (for super_admin audit visibility).
+ * Includes voter email and selected candidates.
+ */
+export async function logVoteWithDetails(
+    voterEmail: string,
+    electionId: string,
+    electionName: string,
+    candidateNames: string[],
+    isUpdate: boolean = false
+): Promise<void> {
+    await logAuditEvent({
+        action: AuditActions.VOTE_CAST,
+        category: AuditCategories.VOTE,
+        actorEmail: voterEmail,
+        actorRole: 'voter',
+        targetType: 'Election',
+        targetId: electionId,
+        targetName: electionName,
+        details: {
+            candidatesSelected: candidateNames,
+            candidateCount: candidateNames.length,
+            isUpdate: isUpdate,
+        },
+    });
+}
+

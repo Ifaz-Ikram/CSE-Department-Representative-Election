@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { logAnonymousVote } from "@/lib/auditLog";
+import { logVoteWithDetails } from "@/lib/auditLog";
 import { rateLimit } from "@/lib/rateLimit";
 
 const SubmitBallotSchema = z.object({
@@ -49,13 +49,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify all candidate IDs belong to this election
+    // Verify all candidate IDs belong to this election and get names for logging
+    let candidateNames: string[] = [];
     if (candidateIds.length > 0) {
       const candidates = await prisma.candidate.findMany({
         where: {
           id: { in: candidateIds },
           electionId,
         },
+        select: { id: true, name: true },
       });
 
       if (candidates.length !== candidateIds.length) {
@@ -64,6 +66,7 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+      candidateNames = candidates.map(c => c.name);
     }
 
     // Use transaction to ensure atomic update
@@ -116,8 +119,13 @@ export async function POST(req: NextRequest) {
       return ballot;
     });
 
-    // Log anonymous vote (no voter identity)
-    await logAnonymousVote(electionId, election.name);
+    // Log vote with full details for super_admin visibility
+    await logVoteWithDetails(
+      session.user.email!,
+      electionId,
+      election.name,
+      candidateNames
+    );
 
     return NextResponse.json({
       success: true,
