@@ -22,7 +22,16 @@ export async function GET() {
         const ballots = await prisma.ballot.findMany({
             where: { voterId: user.id },
             include: {
-                election: true,
+                election: {
+                    include: {
+                        _count: {
+                            select: {
+                                candidates: true,
+                                ballots: true,
+                            },
+                        },
+                    },
+                },
                 choices: {
                     include: {
                         candidate: true,
