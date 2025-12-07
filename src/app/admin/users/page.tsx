@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Link from "next/link";
 import GlowDivider from "@/components/GlowDivider";
+import SearchableDropdown from "@/components/SearchableDropdown";
 
 interface User {
     id: string;
@@ -36,6 +37,11 @@ export default function UsersPage() {
     const [error, setError] = useState<string | null>(null);
     const [updating, setUpdating] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    // Filter states
+    const [filterName, setFilterName] = useState("");
+    const [filterIndex, setFilterIndex] = useState("");
+    const [filterRole, setFilterRole] = useState("");
 
     const userRole = (session?.user as any)?.role;
     const currentUserEmail = session?.user?.email;
@@ -123,6 +129,19 @@ export default function UsersPage() {
     const admins = users.filter(u => u.role === "admin");
     const voters = users.filter(u => u.role === "voter");
 
+    // Compute unique options for dropdowns
+    const uniqueNames = Array.from(new Set(users.map(u => u.name || "").filter(Boolean))).sort();
+    const uniqueIndices = Array.from(new Set(users.map(u => u.indexNumber || "").filter(Boolean))).sort();
+    const uniqueRoles = Array.from(new Set(users.map(u => u.role))).sort();
+
+    // Filtered users
+    const filteredUsers = users.filter(user => {
+        const matchName = filterName ? (user.name || "") === filterName : true;
+        const matchIndex = filterIndex ? (user.indexNumber || "") === filterIndex : true;
+        const matchRole = filterRole ? user.role === filterRole : true;
+        return matchName && matchIndex && matchRole;
+    });
+
     return (
         <div className="min-h-screen circuit-bg">
             <Navigation />
@@ -200,36 +219,57 @@ export default function UsersPage() {
 
                     {/* Users Table */}
                     {!loading && (
-                        <div className="glass-card overflow-hidden animate-slide-up">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
+                        <div className="glass-card overflow-visible animate-slide-up">
+                            <div className="overflow-x-auto min-h-[400px]">
+                                <table className="w-full border-separate border-spacing-0">
                                     <thead>
-                                        <tr className="border-b border-cyan/20 bg-navy-dark/50">
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                User
+                                        <tr className="bg-navy-dark/50">
+                                            <th className="px-6 py-4 text-left align-top w-1/3">
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">User</div>
+                                                <SearchableDropdown
+                                                    options={uniqueNames}
+                                                    value={filterName}
+                                                    onChange={setFilterName}
+                                                    placeholder="Filter User..."
+                                                    className="w-full"
+                                                />
                                             </th>
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Index Number
+                                            <th className="px-6 py-4 text-left align-top w-1/4">
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Index Number</div>
+                                                <SearchableDropdown
+                                                    options={uniqueIndices}
+                                                    value={filterIndex}
+                                                    onChange={setFilterIndex}
+                                                    placeholder="Filter Index..."
+                                                    className="w-full"
+                                                />
                                             </th>
-                                            <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
-                                                Current Role
+                                            <th className="px-6 py-4 text-left align-top w-1/4">
+                                                <div className="text-cyan text-sm font-bold uppercase tracking-wide mb-2">Current Role</div>
+                                                <SearchableDropdown
+                                                    options={uniqueRoles}
+                                                    value={filterRole}
+                                                    onChange={setFilterRole}
+                                                    placeholder="Filter Role..."
+                                                    className="w-full"
+                                                />
                                             </th>
                                             {isSuperAdmin && (
-                                                <th className="px-6 py-4 text-left text-cyan text-sm font-bold uppercase tracking-wide">
+                                                <th className="px-6 py-4 text-left align-top text-cyan text-sm font-bold uppercase tracking-wide">
                                                     Change Role
                                                 </th>
                                             )}
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {users.length === 0 ? (
+                                        {filteredUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan={isSuperAdmin ? 4 : 3} className="px-6 py-12 text-center text-gray-400">
+                                                <td colSpan={isSuperAdmin ? 4 : 3} className="px-6 py-12 text-center text-gray-400 border-t border-cyan/20">
                                                     No users found
                                                 </td>
                                             </tr>
                                         ) : (
-                                            users.map((user) => (
+                                            filteredUsers.map((user) => (
                                                 <tr
                                                     key={user.id}
                                                     className={`border-b border-cyan/10 hover:bg-cyan/5 transition-colors ${user.email === currentUserEmail ? "bg-cyan/10" : ""
