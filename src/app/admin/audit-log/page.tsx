@@ -194,9 +194,7 @@ export default function AuditLogPage() {
             case "VOTE_CAST":
                 // New format: shows actual candidates selected
                 if (d.candidatesSelected && Array.isArray(d.candidatesSelected)) {
-                    const names = d.candidatesSelected.slice(0, 3).join(", ");
-                    const extra = d.candidatesSelected.length > 3 ? ` +${d.candidatesSelected.length - 3} more` : "";
-                    return `Voted: ${names}${extra} (${d.candidateCount})`;
+                    return `Voted: ${d.candidatesSelected.join(", ")}`;
                 }
                 // Old format: anonymous
                 return d.anonymized ? "Anonymous Vote (Legacy)" : "Vote Recorded";
@@ -427,7 +425,7 @@ export default function AuditLogPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-cyan text-sm">
-                                                        <span className="truncate max-w-[190px] block" title={formatDetails(log)}>
+                                                        <span className="block whitespace-normal">
                                                             {formatDetails(log)}
                                                         </span>
                                                     </td>
