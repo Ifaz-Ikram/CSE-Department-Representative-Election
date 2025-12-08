@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
             data: {
                 name: sanitizedName,
                 description: sanitizedDescription,
-                candidates: candidateData,
+                candidates: candidateData as unknown as import("@prisma/client").Prisma.InputJsonValue,
             },
         });
 
@@ -187,7 +187,7 @@ export async function PUT(request: NextRequest) {
         }
 
         // Parse candidates from JSON
-        const presetCandidates = preset.candidates as CandidatePresetData[];
+        const presetCandidates = preset.candidates as unknown as CandidatePresetData[];
 
         if (!Array.isArray(presetCandidates)) {
             return NextResponse.json({ error: "Invalid preset data" }, { status: 500 });
