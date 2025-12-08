@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
-import ElectionCard from "@/components/ElectionCard"; // New import
+import ElectionCard from "@/components/ElectionCard";
+import CandidatePhoto from "@/components/CandidatePhoto"; // New import
 import { normalizePhotoUrl, getInitials } from "@/lib/themeHelpers";
 
 interface CandidateStats {
@@ -327,28 +328,12 @@ function ResultsPageContent() {
                     <div className="flex items-center space-x-6">
                       {/* Winner Photo */}
                       <div className="flex-shrink-0">
-                        {normalizePhotoUrl(winner.photoUrl) ? (
-                          <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden border-4 border-gold shadow-lg shadow-gold/30">
-                            <img
-                              src={normalizePhotoUrl(winner.photoUrl)!}
-                              alt={winner.name}
-                              className="w-full h-full object-cover"
-                              referrerPolicy="no-referrer"
-                              onError={(e) => {
-                                setTimeout(() => {
-                                  const img = e.target as HTMLImageElement;
-                                  if (img.naturalWidth === 0) {
-                                    img.style.display = 'none';
-                                  }
-                                }, 100);
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-gradient-to-br from-gold/20 to-navy-lighter border-4 border-gold flex items-center justify-center shadow-lg shadow-gold/30">
-                            <span className="text-4xl font-bold text-gold">{getInitials(winner.name)}</span>
-                          </div>
-                        )}
+                        <CandidatePhoto
+                          url={normalizePhotoUrl(winner.photoUrl)}
+                          name={winner.name}
+                          className="w-24 h-24 md:w-32 md:h-32 rounded-xl border-4 border-gold shadow-lg shadow-gold/30"
+                          initialsClassName="text-4xl font-bold text-gold"
+                        />
                       </div>
 
                       {/* Winner Info */}
@@ -416,36 +401,18 @@ function ResultsPageContent() {
                         </div>
 
                         {/* Candidate Photo */}
-                        {photoUrl ? (
-                          <div className={`w-14 h-14 rounded-lg overflow-hidden border-2 ${index === 0 ? 'border-gold' :
-                            index === 1 ? 'border-gray-400' :
-                              index === 2 ? 'border-orange-700' :
-                                'border-cyan/30'
-                            }`}>
-                            <img
-                              src={photoUrl}
-                              alt={candidate.name}
-                              className="w-full h-full object-cover"
-                              referrerPolicy="no-referrer"
-                              onError={(e) => {
-                                setTimeout(() => {
-                                  const img = e.target as HTMLImageElement;
-                                  if (img.naturalWidth === 0) {
-                                    img.style.display = 'none';
-                                  }
-                                }, 100);
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className={`w-14 h-14 rounded-lg bg-navy-dark flex items-center justify-center border-2 ${index === 0 ? 'border-gold' :
-                            index === 1 ? 'border-gray-400' :
-                              index === 2 ? 'border-orange-700' :
-                                'border-cyan/30'
-                            }`}>
-                            <span className="text-lg font-bold text-cyan">{getInitials(candidate.name)}</span>
-                          </div>
-                        )}
+                        <div className="flex-shrink-0">
+                          <CandidatePhoto
+                            url={photoUrl}
+                            name={candidate.name}
+                            className={`w-14 h-14 rounded-lg border-2 ${index === 0 ? "border-gold" :
+                                index === 1 ? "border-gray-400" :
+                                  index === 2 ? "border-orange-700" :
+                                    "border-cyan/30"
+                              }`}
+                            initialsClassName="text-lg font-bold text-cyan"
+                          />
+                        </div>
 
                         {/* Candidate Info */}
                         <div className="flex-1">

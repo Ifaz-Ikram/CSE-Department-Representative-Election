@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import GlowDivider from "@/components/GlowDivider";
-import ElectionCard from "@/components/ElectionCard"; // New import
+import ElectionCard from "@/components/ElectionCard";
+import CandidatePhoto from "@/components/CandidatePhoto";
 import { normalizePhotoUrl, getInitials } from "@/lib/themeHelpers";
 
 interface Candidate {
@@ -483,32 +484,12 @@ export default function VotePage() {
                       >
                         {/* Candidate Photo */}
                         <div className="flex-shrink-0">
-                          {photoUrl ? (
-                            <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-xl overflow-hidden border-2 border-cyan shadow-lg shadow-cyan/30">
-                              <img
-                                src={photoUrl}
-                                alt={candidate.name}
-                                className="w-full h-full object-cover"
-                                referrerPolicy="no-referrer"
-                                onError={(e) => {
-                                  setTimeout(() => {
-                                    const img = e.target as HTMLImageElement;
-                                    if (img.naturalWidth === 0) {
-                                      img.style.display = 'none';
-                                      img.nextElementSibling?.classList.remove('hidden');
-                                    }
-                                  }, 100);
-                                }}
-                              />
-                              <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
-                                <span className="text-lg font-bold text-cyan">{getInitials(candidate.name)}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 border-cyan flex items-center justify-center shadow-lg shadow-cyan/30">
-                              <span className="text-lg font-bold text-cyan">{getInitials(candidate.name)}</span>
-                            </div>
-                          )}
+                          <CandidatePhoto
+                            url={photoUrl}
+                            name={candidate.name}
+                            className="w-12 h-12 md:w-16 md:h-16 rounded-xl border-2 border-cyan shadow-lg shadow-cyan/30"
+                            initialsClassName="text-lg font-bold text-cyan"
+                          />
                         </div>
 
                         {/* Name + Index */}
@@ -936,34 +917,15 @@ export default function VotePage() {
                       <div className="flex items-center gap-4">
                         {/* Candidate Photo */}
                         <div className="flex-shrink-0">
-                          {photoUrl ? (
-                            <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
-                              }`}>
-                              <img
-                                src={photoUrl}
-                                alt={candidate.name}
-                                className="w-full h-full object-cover"
-                                referrerPolicy="no-referrer"
-                                onError={(e) => {
-                                  setTimeout(() => {
-                                    const img = e.target as HTMLImageElement;
-                                    if (img.naturalWidth === 0) {
-                                      img.style.display = 'none';
-                                      img.nextElementSibling?.classList.remove('hidden');
-                                    }
-                                  }, 100);
-                                }}
-                              />
-                              <div className="hidden w-full h-full bg-gradient-to-br from-cyan/20 to-navy-light flex items-center justify-center">
-                                <span className="text-xl font-bold text-cyan">{getInitials(candidate.name)}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className={`w-16 h-16 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-navy-light to-navy-lighter border-2 flex items-center justify-center transition-all ${isSelected ? 'border-cyan shadow-lg shadow-cyan/30' : 'border-cyan/30'
-                              }`}>
-                              <span className="text-xl font-bold text-cyan">{getInitials(candidate.name)}</span>
-                            </div>
-                          )}
+                          <CandidatePhoto
+                            url={photoUrl}
+                            name={candidate.name}
+                            className={`w-16 h-16 md:w-20 md:h-20 rounded-xl border-2 transition-all ${isSelected
+                              ? "border-cyan shadow-lg shadow-cyan/30"
+                              : "border-cyan/30"
+                              }`}
+                            initialsClassName="text-xl font-bold text-cyan"
+                          />
                         </div>
 
                         {/* Name + Index + Languages */}
