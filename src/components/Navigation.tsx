@@ -85,7 +85,7 @@ export default function Navigation() {
                   <span className="text-white">CSE </span>
                   <span className="text-gold glow-text-gold">23</span>
                 </div>
-                <div className="hidden md:block text-cyan text-xs tracking-wide uppercase leading-none mt-1.5">
+                <div className="text-cyan text-xs tracking-wide uppercase leading-none mt-1.5">
                   Department Elections
                 </div>
               </div>
