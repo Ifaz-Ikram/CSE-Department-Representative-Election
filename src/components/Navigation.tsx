@@ -208,11 +208,11 @@ export default function Navigation() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-4 space-y-3 animate-slide-up">
+            <div className="md:hidden mt-3 pb-2 space-y-2 animate-slide-up">
               {session ? (
                 <>
                   {/* User Info Mobile */}
-                  <div className="flex items-center space-x-3 p-3 bg-navy-light/50 rounded-lg border border-cyan/20">
+                  <div className="flex items-center space-x-3 p-2.5 bg-navy-light/50 rounded-lg border border-cyan/20">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-cyan/50 flex-shrink-0">
                       {session.user.image ? (
                         <img
@@ -235,7 +235,7 @@ export default function Navigation() {
 
                   <Link
                     href="/vote"
-                    className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/vote"
+                    className={`block px-4 py-2 rounded-lg transition-all ${pathname === "/vote"
                       ? "bg-cyan/20 text-cyan border border-cyan/50"
                       : "text-white hover:bg-cyan/10"
                       }`}
@@ -245,7 +245,7 @@ export default function Navigation() {
                   </Link>
                   <Link
                     href="/my-votes"
-                    className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/my-votes"
+                    className={`block px-4 py-2 rounded-lg transition-all ${pathname === "/my-votes"
                       ? "bg-cyan/20 text-cyan border border-cyan/50"
                       : "text-white hover:bg-cyan/10"
                       }`}
@@ -256,7 +256,7 @@ export default function Navigation() {
                   {showResults && (
                     <Link
                       href="/results"
-                      className={`block px-4 py-3 rounded-lg transition-all ${pathname === "/results"
+                      className={`block px-4 py-2 rounded-lg transition-all ${pathname === "/results"
                         ? "bg-cyan/20 text-cyan border border-cyan/50"
                         : "text-white hover:bg-cyan/10"
                         }`}
@@ -269,7 +269,7 @@ export default function Navigation() {
                     session.user.role === "super_admin") && (
                       <Link
                         href="/admin"
-                        className={`block px-4 py-3 rounded-lg transition-all ${pathname.startsWith("/admin")
+                        className={`block px-4 py-2 rounded-lg transition-all ${pathname.startsWith("/admin")
                           ? "bg-cyan/20 text-cyan border border-cyan/50"
                           : "text-white hover:bg-cyan/10"
                           }`}
