@@ -7,6 +7,8 @@ import Navigation from "@/components/Navigation";
 import Link from "next/link";
 import GlowDivider from "@/components/GlowDivider";
 import SearchableDropdown from "@/components/SearchableDropdown";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface AuditLog {
     id: string;
@@ -77,8 +79,8 @@ export default function AuditLogPage() {
     const [filterCategory, setFilterCategory] = useState("");
     const [filterActor, setFilterActor] = useState("");
     const [filterTarget, setFilterTarget] = useState("");
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
     const [page, setPage] = useState(1);
 
     // Check authorization
@@ -123,8 +125,8 @@ export default function AuditLogPage() {
             if (filterCategory) params.append("category", filterCategory);
             if (filterActor) params.append("actor", filterActor);
             if (filterTarget) params.append("targetName", filterTarget);
-            if (startDate) params.append("startDate", startDate);
-            if (endDate) params.append("endDate", endDate);
+            if (startDate) params.append("startDate", startDate.toISOString().split('T')[0]);
+            if (endDate) params.append("endDate", endDate.toISOString().split('T')[0]);
             params.append("page", page.toString());
             params.append("limit", "50");
 
@@ -271,20 +273,30 @@ export default function AuditLogPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-cyan text-sm font-bold mb-2">Start Date</label>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                                <DatePicker
+                                    selected={startDate}
+                                    onChange={(date) => { setStartDate(date); setPage(1); }}
+                                    dateFormat="MMMM d, yyyy"
+                                    maxDate={endDate || undefined}
+                                    placeholderText="Select start date..."
                                     className="input-field w-full"
+                                    calendarClassName="custom-datepicker"
+                                    wrapperClassName="w-full"
+                                    isClearable
                                 />
                             </div>
                             <div>
                                 <label className="block text-cyan text-sm font-bold mb-2">End Date</label>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                                <DatePicker
+                                    selected={endDate}
+                                    onChange={(date) => { setEndDate(date); setPage(1); }}
+                                    dateFormat="MMMM d, yyyy"
+                                    minDate={startDate || undefined}
+                                    placeholderText="Select end date..."
                                     className="input-field w-full"
+                                    calendarClassName="custom-datepicker"
+                                    wrapperClassName="w-full"
+                                    isClearable
                                 />
                             </div>
                         </div>
