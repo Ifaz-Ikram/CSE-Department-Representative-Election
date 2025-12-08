@@ -12,19 +12,22 @@ const createPrismaClient = () => {
   if (!globalForPrisma.pool) {
     // Optimized connection pool settings for Supabase
     const isDevelopment = process.env.NODE_ENV !== 'production';
-    
+
     globalForPrisma.pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      
+
       // Connection pool sizing - CRITICAL for serverless (Vercel)
       // Each serverless function gets its own pool, so keep it minimal
       max: isDevelopment ? 5 : 1, // Dev: 5, Prod (serverless): 1 connection per function
       min: isDevelopment ? 2 : 0, // Serverless: no idle connections
-      
+
       // Timing settings
       idleTimeoutMillis: 10000, // Close idle connections quickly (10s)
       connectionTimeoutMillis: 10000, // Timeout if can't connect in 10s
-      
+
+      // Query timeout - prevent long-running queries from hanging
+      statement_timeout: 30000, // 30 seconds max query time
+
       // Error handling
       allowExitOnIdle: !isDevelopment, // Allow serverless functions to exit when idle
     });
@@ -44,13 +47,13 @@ const createPrismaClient = () => {
       });
     }
   }
-  
+
   const adapter = new PrismaPg(globalForPrisma.pool);
-  
-  return new PrismaClient({ 
+
+  return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' 
-      ? ['query', 'error', 'warn'] 
+    log: process.env.NODE_ENV === 'development'
+      ? ['query', 'error', 'warn']
       : ['error'],
   });
 };
