@@ -119,6 +119,13 @@ export async function POST(request: NextRequest) {
         const sanitizedName = sanitizeInput(presetName, 100);
         const sanitizedDescription = sanitizeHtml(description || "");
 
+        if (!sanitizedName) {
+            return NextResponse.json(
+                { error: "Invalid preset name" },
+                { status: 400 }
+            );
+        }
+
         const preset: PresetFile = {
             name: sanitizedName,
             description: sanitizedDescription,
@@ -135,8 +142,8 @@ export async function POST(request: NextRequest) {
 
         await ensurePresetsDir();
 
-        // Create safe filename
-        const safeFilename = presetName
+        // Create safe filename from sanitized name
+        const safeFilename = sanitizedName
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "_")
             .replace(/^_+|_+$/g, "");
