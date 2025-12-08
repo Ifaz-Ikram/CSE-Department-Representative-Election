@@ -255,7 +255,7 @@ function ResultsPageContent() {
           {/* Header */}
           <div className="mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-              The Votes Are <span className="text-gradient glow-text">Counted 🗳️</span>
+              The Votes Are <span className="text-gradient glow-text">Counted </span>🗳️
             </h1>
             <p className="text-gray-400 text-lg">
               See who the batch has chosen to lead the way
