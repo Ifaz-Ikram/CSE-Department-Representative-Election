@@ -60,8 +60,8 @@
 
 - **👥 Role-Based Access Control**
   - **Voter**: Standard voting privileges
-  - **Admin**: View statistics and export data after election
-  - **Super Admin**: Full system control including election management
+  - **Admin**: View statistics, manage elections, and load candidate presets
+  - **Super Admin**: Full system control including user role promotion
 
 - **📈 Comprehensive Dashboard**
   - Election status overview (active, scheduled, completed)
@@ -74,6 +74,11 @@
   - Time-series voting patterns
   - Candidate performance metrics
   - Demographic breakdowns
+
+- **📋 Candidate Presets System**
+  - Instant loading of pre-configured candidate lists
+  - Batch-specific templates (English, Sinhala, Tamil streams)
+  - Duplicate prevention and smart merging
 
 - **📥 Data Export**
   - CSV export for results, ballots, statistics, and voter lists
@@ -88,12 +93,10 @@
 
 ### User Experience
 
-- **🎨 Modern UI/UX**
-  - Responsive design for all devices
-  - Dark/light theme support
-  - Animated backgrounds with grid patterns
-  - Smooth transitions and loading states
-  - Accessible color schemes
+- **🎨 Cyberpunk/Futuristic UI**
+  - Custom "Circuit Board" animated backgrounds
+  - Neon glow effects and glassmorphism cards
+  - Navy/Cyan/Gold color palette for premium feel
 
 - **⏱️ Real-Time Updates**
   - Live election status monitoring
@@ -141,6 +144,7 @@
   - User profile data
 - URL validation to prevent javascript: and data: URI attacks
 - Email format validation with regex patterns
+- **Timing Safe Auth**: Randomized delays (100-300ms) to prevent email enumeration timing attacks
 - SQL injection protection via Prisma ORM parameterization
 
 ✅ **Content Security Policy (CSP)**
