@@ -51,6 +51,7 @@ function ResultsPageContent() {
   const [election, setElection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accessDeniedMessage, setAccessDeniedMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -72,19 +73,21 @@ function ResultsPageContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (selectedElectionId) {
+    if (selectedElectionId && !accessDeniedMessage) {
       fetchStatistics();
 
-      // For voters, poll every 1 seconds to check if access is still valid
+      // For voters, poll every 10 seconds to check if access is still valid
       if ((session?.user as any)?.role === 'voter') {
         const interval = setInterval(() => {
-          fetchStatistics();
-        }, 1000); // Check every 1 seconds
+          if (!accessDeniedMessage) {
+            fetchStatistics();
+          }
+        }, 10000); // Check every 10 seconds (reduced from 1s to prevent loop)
 
         return () => clearInterval(interval);
       }
     }
-  }, [selectedElectionId, session]);
+  }, [selectedElectionId, session, accessDeniedMessage]);
 
   const fetchElections = async () => {
     try {
@@ -112,10 +115,22 @@ function ResultsPageContent() {
         setTotalBallots(data.totalBallots);
         setElection(data.election);
         setError(null);
+        setAccessDeniedMessage(null);
       } else {
-        // If voter loses access (403), redirect to vote page
-        if (res.status === 403 && (session?.user as any)?.role === 'voter') {
-          router.push('/vote');
+        // Handle 403 - Show message explaining why access is denied
+        if (res.status === 403) {
+          const userRole = (session?.user as any)?.role;
+          const message = data.error || "Results are restricted during active elections to protect vote integrity.";
+          setAccessDeniedMessage(message);
+          setStats([]);
+          setElection(null);
+
+          // Only auto-redirect voters after showing the message
+          if (userRole === 'voter') {
+            setTimeout(() => {
+              router.push('/vote');
+            }, 3000); // Show message for 3 seconds before redirecting
+          }
           return;
         }
         setError(data.error || "Failed to fetch statistics");
@@ -209,6 +224,38 @@ function ResultsPageContent() {
             </svg>
             <span>Back to Elections</span>
           </button>
+
+          {/* Access Denied Notification */}
+          {accessDeniedMessage && (
+            <div className="glass-card p-6 mb-8 border-2 border-yellow-500/50 bg-yellow-500/5 animate-fade-in">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-yellow-400 mb-2">Results Restricted</h3>
+                  <p className="text-gray-300 mb-3">{accessDeniedMessage}</p>
+                  {(session?.user as any)?.role === 'voter' && (
+                    <p className="text-sm text-yellow-500/70">
+                      Redirecting to voting page in a moment...
+                    </p>
+                  )}
+                  {(session?.user as any)?.role !== 'voter' && (
+                    <button
+                      onClick={handleBackToElections}
+                      className="btn-secondary text-sm mt-2"
+                    >
+                      ← Return to Elections
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Header */}
           <div className="mb-8 animate-fade-in">
