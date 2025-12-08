@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { promises as fs } from "fs";
 import path from "path";
+import { invalidateCandidateCache } from "@/lib/cache";
 
 const PRESETS_DIR = path.join(process.cwd(), "data", "presets");
 
@@ -179,18 +180,23 @@ export async function PUT(request: NextRequest) {
         // Add candidates from preset to the election
         let addedCount = 0;
         let skippedCount = 0;
+        const skippedCandidates: string[] = [];
 
         for (const candidate of preset.candidates) {
-            // Check if candidate already exists in this election
+            // Normalize index number for comparison (trim whitespace)
+            const normalizedIndexNumber = candidate.indexNumber.trim();
+            
+            // Check if candidate already exists in this election by index number
             const existing = await prisma.candidate.findFirst({
                 where: {
                     electionId,
-                    indexNumber: candidate.indexNumber,
+                    indexNumber: normalizedIndexNumber,
                 },
             });
 
             if (existing) {
                 skippedCount++;
+                skippedCandidates.push(`${candidate.name} (${normalizedIndexNumber})`);
                 continue;
             }
 
@@ -218,8 +224,8 @@ export async function PUT(request: NextRequest) {
                 data: {
                     electionId,
                     userId,
-                    name: candidate.name,
-                    indexNumber: candidate.indexNumber,
+                    name: candidate.name.trim(),
+                    indexNumber: candidate.indexNumber.trim(),
                     email: candidate.email,
                     symbol: candidate.symbol,
                     photoUrl: candidate.photoUrl,
@@ -230,11 +236,17 @@ export async function PUT(request: NextRequest) {
             addedCount++;
         }
 
+        // Invalidate candidate cache to ensure frontend gets fresh data
+        await invalidateCandidateCache(electionId);
+
         return NextResponse.json({
             success: true,
             added: addedCount,
             skipped: skippedCount,
-            message: `Added ${addedCount} candidates, skipped ${skippedCount} (already exist)`,
+            skippedCandidates,
+            message: skippedCount > 0 
+                ? `Added ${addedCount} new candidates. Skipped ${skippedCount} that already exist: ${skippedCandidates.join(', ')}`
+                : `Successfully added ${addedCount} candidates`,
         });
     } catch (error) {
         if (error instanceof Error) {
