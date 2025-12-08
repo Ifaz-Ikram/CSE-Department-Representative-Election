@@ -408,6 +408,12 @@
 /* ===== REACT DATEPICKER CUSTOM STYLES ===== */
 .react-datepicker-wrapper {
   width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
 }
 
 .react-datepicker {
@@ -418,6 +424,7 @@
   box-shadow: 0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(0, 229, 255, 0.1);
   color: white !important;
   overflow: hidden;
+  z-index: 9999 !important;
 }
 
 .react-datepicker__header {
