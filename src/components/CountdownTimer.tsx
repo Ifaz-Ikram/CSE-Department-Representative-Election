@@ -50,66 +50,74 @@ export default function CountdownTimer({ startTime, endTime }: CountdownTimerPro
 
     if (!timeRemaining) return null;
 
+    const isUrgent = timeRemaining.hours === 0;
+    const isWarning = timeRemaining.hours < 4;
+
+    let message = "Voting Closes In";
+    let accentColor = "cyan"; // Tailwind color name part
+
+    if (isUrgent) {
+        message = "Hurry! Less than an hour left ⏳";
+        accentColor = "red-400";
+    } else if (isWarning) {
+        message = "Time is running out";
+        accentColor = "yellow-400";
+    }
+
+    // Dynamic border/text classes based on urgency
+    const borderColor = isUrgent ? "border-red-500/30" : isWarning ? "border-yellow-500/30" : "border-cyan/10";
+    const textColor = isUrgent ? "text-red-400" : isWarning ? "text-yellow-400" : "text-cyan";
+    const glowColor = isUrgent ? "from-red-500/10" : isWarning ? "from-yellow-500/10" : "from-cyan/5";
+    const pulseColor = isUrgent ? "bg-red-500" : isWarning ? "bg-yellow-500" : "bg-cyan";
+
     return (
-        <div className="mt-6 pt-6 border-t border-cyan/10">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-dark/80 via-navy-lighter/50 to-navy-dark/80 backdrop-blur-sm border border-cyan/10 p-6">
+        <div className={`mt-6 pt-6 border-t ${borderColor}`}>
+            <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-r from-navy-dark/80 via-navy-lighter/50 to-navy-dark/80 backdrop-blur-sm border ${borderColor} p-6 transition-colors duration-1000`}>
                 {/* Subtle animated background glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan/5 to-transparent animate-pulse"></div>
+                <div className={`absolute inset-0 bg-gradient-to-r from-transparent ${glowColor} to-transparent animate-pulse`}></div>
 
                 <div className="relative">
-                    <div className="flex items-center justify-center gap-1 mb-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse"></div>
-                        <span className="text-cyan/80 text-xs uppercase tracking-[0.2em] font-medium">
-                            Voting Ends In
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        <div className={`w-2 h-2 rounded-full ${pulseColor} animate-pulse`}></div>
+                        <span className={`${textColor} text-sm font-bold uppercase tracking-widest`}>
+                            {message}
                         </span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse"></div>
+                        <div className={`w-2 h-2 rounded-full ${pulseColor} animate-pulse`}></div>
                     </div>
 
-                    <div className="flex items-center justify-center gap-2 md:gap-3">
+                    <div className="flex items-center justify-center gap-3">
                         {/* Hours */}
-                        <div className="group">
-                            <div className="relative bg-navy-dark/60 backdrop-blur rounded-lg px-3 md:px-5 py-2 md:py-3 border border-cyan/20 group-hover:border-cyan/40 transition-colors">
-                                <span className="text-2xl md:text-4xl font-mono font-bold text-white tracking-wider">
+                        <div className="flex flex-col items-center">
+                            <div className={`bg-navy-dark/60 backdrop-blur-md rounded-xl px-4 py-3 border ${borderColor} min-w-[70px] text-center`}>
+                                <span className="text-3xl md:text-4xl font-mono font-bold text-white">
                                     {String(timeRemaining.hours).padStart(2, "0")}
                                 </span>
                             </div>
-                            <p className="text-center text-[10px] md:text-xs text-gray-500 mt-1.5 uppercase tracking-wider">
-                                hrs
-                            </p>
+                            <span className="text-gray-500 text-xs mt-1 lowercase">hours</span>
                         </div>
 
-                        <span className="text-xl md:text-2xl font-light text-cyan/40 -mt-4">
-                            :
-                        </span>
+                        <span className={`text-2xl font-light ${textColor} -mt-5`}>:</span>
 
                         {/* Minutes */}
-                        <div className="group">
-                            <div className="relative bg-navy-dark/60 backdrop-blur rounded-lg px-3 md:px-5 py-2 md:py-3 border border-cyan/20 group-hover:border-cyan/40 transition-colors">
-                                <span className="text-2xl md:text-4xl font-mono font-bold text-white tracking-wider">
+                        <div className="flex flex-col items-center">
+                            <div className={`bg-navy-dark/60 backdrop-blur-md rounded-xl px-4 py-3 border ${borderColor} min-w-[70px] text-center`}>
+                                <span className="text-3xl md:text-4xl font-mono font-bold text-white">
                                     {String(timeRemaining.minutes).padStart(2, "0")}
                                 </span>
                             </div>
-                            <p className="text-center text-[10px] md:text-xs text-gray-500 mt-1.5 uppercase tracking-wider">
-                                min
-                            </p>
+                            <span className="text-gray-500 text-xs mt-1 lowercase">mins</span>
                         </div>
 
-                        <span className="text-xl md:text-2xl font-light text-cyan/40 -mt-4">
-                            :
-                        </span>
+                        <span className={`text-2xl font-light ${textColor} -mt-5`}>:</span>
 
                         {/* Seconds */}
-                        <div className="group">
-                            <div className="relative bg-navy-dark/60 backdrop-blur rounded-lg px-3 md:px-5 py-2 md:py-3 border border-cyan/20 group-hover:border-cyan/40 transition-colors overflow-hidden">
-                                <span className="text-2xl md:text-4xl font-mono font-bold text-cyan tracking-wider">
+                        <div className="flex flex-col items-center">
+                            <div className={`bg-navy-dark/60 backdrop-blur-md rounded-xl px-4 py-3 border ${borderColor} min-w-[70px] text-center relative overflow-hidden`}>
+                                <span className={`text-3xl md:text-4xl font-mono font-bold ${textColor}`}>
                                     {String(timeRemaining.seconds).padStart(2, "0")}
                                 </span>
-                                {/* Subtle tick animation indicator */}
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan to-transparent opacity-50"></div>
                             </div>
-                            <p className="text-center text-[10px] md:text-xs text-gray-500 mt-1.5 uppercase tracking-wider">
-                                sec
-                            </p>
+                            <span className="text-gray-500 text-xs mt-1 lowercase">secs</span>
                         </div>
                     </div>
                 </div>

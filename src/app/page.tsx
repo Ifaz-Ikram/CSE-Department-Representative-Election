@@ -127,7 +127,7 @@ function HomeContent() {
                 Semesters 4, 5 & 6
               </p>
               <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto">
-                A secure, transparent voting platform for selecting our batch representatives
+                No paper ballots, no confusion. Just log in and pick the best for the batch.
               </p>
             </div>
           </div>
@@ -135,12 +135,12 @@ function HomeContent() {
           <GlowDivider className="my-12" />
 
           {/* CTA Section */}
-          <div className="max-w-md mx-auto mb-16 animate-slide-up">
-            <div className="card-premium text-center space-y-6">
+          <div className="max-w-md mx-auto mb-16 animate-slide-up transform md:-rotate-1 hover:rotate-0 transition-transform duration-300">
+            <div className="card-premium text-center space-y-6 border-2 border-cyan/30 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
               <div className="space-y-3">
-                <h3 className="text-2xl md:text-3xl font-bold text-white">Cast Your Vote</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-white">Ready to Vote?</h3>
                 <p className="text-gray-400">
-                  Sign in with your CSE Gmail account to participate in the election
+                  You'll need your <span className="text-cyan font-bold">@cse.mrt.ac.lk</span> email to get in.
                 </p>
               </div>
               <button
@@ -176,34 +176,34 @@ function HomeContent() {
 
           {/* How It Works Section */}
           <div className="mb-16">
-            <div className="card-premium text-left max-w-3xl mx-auto">
-              <h3 className="text-3xl font-bold text-gradient mb-6 text-center">How It Works</h3>
-              <ol className="space-y-5">
+            <div className="card-premium text-left max-w-3xl mx-auto border-l-4 border-cyan">
+              <h3 className="text-3xl font-bold text-gradient mb-8 text-center md:text-left pl-4">The Process</h3>
+              <ol className="space-y-6">
                 <li className="flex items-start group">
-                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-xl bg-navy-darker border border-cyan/50 flex items-center justify-center text-cyan font-bold text-lg mr-4 shadow-[4px_4px_0px_0px_rgba(6,182,212,0.2)] group-hover:translate-y-1 group-hover:translate-x-1 group-hover:shadow-none transition-all">
                     1
                   </span>
                   <div className="flex-1 pt-1">
-                    <p className="text-white font-semibold mb-1">Sign in with your CSE Gmail account</p>
-                    <p className="text-gray-400 text-sm">Use your official @cse.mrt.ac.lk email to access the voting platform</p>
+                    <p className="text-white font-bold text-lg mb-1">Prove you're CSE 23</p>
+                    <p className="text-gray-400 text-sm">Sign in with your CSE Google account. No impostors allowed 🛡️</p>
                   </div>
                 </li>
                 <li className="flex items-start group">
-                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-xl bg-navy-darker border border-pink-500/50 flex items-center justify-center text-pink-400 font-bold text-lg mr-4 shadow-[4px_4px_0px_0px_rgba(236,72,153,0.2)] group-hover:translate-y-1 group-hover:translate-x-1 group-hover:shadow-none transition-all">
                     2
                   </span>
                   <div className="flex-1 pt-1">
-                    <p className="text-white font-semibold mb-1">Select up to 10 candidates</p>
-                    <p className="text-gray-400 text-sm">Review candidate profiles and choose your preferred representatives</p>
+                    <p className="text-white font-bold text-lg mb-1">Pick your squad</p>
+                    <p className="text-gray-400 text-sm">Select up to 10 candidates. Read their profiles, check their stats.</p>
                   </div>
                 </li>
                 <li className="flex items-start group">
-                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
+                  <span className="flex-shrink-0 w-10 h-10 rounded-xl bg-navy-darker border border-gold/50 flex items-center justify-center text-gold font-bold text-lg mr-4 shadow-[4px_4px_0px_0px_rgba(250,204,21,0.2)] group-hover:translate-y-1 group-hover:translate-x-1 group-hover:shadow-none transition-all">
                     3
                   </span>
                   <div className="flex-1 pt-1">
-                    <p className="text-white font-semibold mb-1">Submit your ballot</p>
-                    <p className="text-gray-400 text-sm">Confirm your choices and submit (you can modify before the deadline)</p>
+                    <p className="text-white font-bold text-lg mb-1">Lock it in</p>
+                    <p className="text-gray-400 text-sm">Submit your vote. Changed your mind? You can edit it until the deadline.</p>
                   </div>
                 </li>
               </ol>
@@ -215,28 +215,36 @@ function HomeContent() {
           {/* Features Section */}
           <div className="mb-16">
             <h3 className="text-3xl font-bold text-white text-center mb-10">
-              Why Choose Our <span className="text-gradient">Platform</span>
+              Why This <span className="text-gradient">Platform?</span>
             </h3>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="glass-card text-center p-8 group">
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🔒</div>
-                <h4 className="text-xl font-bold text-white mb-3">Secure</h4>
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {/* Card 1: Large */}
+              <div className="glass-card text-left p-8 md:col-span-2 flex flex-col md:flex-row items-center gap-6 border border-cyan/20 bg-gradient-to-br from-navy-dark to-navy-darker relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-cyan/20 transition-colors"></div>
+                <div className="text-6xl group-hover:scale-110 transition-transform duration-300">🛡️</div>
+                <div>
+                  <h4 className="text-2xl font-bold text-white mb-2">Exclusively for CSE 23</h4>
+                  <p className="text-gray-400 leading-relaxed">
+                    This isn't a public poll. Our whitelist system ensures <span className="text-cyan">only our batchmates</span> get a say. Your vote is encrypted, backed up, and counts exactly as much as everyone else's.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 2: Small */}
+              <div className="glass-card text-left p-8 border border-pink-500/20 bg-gradient-to-br from-navy-dark to-navy-darker group hover:border-pink-500/40 transition-colors">
+                <div className="text-4xl mb-4 group-hover:-rotate-12 transition-transform duration-300 inline-block">✏️</div>
+                <h4 className="text-xl font-bold text-white mb-2">Change Your Mind?</h4>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Google OAuth authentication ensures only authorized students can vote. Your data is protected.
+                  Vote now, realized you missed someone later? No stress. You can edit your ballot anytime before the deadline.
                 </p>
               </div>
-              <div className="glass-card text-center p-8 group">
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">✏️</div>
-                <h4 className="text-xl font-bold text-white mb-3">Editable</h4>
+
+              {/* Card 3: Small */}
+              <div className="glass-card text-left p-8 border border-gold/20 bg-gradient-to-br from-navy-dark to-navy-darker group hover:border-gold/40 transition-colors">
+                <div className="text-4xl mb-4 group-hover:rotate-12 transition-transform duration-300 inline-block">⚡</div>
+                <h4 className="text-xl font-bold text-white mb-2">Instant Results</h4>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Change your vote anytime before the election deadline. Flexibility at your fingertips.
-                </p>
-              </div>
-              <div className="glass-card text-center p-8 group">
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">⚖️</div>
-                <h4 className="text-xl font-bold text-white mb-3">Democratic</h4>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  Every vote counts equally. Fair representation through a transparent democratic process.
+                  Once the election ends, results are calculated instantly. No waiting for manual counts.
                 </p>
               </div>
             </div>

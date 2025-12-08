@@ -255,10 +255,10 @@ function ResultsPageContent() {
           {/* Header */}
           <div className="mb-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-              Election <span className="text-gradient glow-text">Results</span>
+              The Votes Are <span className="text-gradient glow-text">Counted 🗳️</span>
             </h1>
             <p className="text-gray-400 text-lg">
-              View election statistics and candidate rankings
+              See who the batch has chosen to lead the way
             </p>
           </div>
 
@@ -306,7 +306,7 @@ function ResultsPageContent() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-navy-dark/50 rounded-xl p-4 text-center">
                     <div className="text-3xl font-bold text-cyan mb-1">{totalBallots}</div>
-                    <div className="text-gray-400 text-sm uppercase tracking-wide">Total Votes</div>
+                    <div className="text-gray-400 text-sm uppercase tracking-wide">Ballots Cast</div>
                   </div>
                   <div className="bg-navy-dark/50 rounded-xl p-4 text-center">
                     <div className="text-3xl font-bold text-gold mb-1">{stats.length}</div>
@@ -339,7 +339,7 @@ function ResultsPageContent() {
                       {/* Winner Info */}
                       <div className="flex-1">
                         <div className="text-gold text-sm font-bold uppercase tracking-wide mb-1">
-                          🏆 Leading Candidate
+                          🌟 The People's Choice
                         </div>
                         <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 truncate">
                           {winner.name}
@@ -406,9 +406,9 @@ function ResultsPageContent() {
                             url={photoUrl}
                             name={candidate.name}
                             className={`w-14 h-14 rounded-lg border-2 ${index === 0 ? "border-gold" :
-                                index === 1 ? "border-gray-400" :
-                                  index === 2 ? "border-orange-700" :
-                                    "border-cyan/30"
+                              index === 1 ? "border-gray-400" :
+                                index === 2 ? "border-orange-700" :
+                                  "border-cyan/30"
                               }`}
                             initialsClassName="text-lg font-bold text-cyan"
                           />

@@ -45,9 +45,6 @@ prisma/migrations/
 *.csv
 
 # project notes
-done.md
 UI_HUMANIZATION_AUDIT.md
 AI_DESIGN_ELEMENTS.md
-MOBILE_RESPONSIVENESS_AUDIT.md
-
 
