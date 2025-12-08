@@ -308,72 +308,93 @@ export default function VotePage() {
           {/* Modal */}
           <div className="relative w-full max-w-2xl max-h-[90vh] animate-slide-up rounded-2xl overflow-hidden bg-gradient-to-br from-navy-light to-navy-darker border-2 border-cyan/50 shadow-2xl" style={{ boxShadow: '0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(0, 229, 255, 0.1)' }}>
             <div className="max-h-[90vh] overflow-y-auto">
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-white mb-4 flex items-center">
-                  <span className="text-cyan mr-2"></span>
-                  <span>Who We Need</span>
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    { label: 'Sinhala Speaking Boys', value: '6', color: 'from-cyan/20 to-blue-500/20', border: 'border-cyan/40', textColor: 'text-cyan' },
-                    { label: 'Sinhala Speaking Girls', value: '1', color: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-400/40', textColor: 'text-pink-400' },
-                    { label: 'Tamil Speaking Boys', value: '2', color: 'from-blue-500/20 to-cyan/20', border: 'border-gold/40', textColor: 'text-gold' },
-                    { label: 'Tamil Speaking Girls', value: '1', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-400/40', textColor: 'text-purple-400' }
-                  ].map((cat, i) => (
-                    <div key={i} className={`bg-gradient-to-br ${cat.color} rounded-xl p-4 border-2 ${cat.border} text-center transition-transform duration-300 hover:scale-105`} style={{ boxShadow: `0 0 20px ${cat.border.includes('cyan') ? 'rgba(0,229,255,0.2)' : cat.border.includes('pink') ? 'rgba(236,72,153,0.2)' : cat.border.includes('gold') ? 'rgba(247,201,72,0.2)' : 'rgba(168,85,247,0.2)'}`, willChange: 'transform' }}>
-                      <div className={`text-3xl font-bold ${cat.textColor} mb-1`}>{cat.value}</div>
-                      <div className="text-xs text-gray-300 font-medium uppercase tracking-wide">{cat.label}</div>
-                    </div>
-                  ))}
+              {/* Header with Gradient */}
+              <div className="relative overflow-hidden">
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gold/10 via-cyan/10 to-gold/10 animate-shimmer" />
+
+                <div className="relative p-6 border-b-2 border-cyan/30">
+                  <h2 className="text-2xl md:text-3xl font-bold text-center text-white mb-2">
+                    <span className="inline-flex items-center space-x-2">
+                      <span>📢</span>
+                      <span>READ BEFORE</span>
+                      <span className="text-gradient glow-text">VOTING</span>
+                    </span>
+                  </h2>
+                  <p className="text-center text-gray-400">Please read these important guidelines carefully</p>
                 </div>
               </div>
 
-              {/* Important Notes */}
-              <div className="bg-gradient-to-br from-gold/10 to-gold/5 rounded-xl p-4 md:p-5 border-2 border-gold/30 shadow-lg" style={{ boxShadow: '0 0 30px rgba(247, 201, 72, 0.15)' }}>
-                <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 flex items-center">
-                  <span className="text-gold mr-2">⚠️</span>
-                  <span>Things to Remember</span>
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-gold/20 transition-all duration-300 hover:border-gold/40 hover:bg-navy-darker/70">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
-                      <span className="text-navy-dark font-bold">1</span>
-                    </div>
-                    <p className="text-gray-300 leading-relaxed">
-                      <span className="text-white font-semibold">Selection is NOT purely based on vote count.</span> Final representatives will be chosen <span className="text-cyan font-medium">within each category</span>, not by highest votes overall.
-                    </p>
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                {/* Category Breakdown */}
+                <div>
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-4 flex items-center">
+                    <span className="text-cyan mr-2"></span>
+                    <span>Category Breakdown</span>
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { label: 'Sinhala Speaking Boys', value: '6', color: 'from-cyan/20 to-blue-500/20', border: 'border-cyan/40', textColor: 'text-cyan' },
+                      { label: 'Sinhala Speaking Girls', value: '1', color: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-400/40', textColor: 'text-pink-400' },
+                      { label: 'Tamil Speaking Boys', value: '2', color: 'from-blue-500/20 to-cyan/20', border: 'border-gold/40', textColor: 'text-gold' },
+                      { label: 'Tamil Speaking Girls', value: '1', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-400/40', textColor: 'text-purple-400' }
+                    ].map((cat, i) => (
+                      <div key={i} className={`bg-gradient-to-br ${cat.color} rounded-xl p-4 border-2 ${cat.border} text-center transition-transform duration-300 hover:scale-105`} style={{ boxShadow: `0 0 20px ${cat.border.includes('cyan') ? 'rgba(0,229,255,0.2)' : cat.border.includes('pink') ? 'rgba(236,72,153,0.2)' : cat.border.includes('gold') ? 'rgba(247,201,72,0.2)' : 'rgba(168,85,247,0.2)'}`, willChange: 'transform' }}>
+                        <div className={`text-3xl font-bold ${cat.textColor} mb-1`}>{cat.value}</div>
+                        <div className="text-xs text-gray-300 font-medium uppercase tracking-wide">{cat.label}</div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-start space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-gold/20 transition-all duration-300 hover:border-gold/40 hover:bg-navy-darker/70">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
-                      <span className="text-navy-dark font-bold">2</span>
+                </div>
+
+                {/* Important Notes */}
+                <div className="bg-gradient-to-br from-gold/10 to-gold/5 rounded-xl p-4 md:p-5 border-2 border-gold/30 shadow-lg" style={{ boxShadow: '0 0 30px rgba(247, 201, 72, 0.15)' }}>
+                  <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 flex items-center">
+                    <span className="text-gold mr-2">⚠️</span>
+                    <span>Important Voting Notes</span>
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-gold/20 transition-all duration-300 hover:border-gold/40 hover:bg-navy-darker/70">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
+                        <span className="text-navy-dark font-bold">1</span>
+                      </div>
+                      <p className="text-gray-300 leading-relaxed">
+                        <span className="text-white font-semibold">Selection is NOT purely based on vote count.</span> Final representatives will be chosen <span className="text-cyan font-medium">within each category</span>, not by highest votes overall.
+                      </p>
                     </div>
-                    <p className="text-gray-300 leading-relaxed">
-                      <span className="text-white font-semibold">Keep category numbers in mind</span> while voting to ensure balanced representation across all groups.
-                    </p>
-                  </div>
-                  <div className="flex items-start space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-gold/20 transition-all duration-300 hover:border-gold/40 hover:bg-navy-darker/70">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
-                      <span className="text-navy-dark font-bold">3</span>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-gold/20 transition-all duration-300 hover:border-gold/40 hover:bg-navy-darker/70">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
+                        <span className="text-navy-dark font-bold">2</span>
+                      </div>
+                      <p className="text-gray-300 leading-relaxed">
+                        <span className="text-white font-semibold">Keep category numbers in mind</span> while voting to ensure balanced representation across all groups.
+                      </p>
                     </div>
-                    <p className="text-gray-300 leading-relaxed">
-                      <span className="text-white font-semibold">Every stream needs representation.</span> A candidate with high votes <span className="text-red-400 font-medium">might NOT be selected</span> if their stream is filled. A candidate with fewer votes <span className="text-green-400 font-medium">might be selected</span> to ensure fair representation.
-                    </p>
+                    <div className="flex items-start space-x-3 p-3 rounded-lg bg-navy-darker/50 border border-gold/20 transition-all duration-300 hover:border-gold/40 hover:bg-navy-darker/70">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan/30">
+                        <span className="text-navy-dark font-bold">3</span>
+                      </div>
+                      <p className="text-gray-300 leading-relaxed">
+                        <span className="text-white font-semibold">Every stream needs representation.</span> A candidate with high votes <span className="text-red-400 font-medium">might NOT be selected</span> if their stream is filled. A candidate with fewer votes <span className="text-green-400 font-medium">might be selected</span> to ensure fair representation.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t-2 border-cyan/30 bg-navy-darker/50 rounded-b-2xl">
-              <button
-                onClick={() => setShowGuidelinesModal(false)}
-                className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center space-x-2 hover:scale-105 transition-transform"
-              >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span>Got it, let's vote 🚀</span>
-              </button>
+              {/* Footer */}
+              <div className="p-6 border-t-2 border-cyan/30 bg-navy-darker/50 rounded-b-2xl">
+                <button
+                  onClick={() => setShowGuidelinesModal(false)}
+                  className="w-full btn-primary py-4 text-lg font-bold flex items-center justify-center space-x-2 hover:scale-105 transition-transform"
+                >
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span>I Understand, Let Me Vote</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
