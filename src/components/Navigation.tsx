@@ -28,13 +28,9 @@ export default function Navigation() {
           const isAdmin = role === 'admin';
           const isVoter = role === 'voter';
 
-          // Super admin always sees results if there are any ended elections
+          // Super admin always sees results (no conditions)
           if (isSuperAdmin) {
-            const hasEndedElection = data.elections?.some((election: any) => {
-              const end = new Date(election.endTime);
-              return now > end;
-            });
-            setShowResults(hasEndedElection);
+            setShowResults(true);
             return;
           }
 
