@@ -131,6 +131,12 @@ export async function PATCH(request: NextRequest) {
             },
         });
 
+        // Invalidate user's sessions to force re-authentication with new role
+        // This ensures the user gets a fresh JWT with updated role claims
+        await prisma.session.deleteMany({
+            where: { userId: userId },
+        });
+
         // Log the role change
         await logAuditEvent({
             action: AuditActions.USER_ROLE_CHANGED,
@@ -144,13 +150,15 @@ export async function PATCH(request: NextRequest) {
                 oldRole,
                 newRole,
                 userEmail: targetUser.email,
+                sessionRotated: true,
             },
         });
 
         return NextResponse.json({
             success: true,
             user: updatedUser,
-            message: `Role changed from ${oldRole} to ${newRole}`,
+            message: `Role changed from ${oldRole} to ${newRole}. User will need to re-login.`,
+            sessionRotated: true,
         });
     } catch (error) {
         if (error instanceof z.ZodError) {
