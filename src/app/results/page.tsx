@@ -119,18 +119,10 @@ function ResultsPageContent() {
       } else {
         // Handle 403 - Show message explaining why access is denied
         if (res.status === 403) {
-          const userRole = (session?.user as any)?.role;
           const message = data.error || "Results are restricted during active elections to protect vote integrity.";
           setAccessDeniedMessage(message);
           setStats([]);
           setElection(null);
-
-          // Only auto-redirect voters after showing the message
-          if (userRole === 'voter') {
-            setTimeout(() => {
-              router.push('/vote');
-            }, 3000); // Show message for 3 seconds before redirecting
-          }
           return;
         }
         setError(data.error || "Failed to fetch statistics");
@@ -239,12 +231,14 @@ function ResultsPageContent() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-yellow-400 mb-2">Results Restricted</h3>
                   <p className="text-gray-300 mb-3">{accessDeniedMessage}</p>
-                  {(session?.user as any)?.role === 'voter' && (
-                    <p className="text-sm text-yellow-500/70">
-                      Redirecting to voting page in a moment...
-                    </p>
-                  )}
-                  {(session?.user as any)?.role !== 'voter' && (
+                  {(session?.user as any)?.role === 'voter' ? (
+                    <button
+                      onClick={() => router.push('/vote')}
+                      className="btn-secondary text-sm mt-2"
+                    >
+                      ← Go to Voting Page
+                    </button>
+                  ) : (
                     <button
                       onClick={handleBackToElections}
                       className="btn-secondary text-sm mt-2"
