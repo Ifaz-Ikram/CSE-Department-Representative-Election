@@ -217,9 +217,9 @@ export default function UsersPage() {
                         </div>
                     )}
 
-                    {/* Users Table */}
+                    {/* Users Table - Desktop */}
                     {!loading && (
-                        <div className="glass-card overflow-visible animate-slide-up">
+                        <div className="hidden md:block glass-card overflow-visible animate-slide-up">
                             <div className="overflow-x-auto min-h-[400px]">
                                 <table className="w-full border-separate border-spacing-0">
                                     <thead>
@@ -332,6 +332,88 @@ export default function UsersPage() {
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Users Cards - Mobile */}
+                    {!loading && (
+                        <div className="md:hidden space-y-4 animate-slide-up">
+                            {/* Mobile Filters */}
+                            <div className="glass-card p-4 space-y-3 overflow-visible relative z-40">
+                                <h3 className="text-cyan text-sm font-bold uppercase tracking-wide">Filters</h3>
+                                <SearchableDropdown
+                                    options={uniqueNames}
+                                    value={filterName}
+                                    onChange={setFilterName}
+                                    placeholder="Filter by Name..."
+                                    className="w-full"
+                                />
+                                <SearchableDropdown
+                                    options={uniqueRoles}
+                                    value={filterRole}
+                                    onChange={setFilterRole}
+                                    placeholder="Filter by Role..."
+                                    className="w-full"
+                                />
+                            </div>
+
+                            {filteredUsers.length === 0 ? (
+                                <div className="glass-card p-8 text-center text-gray-400">
+                                    No users found
+                                </div>
+                            ) : (
+                                filteredUsers.map((user) => (
+                                    <div
+                                        key={user.id}
+                                        className={`glass-card p-4 ${user.email === currentUserEmail ? "border-cyan/50" : ""}`}
+                                    >
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-white font-medium flex items-center space-x-2 flex-wrap">
+                                                    <span className="text-lg">{roleIcons[user.role]}</span>
+                                                    <span className="truncate">{user.name || "No name"}</span>
+                                                    {user.email === currentUserEmail && (
+                                                        <span className="text-xs bg-cyan/20 text-cyan px-2 py-0.5 rounded">
+                                                            You
+                                                        </span>
+                                                    )}
+                                                </p>
+                                                <p className="text-gray-400 text-sm truncate">{user.email}</p>
+                                                {user.indexNumber && (
+                                                    <p className="text-gray-500 text-xs mt-1">Index: {user.indexNumber}</p>
+                                                )}
+                                            </div>
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ml-2 ${roleColors[user.role]}`}
+                                            >
+                                                {user.role.replace("_", " ")}
+                                            </span>
+                                        </div>
+
+                                        {isSuperAdmin && user.email !== currentUserEmail && (
+                                            <div className="pt-3 border-t border-cyan/20">
+                                                <label className="text-gray-400 text-xs mb-1 block">Change Role</label>
+                                                <select
+                                                    value={user.role}
+                                                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                                                    disabled={updating === user.id}
+                                                    className="input-field text-sm py-2 px-3 pr-10 bg-navy-dark disabled:opacity-50 appearance-none cursor-pointer w-full"
+                                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2300E5FF' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.25rem' }}
+                                                >
+                                                    <option value="voter">Voter</option>
+                                                    <option value="admin">Admin</option>
+                                                    <option value="super_admin">Super Admin</option>
+                                                </select>
+                                                {updating === user.id && (
+                                                    <span className="text-cyan text-sm animate-pulse mt-1 block">
+                                                        Updating...
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
                         </div>
                     )}
 

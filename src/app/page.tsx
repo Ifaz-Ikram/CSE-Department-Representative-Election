@@ -124,7 +124,7 @@ function HomeContent() {
                 Elections
               </h2>
               <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mt-6 font-light">
-                Batch 23 – Semesters 4, 5 & 6
+                Semesters 4, 5 & 6
               </p>
               <p className="text-base md:text-lg text-gray-400 max-w-2xl mx-auto">
                 A secure, transparent voting platform for selecting our batch representatives
@@ -206,15 +206,6 @@ function HomeContent() {
                     <p className="text-gray-400 text-sm">Confirm your choices and submit (you can modify before the deadline)</p>
                   </div>
                 </li>
-                {/* <li className="flex items-start group">
-                  <span className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-cyan to-cyan-light flex items-center justify-center text-navy font-bold text-lg mr-4 group-hover:scale-110 transition-transform">
-                    4
-                  </span>
-                  <div className="flex-1 pt-1">
-                    <p className="text-white font-semibold mb-1">View results after election ends</p>
-                    <p className="text-gray-400 text-sm">Check real-time results once the voting period concludes</p>
-                  </div>
-                </li> */}
               </ol>
             </div>
           </div>

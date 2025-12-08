@@ -251,7 +251,7 @@ function AdminBallotsContent() {
                           border: '2px solid rgba(6, 182, 212, 0.3)',
                           borderRadius: '0.75rem',
                           backdropFilter: 'blur(12px)',
-                          zIndex: 9999
+                          zIndex: 40
                         }),
                         menuList: (base) => ({
                           ...base,

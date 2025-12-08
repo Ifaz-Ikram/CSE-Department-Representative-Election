@@ -751,7 +751,7 @@ export default function ManageCandidatesPage() {
                     <textarea
                       value={editSymbol}
                       onChange={(e) => setEditSymbol(e.target.value)}
-                      placeholder="Enter candidate's manifesto, vision, and qualifications..."
+                      placeholder="Enter candidate's Symbol (Emoji)"
                       className="input-field w-full min-h-[120px] resize-y"
                     />
                   </div>

@@ -56,7 +56,7 @@ export default function SearchableDropdown({
             </div>
 
             {isOpen && (
-                <div className="absolute z-50 mt-1 w-full min-w-[200px] bg-navy-dark border border-cyan/30 rounded-lg shadow-xl shadow-cyan/10 overflow-hidden animate-fade-in">
+                <div className="absolute z-40 mt-1 w-full min-w-[200px] bg-navy-dark border border-cyan/30 rounded-lg shadow-xl shadow-cyan/10 overflow-hidden animate-fade-in">
                     <div className="p-2 border-b border-cyan/10">
                         <input
                             type="text"

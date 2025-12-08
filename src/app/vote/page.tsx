@@ -355,13 +355,6 @@ export default function VotePage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-gold/10 via-cyan/10 to-gold/10 animate-shimmer" />
 
                 <div className="relative p-6 border-b-2 border-cyan/30">
-                  <div className="flex items-center justify-center space-x-3 mb-3">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gold/30 to-gold/10 flex items-center justify-center border-2 border-gold/50 shadow-lg shadow-gold/20">
-                      <svg className="w-8 h-8 text-gold" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
                   <h2 className="text-2xl md:text-3xl font-bold text-center text-white mb-2">
                     <span className="inline-flex items-center space-x-2">
                       <span>📢</span>
@@ -383,10 +376,10 @@ export default function VotePage() {
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: 'Sinhala Speaking Boy', value: '6', color: 'from-cyan/20 to-blue-500/20', border: 'border-cyan/40', textColor: 'text-cyan' },
-                      { label: 'Sinhala Speaking Girl', value: '1', color: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-400/40', textColor: 'text-pink-400' },
-                      { label: 'Tamil Speaking Boy', value: '2', color: 'from-blue-500/20 to-cyan/20', border: 'border-gold/40', textColor: 'text-gold' },
-                      { label: 'Tamil Speaking Girl', value: '1', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-400/40', textColor: 'text-purple-400' }
+                      { label: 'Sinhala Speaking Boys', value: '6', color: 'from-cyan/20 to-blue-500/20', border: 'border-cyan/40', textColor: 'text-cyan' },
+                      { label: 'Sinhala Speaking Girls', value: '1', color: 'from-pink-500/20 to-purple-500/20', border: 'border-pink-400/40', textColor: 'text-pink-400' },
+                      { label: 'Tamil Speaking Boys', value: '2', color: 'from-blue-500/20 to-cyan/20', border: 'border-gold/40', textColor: 'text-gold' },
+                      { label: 'Tamil Speaking Girls', value: '1', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-400/40', textColor: 'text-purple-400' }
                     ].map((cat, i) => (
                       <div key={i} className={`bg-gradient-to-br ${cat.color} rounded-xl p-4 border-2 ${cat.border} text-center transition-transform duration-300 hover:scale-105`} style={{ boxShadow: `0 0 20px ${cat.border.includes('cyan') ? 'rgba(0,229,255,0.2)' : cat.border.includes('pink') ? 'rgba(236,72,153,0.2)' : cat.border.includes('gold') ? 'rgba(247,201,72,0.2)' : 'rgba(168,85,247,0.2)'}`, willChange: 'transform' }}>
                         <div className={`text-3xl font-bold ${cat.textColor} mb-1`}>{cat.value}</div>
@@ -663,25 +656,25 @@ export default function VotePage() {
                   {/* Status Badge & Countdown */}
                   <div className="text-right">
                     {isElectionActive && (
-                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/50 animate-pulse">
-                        <span className="w-2 h-2 rounded-full bg-green-400 animate-ping"></span>
-                        <span className="text-green-400 font-semibold text-sm">LIVE</span>
+                      <span className="inline-flex items-center space-x-1.5 px-2 py-1 md:px-4 md:py-2 rounded-lg bg-green-500/20 border border-green-500/50 animate-pulse">
+                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-400 animate-ping"></span>
+                        <span className="text-green-400 font-semibold text-xs md:text-sm">LIVE</span>
                       </span>
                     )}
                     {isElectionEnded && (
-                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/50">
-                        <svg className="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <span className="inline-flex items-center space-x-1.5 px-2 py-1 md:px-4 md:py-2 rounded-lg bg-red-500/20 border border-red-500/50">
+                        <svg className="w-3 h-3 md:w-4 md:h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-red-400 font-semibold text-sm">ENDED</span>
+                        <span className="text-red-400 font-semibold text-xs md:text-sm">ENDED</span>
                       </span>
                     )}
                     {!isElectionActive && !isElectionEnded && (
-                      <span className="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/50">
-                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <span className="inline-flex items-center space-x-1.5 px-2 py-1 md:px-4 md:py-2 rounded-lg bg-yellow-500/20 border border-yellow-500/50">
+                        <svg className="w-3 h-3 md:w-4 md:h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-yellow-400 font-semibold text-sm">UPCOMING</span>
+                        <span className="text-yellow-400 font-semibold text-xs md:text-sm">UPCOMING</span>
                       </span>
                     )}
                   </div>
@@ -889,9 +882,6 @@ export default function VotePage() {
                       </div>
                       {selectedCandidates.size === 10 && (
                         <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-gold/20 border border-gold/50 text-gold text-sm animate-pulse">
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
-                          </svg>
                           <span>Maximum</span>
                         </span>
                       )}

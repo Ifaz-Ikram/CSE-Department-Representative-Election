@@ -4,8 +4,8 @@ export default function Footer() {
             <div className="container mx-auto px-4">
                 <div className="text-center space-y-6">
                     {/* CSE 23 | Department Representative Elections - One Line */}
-                    <div className="flex justify-center items-center space-x-3">
-                        <span className="font-[family-name:var(--font-orbitron)] text-lg font-bold tracking-wide">
+                    <div className="flex justify-center items-center space-x-3 flex-wrap">
+                        <span className="font-[family-name:var(--font-orbitron)] text-lg font-bold tracking-wide whitespace-nowrap">
                             <span className="text-white">CSE </span>
                             <span className="text-gold glow-text-gold">23</span>
                         </span>

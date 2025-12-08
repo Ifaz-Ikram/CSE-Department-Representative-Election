@@ -81,8 +81,8 @@ export default function ElectionCard({ election, type, onClick }: ElectionCardPr
         borderColor = "border-green-500/50";
         activeClass = "shadow-[0_0_15px_rgba(34,197,94,0.1)] hover:shadow-[0_0_25px_rgba(34,197,94,0.2)]";
         badge = (
-            <span className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+            <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold animate-pulse">
+                <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-ping"></span>
                 <span>LIVE</span>
             </span>
         );
@@ -105,7 +105,7 @@ export default function ElectionCard({ election, type, onClick }: ElectionCardPr
     } else if (isUpcoming) {
         borderColor = "border-yellow-500/50";
         badge = (
-            <span className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold">
+            <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -119,7 +119,7 @@ export default function ElectionCard({ election, type, onClick }: ElectionCardPr
     } else if (isEnded) {
         borderColor = "border-gray-500/40";
         badge = (
-            <span className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold">
+            <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>

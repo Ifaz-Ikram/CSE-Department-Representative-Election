@@ -244,7 +244,7 @@ function ResultsPageContent() {
               <div className="card-premium mb-8 animate-slide-up">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 truncate">
                       {election.name}
                     </h2>
                     <p className="text-gray-400">Final Results</p>
@@ -283,11 +283,6 @@ function ResultsPageContent() {
               {winner && winner.voteCount > 0 && (
                 <div className="mb-8 animate-slide-up">
                   <div className="relative overflow-hidden card-premium border-2 border-gold glow-border-gold">
-                    {/* Crown Icon */}
-                    <div className="absolute top-4 right-4 text-gold text-4xl animate-float">
-                      👑
-                    </div>
-
                     <div className="flex items-center space-x-6">
                       {/* Winner Photo */}
                       <div className="flex-shrink-0">
@@ -320,7 +315,7 @@ function ResultsPageContent() {
                         <div className="text-gold text-sm font-bold uppercase tracking-wide mb-1">
                           🏆 Leading Candidate
                         </div>
-                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 truncate">
                           {winner.name}
                         </h3>
                         <p className="text-gold font-semibold">{winner.indexNumber}</p>
@@ -414,8 +409,8 @@ function ResultsPageContent() {
                         {/* Candidate Info */}
                         <div className="flex-1">
                           <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                            {candidate.name}
-                            {candidate.symbol && <span className="text-xl">{candidate.symbol}</span>}
+                            <span className="truncate">{candidate.name}</span>
+                            {candidate.symbol && <span className="text-xl flex-shrink-0">{candidate.symbol}</span>}
                           </h4>
                           <p className={`text-sm ${index === 0 ? 'text-gold' :
                             index === 1 ? 'text-gray-400' :

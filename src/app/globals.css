@@ -312,7 +312,7 @@
 
 /* ===== BADGES ===== */
 .badge {
-  @apply inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide;
+  @apply inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide whitespace-nowrap;
 }
 
 .badge-active {
@@ -409,18 +409,18 @@
 .react-datepicker-wrapper {
   width: 100%;
   position: relative;
-  z-index: 100;
+  z-index: 30;
 }
 
 .react-datepicker-popper {
-  z-index: 99999 !important;
+  z-index: 40 !important;
   position: absolute !important;
   isolation: isolate;
 }
 
 .react-datepicker__tab-loop {
   position: relative !important;
-  z-index: 99999 !important;
+  z-index: 40 !important;
 }
 
 /* Ensure the datepicker portal overlay appears above everything */
@@ -439,7 +439,7 @@
 
 /* Custom popper for datepicker to appear above table */
 .datepicker-popper-custom {
-  z-index: 99999 !important;
+  z-index: 40 !important;
 }
 
 .react-datepicker {
@@ -450,7 +450,7 @@
   box-shadow: 0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(0, 229, 255, 0.1);
   color: white !important;
   overflow: visible;
-  z-index: 99999 !important;
+  z-index: 40 !important;
   position: relative;
 }
 
@@ -734,4 +734,52 @@ input[type="datetime-local"]::-webkit-inner-spin-button {
 input[type="date"]::-webkit-clear-button,
 input[type="datetime-local"]::-webkit-clear-button {
   display: none;
+}
+
+/* ===== MOBILE RESPONSIVENESS UTILITIES ===== */
+@layer utilities {
+
+  /* Line clamping for text truncation */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Touch-friendly utilities (44px min touch target per iOS/Android guidelines) */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
+  }
+
+  /* Remove tap highlight on touch devices */
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scrolling for touch devices */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Small screen adjustments (iPhone SE, older devices) */
+@media (max-width: 375px) {
+
+  .card-premium,
+  .glass-card {
+    @apply px-4 py-4;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    @apply py-2 px-4 text-xs;
+  }
 }
