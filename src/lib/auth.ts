@@ -29,6 +29,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user }) {
       if (!user.email) {
+        // Timing attack mitigation: Add random delay
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 200 + 100)); // 100-300ms
         monitorAuthFailure("No email provided", undefined, undefined);
         return "/?error=InvalidDomain";
       }
@@ -40,6 +42,10 @@ export const authOptions: NextAuthOptions = {
 
       if (!registry || !registry.isActive) {
         // Not in our whitelist of 200 CSE23 students - deny access
+
+        // Timing attack mitigation: Add random delay
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 200 + 100)); // 100-300ms
+
         monitorAuthFailure(
           "User not in voter registry or inactive",
           user.email,
@@ -110,12 +116,12 @@ export const authOptions: NextAuthOptions = {
       if (!token.exp) {
         token.exp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days
       }
-      
+
       // On sign in, store account info
       if (account) {
         token.accessToken = account.access_token;
       }
-      
+
       // Force refresh user data if session was updated
       if (trigger === "update") {
         const dbUser = await prisma.user.findUnique({
@@ -126,7 +132,7 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role as "voter" | "admin" | "super_admin";
         }
       }
-      
+
       return token;
     },
     async redirect({ url, baseUrl }) {
@@ -162,7 +168,7 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === "production" 
+      name: process.env.NODE_ENV === "production"
         ? `__Secure-next-auth.session-token`
         : `next-auth.session-token`,
       options: {
