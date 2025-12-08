@@ -1,37 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { promises as fs } from "fs";
-import path from "path";
 import { invalidateCandidateCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rateLimit";
 import { sanitizeInput, sanitizeHtml } from "@/lib/sanitize";
 
-const PRESETS_DIR = path.join(process.cwd(), "data", "presets");
-
-// Ensure presets directory exists
-async function ensurePresetsDir() {
-    try {
-        await fs.access(PRESETS_DIR);
-    } catch {
-        await fs.mkdir(PRESETS_DIR, { recursive: true });
-    }
-}
-
-interface CandidatePreset {
+interface CandidatePresetData {
     name: string;
     indexNumber: string;
     email: string | null;
     symbol: string | null;
     photoUrl: string | null;
     languages: string[];
-}
-
-interface PresetFile {
-    name: string;
-    description: string;
-    createdAt: string;
-    candidates: CandidatePreset[];
 }
 
 // GET - List all available presets
@@ -42,27 +22,28 @@ export async function GET(request: NextRequest) {
         if (rateLimitResponse) return rateLimitResponse;
 
         await requireRole(["super_admin"]);
-        await ensurePresetsDir();
 
-        const files = await fs.readdir(PRESETS_DIR);
-        const presets = [];
+        const presets = await prisma.candidatePreset.findMany({
+            orderBy: { createdAt: "desc" },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                candidates: true,
+                createdAt: true,
+            },
+        });
 
-        for (const file of files) {
-            if (file.endsWith(".json")) {
-                const filePath = path.join(PRESETS_DIR, file);
-                const content = await fs.readFile(filePath, "utf-8");
-                const data: PresetFile = JSON.parse(content);
-                presets.push({
-                    id: file.replace(".json", ""),
-                    name: data.name,
-                    description: data.description,
-                    candidateCount: data.candidates.length,
-                    createdAt: data.createdAt,
-                });
-            }
-        }
+        // Format response to match expected structure
+        const formattedPresets = presets.map((p) => ({
+            id: p.id,
+            name: p.name,
+            description: p.description || "",
+            candidateCount: Array.isArray(p.candidates) ? p.candidates.length : 0,
+            createdAt: p.createdAt.toISOString(),
+        }));
 
-        return NextResponse.json({ presets });
+        return NextResponse.json({ presets: formattedPresets });
     } catch (error) {
         if (error instanceof Error) {
             if (error.message === "Unauthorized") {
@@ -95,6 +76,29 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Sanitize inputs
+        const sanitizedName = sanitizeInput(presetName, 100);
+        const sanitizedDescription = sanitizeHtml(description || "");
+
+        if (!sanitizedName) {
+            return NextResponse.json(
+                { error: "Invalid preset name" },
+                { status: 400 }
+            );
+        }
+
+        // Check if preset with same name already exists
+        const existingPreset = await prisma.candidatePreset.findUnique({
+            where: { name: sanitizedName },
+        });
+
+        if (existingPreset) {
+            return NextResponse.json(
+                { error: "A preset with this name already exists" },
+                { status: 400 }
+            );
+        }
+
         // Get candidates from the election
         const candidates = await prisma.candidate.findMany({
             where: { electionId },
@@ -115,47 +119,29 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create preset file with sanitized inputs
-        const sanitizedName = sanitizeInput(presetName, 100);
-        const sanitizedDescription = sanitizeHtml(description || "");
+        // Create preset in database
+        const candidateData: CandidatePresetData[] = candidates.map((c) => ({
+            name: c.name,
+            indexNumber: c.indexNumber,
+            email: c.email,
+            symbol: c.symbol,
+            photoUrl: c.photoUrl,
+            languages: c.languages || [],
+        }));
 
-        if (!sanitizedName) {
-            return NextResponse.json(
-                { error: "Invalid preset name" },
-                { status: 400 }
-            );
-        }
-
-        const preset: PresetFile = {
-            name: sanitizedName,
-            description: sanitizedDescription,
-            createdAt: new Date().toISOString(),
-            candidates: candidates.map((c) => ({
-                name: c.name,
-                indexNumber: c.indexNumber,
-                email: c.email,
-                symbol: c.symbol,
-                photoUrl: c.photoUrl,
-                languages: c.languages || [],
-            })),
-        };
-
-        await ensurePresetsDir();
-
-        // Create safe filename from sanitized name
-        const safeFilename = sanitizedName
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/^_+|_+$/g, "");
-        const filePath = path.join(PRESETS_DIR, `${safeFilename}.json`);
-
-        await fs.writeFile(filePath, JSON.stringify(preset, null, 2));
+        const preset = await prisma.candidatePreset.create({
+            data: {
+                name: sanitizedName,
+                description: sanitizedDescription,
+                candidates: candidateData,
+            },
+        });
 
         return NextResponse.json({
             success: true,
             preset: {
-                id: safeFilename,
-                name: presetName,
+                id: preset.id,
+                name: preset.name,
                 candidateCount: candidates.length,
             },
         });
@@ -191,14 +177,20 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        // Read preset file
-        const filePath = path.join(PRESETS_DIR, `${presetId}.json`);
-        let preset: PresetFile;
-        try {
-            const content = await fs.readFile(filePath, "utf-8");
-            preset = JSON.parse(content);
-        } catch {
+        // Get preset from database
+        const preset = await prisma.candidatePreset.findUnique({
+            where: { id: presetId },
+        });
+
+        if (!preset) {
             return NextResponse.json({ error: "Preset not found" }, { status: 404 });
+        }
+
+        // Parse candidates from JSON
+        const presetCandidates = preset.candidates as CandidatePresetData[];
+
+        if (!Array.isArray(presetCandidates)) {
+            return NextResponse.json({ error: "Invalid preset data" }, { status: 500 });
         }
 
         // Add candidates from preset to the election
@@ -206,7 +198,7 @@ export async function PUT(request: NextRequest) {
         let skippedCount = 0;
         const skippedCandidates: string[] = [];
 
-        for (const candidate of preset.candidates) {
+        for (const candidate of presetCandidates) {
             // Normalize index number for comparison (trim whitespace)
             const normalizedIndexNumber = candidate.indexNumber.trim();
 
@@ -282,6 +274,43 @@ export async function PUT(request: NextRequest) {
             }
         }
         console.error("Load preset error:", error);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+}
+
+// DELETE - Delete a preset
+export async function DELETE(request: NextRequest) {
+    try {
+        // Rate limit check
+        const rateLimitResponse = await rateLimit(request, "admin");
+        if (rateLimitResponse) return rateLimitResponse;
+
+        await requireRole(["super_admin"]);
+        const { searchParams } = new URL(request.url);
+        const presetId = searchParams.get("id");
+
+        if (!presetId) {
+            return NextResponse.json(
+                { error: "Preset ID is required" },
+                { status: 400 }
+            );
+        }
+
+        await prisma.candidatePreset.delete({
+            where: { id: presetId },
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        if (error instanceof Error) {
+            if (error.message === "Unauthorized") {
+                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            }
+            if (error.message === "Forbidden") {
+                return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+            }
+        }
+        console.error("Delete preset error:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
