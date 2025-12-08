@@ -45,6 +45,4 @@ prisma/migrations/
 *.csv
 
 # project notes
-UI_HUMANIZATION_AUDIT.md
-AI_DESIGN_ELEMENTS.md
 
