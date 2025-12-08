@@ -263,15 +263,15 @@ export default function AuditLogPage() {
                     <GlowDivider className="mb-8" />
 
                     {/* Date Range Filters */}
-                    <div className="glass-card p-6 mb-8 animate-slide-up">
+                    <div className="glass-card p-6 mb-8 animate-slide-up overflow-visible relative" style={{ zIndex: 50 }}>
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                             <svg className="w-5 h-5 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <span>Date Range</span>
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-visible">
+                            <div className="relative" style={{ zIndex: 60 }}>
                                 <label className="block text-cyan text-sm font-bold mb-2">Start Date</label>
                                 <DatePicker
                                     selected={startDate}
@@ -282,11 +282,12 @@ export default function AuditLogPage() {
                                     className="input-field w-full"
                                     calendarClassName="custom-datepicker"
                                     wrapperClassName="w-full"
-                                    withPortal
+                                    popperClassName="datepicker-popper-custom"
+                                    popperPlacement="bottom-start"
                                     isClearable
                                 />
                             </div>
-                            <div>
+                            <div className="relative" style={{ zIndex: 55 }}>
                                 <label className="block text-cyan text-sm font-bold mb-2">End Date</label>
                                 <DatePicker
                                     selected={endDate}
@@ -297,7 +298,8 @@ export default function AuditLogPage() {
                                     className="input-field w-full"
                                     calendarClassName="custom-datepicker"
                                     wrapperClassName="w-full"
-                                    withPortal
+                                    popperClassName="datepicker-popper-custom"
+                                    popperPlacement="bottom-start"
                                     isClearable
                                 />
                             </div>

@@ -409,17 +409,37 @@
 .react-datepicker-wrapper {
   width: 100%;
   position: relative;
-  z-index: 1;
+  z-index: 100;
 }
 
 .react-datepicker-popper {
-  z-index: 9999 !important;
-  position: fixed !important;
+  z-index: 99999 !important;
+  position: absolute !important;
+  isolation: isolate;
 }
 
 .react-datepicker__tab-loop {
+  position: relative !important;
+  z-index: 99999 !important;
+}
+
+/* Ensure the datepicker portal overlay appears above everything */
+.react-datepicker__portal {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 99999 !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom popper for datepicker to appear above table */
+.datepicker-popper-custom {
+  z-index: 99999 !important;
 }
 
 .react-datepicker {
@@ -429,8 +449,8 @@
   font-family: 'Inter', sans-serif;
   box-shadow: 0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(0, 229, 255, 0.1);
   color: white !important;
-  overflow: hidden;
-  z-index: 9999 !important;
+  overflow: visible;
+  z-index: 99999 !important;
   position: relative;
 }
 
