@@ -282,6 +282,7 @@ export default function AuditLogPage() {
                                     className="input-field w-full"
                                     calendarClassName="custom-datepicker"
                                     wrapperClassName="w-full"
+                                    popperPlacement="bottom-start"
                                     isClearable
                                 />
                             </div>
@@ -296,6 +297,7 @@ export default function AuditLogPage() {
                                     className="input-field w-full"
                                     calendarClassName="custom-datepicker"
                                     wrapperClassName="w-full"
+                                    popperPlacement="bottom-start"
                                     isClearable
                                 />
                             </div>

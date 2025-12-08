@@ -414,6 +414,12 @@
 
 .react-datepicker-popper {
   z-index: 9999 !important;
+  position: fixed !important;
+}
+
+.react-datepicker__tab-loop {
+  position: fixed !important;
+  z-index: 9999 !important;
 }
 
 .react-datepicker {
@@ -425,6 +431,7 @@
   color: white !important;
   overflow: hidden;
   z-index: 9999 !important;
+  position: relative;
 }
 
 .react-datepicker__header {
