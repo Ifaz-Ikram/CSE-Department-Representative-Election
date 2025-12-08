@@ -660,19 +660,19 @@ export default function VotePage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="bg-navy-dark/50 rounded-xl p-4 border border-cyan/10 text-center">
                       <div className="text-2xl font-bold text-cyan mb-1">6</div>
-                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Boy</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Boys</div>
                     </div>
                     <div className="bg-navy-dark/50 rounded-xl p-4 border border-pink-500/20 text-center">
                       <div className="text-2xl font-bold text-pink-400 mb-1">1</div>
-                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Girl</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Sinhala Speaking Girls</div>
                     </div>
                     <div className="bg-navy-dark/50 rounded-xl p-4 border border-gold/20 text-center">
                       <div className="text-2xl font-bold text-gold mb-1">2</div>
-                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Boy</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Boys</div>
                     </div>
                     <div className="bg-navy-dark/50 rounded-xl p-4 border border-purple-500/20 text-center">
                       <div className="text-2xl font-bold text-purple-400 mb-1">1</div>
-                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Girl</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-wide">Tamil Speaking Girls</div>
                     </div>
                   </div>
                 </div>
