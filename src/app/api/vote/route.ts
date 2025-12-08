@@ -22,56 +22,44 @@ export async function POST(req: NextRequest) {
     // Validate input
     const { electionId, candidateIds } = SubmitBallotSchema.parse(body);
 
-    // Check if election exists and is active
-    const election = await prisma.election.findUnique({
-      where: { id: electionId },
-    });
-
-    if (!election) {
-      return NextResponse.json(
-        { error: "Election not found" },
-        { status: 404 }
-      );
-    }
-
-    const now = new Date();
-    if (now < election.startTime) {
-      return NextResponse.json(
-        { error: "Election has not started yet" },
-        { status: 403 }
-      );
-    }
-
-    if (now > election.endTime) {
-      return NextResponse.json(
-        { error: "Election has ended. Votes are locked." },
-        { status: 403 }
-      );
-    }
-
-    // Verify all candidate IDs belong to this election and get names for logging
-    let candidateNames: string[] = [];
-    if (candidateIds.length > 0) {
-      const candidates = await prisma.candidate.findMany({
-        where: {
-          id: { in: candidateIds },
-          electionId,
-        },
-        select: { id: true, name: true },
+    // Use transaction to ensure atomic validation and update
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Validate Election (Atomic Check)
+      const election = await tx.election.findUnique({
+        where: { id: electionId },
       });
 
-      if (candidates.length !== candidateIds.length) {
-        return NextResponse.json(
-          { error: "Invalid candidate selection" },
-          { status: 400 }
-        );
+      if (!election) {
+        throw new Error("Election not found");
       }
-      candidateNames = candidates.map(c => c.name);
-    }
 
-    // Use transaction to ensure atomic update
-    const result = await prisma.$transaction(async (tx) => {
-      // Find or create ballot
+      const now = new Date();
+      if (now < election.startTime) {
+        throw new Error("Election has not started yet");
+      }
+
+      if (now > election.endTime) {
+        throw new Error("Election has ended. Votes are locked.");
+      }
+
+      // 2. Validate Candidates
+      let candidateNames: string[] = [];
+      if (candidateIds.length > 0) {
+        const candidates = await tx.candidate.findMany({
+          where: {
+            id: { in: candidateIds },
+            electionId,
+          },
+          select: { id: true, name: true },
+        });
+
+        if (candidates.length !== candidateIds.length) {
+          throw new Error("Invalid candidate selection");
+        }
+        candidateNames = candidates.map(c => c.name);
+      }
+
+      // 3. Find or create ballot
       let ballot =
         (await tx.ballot.findUnique({
           where: {
@@ -88,12 +76,11 @@ export async function POST(req: NextRequest) {
           },
         }));
 
-      // Delete existing choices
+      // 4. Update choices
       await tx.ballotChoice.deleteMany({
         where: { ballotId: ballot.id },
       });
 
-      // Create new choices
       if (candidateIds.length > 0) {
         await tx.ballotChoice.createMany({
           data: candidateIds.map((candidateId) => ({
@@ -103,7 +90,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Update ballot timestamp
+      // 5. Update ballot timestamp
       ballot = await tx.ballot.update({
         where: { id: ballot.id },
         data: { updatedAt: new Date() },
@@ -116,20 +103,20 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      return ballot;
+      return { ballot, electionName: election.name, candidateNames };
     });
 
-    // Log vote with full details for super_admin visibility
+    // Log vote with details (outside transaction to keep it fast, but using data from inside)
     await logVoteWithDetails(
       session.user.email!,
       electionId,
-      election.name,
-      candidateNames
+      result.electionName,
+      result.candidateNames
     );
 
     return NextResponse.json({
       success: true,
-      ballot: result,
+      ballot: result.ballot,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -139,8 +126,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (error instanceof Error) {
+      if (error.message === "Unauthorized") {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      if (error.message === "Election not found") {
+        return NextResponse.json({ error: error.message }, { status: 404 });
+      }
+      if (
+        error.message === "Election has not started yet" ||
+        error.message === "Election has ended. Votes are locked."
+      ) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
+      }
+      if (error.message === "Invalid candidate selection") {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      }
     }
 
     console.error("Vote submission error:", error);
