@@ -282,8 +282,7 @@ export default function AuditLogPage() {
                                     className="input-field w-full"
                                     calendarClassName="custom-datepicker"
                                     wrapperClassName="w-full"
-                                    popperPlacement="bottom-start"
-                                    popperContainer={({ children }) => <div style={{ zIndex: 9999 }}>{children}</div>}
+                                    withPortal
                                     isClearable
                                 />
                             </div>
@@ -298,8 +297,7 @@ export default function AuditLogPage() {
                                     className="input-field w-full"
                                     calendarClassName="custom-datepicker"
                                     wrapperClassName="w-full"
-                                    popperPlacement="bottom-start"
-                                    popperContainer={({ children }) => <div style={{ zIndex: 9999 }}>{children}</div>}
+                                    withPortal
                                     isClearable
                                 />
                             </div>
