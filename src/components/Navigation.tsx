@@ -107,7 +107,7 @@ export default function Navigation() {
                   </Link>
                   <Link
                     href="/my-votes"
-                    className={`relative group px-3 py-2 transition-all duration-300 ${pathname === "/my-votes" ? "text-cyan" : "text-white hover:text-cyan"
+                    className={`relative group px-3 py-2 transition-all duration-300 whitespace-nowrap ${pathname === "/my-votes" ? "text-cyan" : "text-white hover:text-cyan"
                       }`}
                   >
                     <span className="relative z-10">My Votes</span>
