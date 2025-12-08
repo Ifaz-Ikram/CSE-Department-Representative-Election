@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 // CSV Export Types
 type ExportType = "results" | "ballots" | "statistics" | "voters";
 
+// Maximum records to export to prevent memory exhaustion
+const MAX_EXPORT_RECORDS = 5000;
+
 /**
  * Generate CSV content from data
  */
@@ -130,7 +133,12 @@ export async function GET(request: NextRequest) {
                         },
                     },
                     orderBy: { createdAt: "desc" },
+                    take: MAX_EXPORT_RECORDS,
                 });
+
+                if (ballots.length === MAX_EXPORT_RECORDS) {
+                    console.warn(`Export truncated: Reached limit of ${MAX_EXPORT_RECORDS} records`);
+                }
 
                 const headers = [
                     "Voter Name",
@@ -212,7 +220,12 @@ export async function GET(request: NextRequest) {
                         },
                     },
                     orderBy: { createdAt: "asc" },
+                    take: MAX_EXPORT_RECORDS,
                 });
+
+                if (ballots.length === MAX_EXPORT_RECORDS) {
+                    console.warn(`Export truncated: Reached limit of ${MAX_EXPORT_RECORDS} records`);
+                }
 
                 const headers = ["#", "Voter Name", "Index Number", "Voted At"];
                 const rows = ballots.map((b, index) => [
