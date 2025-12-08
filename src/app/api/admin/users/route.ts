@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { logAuditEvent, AuditActions, AuditCategories } from '@/lib/auditLog';
 import { z } from 'zod';
+import { rateLimit } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +14,12 @@ const UpdateRoleSchema = z.object({
 });
 
 // GET /api/admin/users - Fetch all users (view for admin + super_admin)
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
+        // Rate limit check
+        const rateLimitResponse = await rateLimit(request, 'admin');
+        if (rateLimitResponse) return rateLimitResponse;
+
         const session = await getServerSession(authOptions);
         const userRole = (session?.user as any)?.role;
 
@@ -52,7 +57,7 @@ export async function GET(request: Request) {
             },
         });
 
-        return NextResponse.json({ 
+        return NextResponse.json({
             users,
             pagination: {
                 page,
@@ -71,8 +76,12 @@ export async function GET(request: Request) {
 }
 
 // PATCH /api/admin/users - Update user role
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
     try {
+        // Rate limit check
+        const rateLimitResponse = await rateLimit(request, 'admin');
+        if (rateLimitResponse) return rateLimitResponse;
+
         const session = await getServerSession(authOptions);
         const userRole = (session?.user as any)?.role;
         const currentUserEmail = session?.user?.email;

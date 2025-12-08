@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { promises as fs } from "fs";
 import path from "path";
 import { invalidateCandidateCache } from "@/lib/cache";
+import { rateLimit } from "@/lib/rateLimit";
 
 const PRESETS_DIR = path.join(process.cwd(), "data", "presets");
 
@@ -33,8 +34,12 @@ interface PresetFile {
 }
 
 // GET - List all available presets
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
+        // Rate limit check
+        const rateLimitResponse = await rateLimit(request, "admin");
+        if (rateLimitResponse) return rateLimitResponse;
+
         await requireRole(["super_admin"]);
         await ensurePresetsDir();
 
@@ -74,6 +79,10 @@ export async function GET() {
 // POST - Save current election's candidates as a preset
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit check
+        const rateLimitResponse = await rateLimit(request, "admin");
+        if (rateLimitResponse) return rateLimitResponse;
+
         await requireRole(["super_admin"]);
         const body = await request.json();
         const { electionId, presetName, description } = body;
@@ -156,6 +165,10 @@ export async function POST(request: NextRequest) {
 // PUT - Load a preset into an election
 export async function PUT(request: NextRequest) {
     try {
+        // Rate limit check
+        const rateLimitResponse = await rateLimit(request, "admin");
+        if (rateLimitResponse) return rateLimitResponse;
+
         await requireRole(["super_admin"]);
         const body = await request.json();
         const { electionId, presetId } = body;
@@ -185,7 +198,7 @@ export async function PUT(request: NextRequest) {
         for (const candidate of preset.candidates) {
             // Normalize index number for comparison (trim whitespace)
             const normalizedIndexNumber = candidate.indexNumber.trim();
-            
+
             // Check if candidate already exists in this election by index number
             const existing = await prisma.candidate.findFirst({
                 where: {
@@ -244,7 +257,7 @@ export async function PUT(request: NextRequest) {
             added: addedCount,
             skipped: skippedCount,
             skippedCandidates,
-            message: skippedCount > 0 
+            message: skippedCount > 0
                 ? `Added ${addedCount} new candidates. Skipped ${skippedCount} that already exist: ${skippedCandidates.join(', ')}`
                 : `Successfully added ${addedCount} candidates`,
         });

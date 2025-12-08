@@ -5,6 +5,7 @@ import { z } from "zod";
 import { logAuditEvent, AuditActions, AuditCategories } from "@/lib/auditLog";
 import { sanitizeInput, sanitizeHtml, sanitizeUrl, sanitizeEmail } from "@/lib/sanitize";
 import { invalidateCandidateCache } from "@/lib/cache";
+import { rateLimit } from "@/lib/rateLimit";
 
 const CreateCandidateSchema = z.object({
   electionId: z.string(),
@@ -27,6 +28,10 @@ const UpdateCandidateSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     await requireRole(["super_admin"]);
     const body = await request.json();
     const data = CreateCandidateSchema.parse(body);
@@ -161,6 +166,10 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await requireRole(["super_admin"]);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -217,6 +226,10 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(request, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await requireRole(["super_admin"]);
     const body = await request.json();
     const data = UpdateCandidateSchema.parse(body);

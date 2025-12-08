@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole, getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit check
+    const rateLimitResponse = await rateLimit(req, "admin");
+    if (rateLimitResponse) return rateLimitResponse;
+
     const session = await getSession();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -95,8 +100,8 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ 
-      ballots, 
+    return NextResponse.json({
+      ballots,
       election,
       pagination: {
         page,
