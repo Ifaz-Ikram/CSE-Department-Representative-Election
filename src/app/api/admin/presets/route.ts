@@ -5,6 +5,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { invalidateCandidateCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rateLimit";
+import { sanitizeInput, sanitizeHtml } from "@/lib/sanitize";
 
 const PRESETS_DIR = path.join(process.cwd(), "data", "presets");
 
@@ -114,10 +115,13 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Create preset file
+        // Create preset file with sanitized inputs
+        const sanitizedName = sanitizeInput(presetName, 100);
+        const sanitizedDescription = sanitizeHtml(description || "");
+
         const preset: PresetFile = {
-            name: presetName,
-            description: description || "",
+            name: sanitizedName,
+            description: sanitizedDescription,
             createdAt: new Date().toISOString(),
             candidates: candidates.map((c) => ({
                 name: c.name,
