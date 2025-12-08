@@ -49,10 +49,14 @@
   - Real-time countdown timer showing time remaining
   - Vote confirmation with candidate preview
   - Anonymous vote storage (no voter-candidate mapping for regular users)
+  - **"My Votes" History**: Dedicated page to review all submitted ballots
 
 - **📊 Real-Time Results**
   - Live vote counting and statistics
-  - Public results visibility toggle (admin-controlled)
+  - **Dual Visibility Controls**:
+    - `resultsVisible`: Admin-only results toggle
+    - `publicResultsVisible`: Public results for all voters
+  - `resultsAutoEnabled`: Automatic results publication after election ends
   - Detailed candidate rankings with vote percentages
   - Participation rate tracking
 
@@ -84,6 +88,7 @@
   - CSV export for results, ballots, statistics, and voter lists
   - Customizable export formats
   - Super admin-only ballot mapping export
+  - **Safety Limits**: Max 5000 records per export to prevent server overload
 
 - **🔍 Audit Trail**
   - Comprehensive logging of all system actions
@@ -100,12 +105,13 @@
 
 - **⏱️ Real-Time Updates**
   - Live election status monitoring
-  - Countdown timers
+  - **Urgency-Aware Countdown**: Timer changes color (Yellow <4h, Red <1h) with contextual messages
   - Instant vote confirmation
   - Dynamic candidate loading
 
 - **🌐 Multi-Language Support**
   - Candidate profiles with language preferences (English, Sinhala, Tamil)
+  - **Ballot Symbols**: Emoji-based candidate identification (🌙, ⭐, etc.)
   - Internationalized interface elements
 
 ---
@@ -126,7 +132,7 @@
   - `sameSite: lax` - CSRF protection
   - `secure: true` - HTTPS-only in production
 - 30-day session expiration with automatic refresh
-- Session invalidation on role changes
+- **Session Rotation**: All sessions invalidated on role change (privilege escalation protection)
 
 ✅ **CSRF Protection**
 - Origin and Referer header validation
@@ -145,6 +151,7 @@
 - URL validation to prevent javascript: and data: URI attacks
 - Email format validation with regex patterns
 - **Timing Safe Auth**: Randomized delays (100-300ms) to prevent email enumeration timing attacks
+- **Vote Race Condition Fix**: Election timing validated *inside* database transactions to prevent deadline bypass
 - SQL injection protection via Prisma ORM parameterization
 
 ✅ **Content Security Policy (CSP)**
@@ -233,6 +240,7 @@
 - Selective field loading with `select` and `include`
 - Connection pooling (max 3 connections for Supabase free tier)
 - Transaction-based vote submissions for atomicity
+- **Query Timeouts**: 30-second hard limit on all database queries to prevent connection exhaustion
 - Efficient vote counting with aggregations
 
 ✅ **Pagination**
@@ -249,11 +257,14 @@
 - Static page generation where possible
 - API routes with dynamic rendering
 - Automatic code splitting
-- Image optimization for candidate photos
+- Image optimization for candidate photos via `CandidatePhoto` component (WebP/AVIF, lazy loading)
 - Middleware-level request processing
 
 ✅ **Caching Strategy**
-- Redis integration for rate limiting
+- **Redis Query Cache**: Full caching layer for expensive DB queries (`cache.ts`)
+  - Elections, Candidates, Results, User data cached with configurable TTL
+  - Cache-aside pattern with automatic invalidation on data changes
+  - TTL tiers: SHORT (1min), MEDIUM (5min), LONG (1hr), VERY_LONG (24hr)
 - Session caching via NextAuth
 - Database connection pooling
 - Efficient query result reuse
@@ -264,6 +275,11 @@
 - Optimized dependencies (React 18, Next.js 14)
 - Sentry source map optimization
 
+✅ **React Performance**
+- Isolated `CountdownTimer` component to prevent full-page re-renders
+- Memoized candidate lists and selection state
+- DevTools-verified: Only timer updates every second, not the entire page
+
 ### Monitoring & Error Tracking
 
 ✅ **Sentry Integration**
@@ -272,6 +288,19 @@
 - Release tracking
 - User feedback collection
 - Source map upload for debugging
+
+✅ **Advanced Monitoring & Alerting** (`monitoring.ts`)
+- **Structured Alerting**: Severity levels (INFO, WARNING, ERROR, CRITICAL)
+- **Category-based Alerts**: Database, Auth, Voting, Rate Limit, Cache, Security, Performance
+- **Automatic Detection**:
+  - Slow database queries (>1s threshold)
+  - Slow API responses (>3s threshold)
+  - Authentication failures with IP tracking
+  - Suspicious voting activity
+  - Rate limit hits
+  - Cache failures
+  - Database connection pool exhaustion
+- **Performance Timing**: `withPerformanceMonitoring()` wrapper for any async operation
 
 ✅ **Logging**
 - Structured error logging
@@ -999,6 +1028,7 @@ cse-election/
 │   │           ├── ballots/
 │   │           ├── statistics/
 │   │           ├── export/
+│   │           ├── presets/       # Candidate presets CRUD
 │   │           └── audit-logs/
 │   │
 │   ├── components/            # React components
@@ -1007,18 +1037,26 @@ cse-election/
 │   │   ├── BackgroundGrid.tsx # Animated background
 │   │   ├── GlowDivider.tsx    # Decorative divider
 │   │   ├── CandidateSelector.tsx  # Vote selection UI
+│   │   ├── CandidatePhoto.tsx # Optimized candidate images (next/image)
+│   │   ├── CountdownTimer.tsx # Urgency-aware election timer
+│   │   ├── ElectionCard.tsx   # Reusable election display card
+│   │   ├── DateTimePicker.tsx # Admin datetime input component
+│   │   ├── SearchableDropdown.tsx # Enhanced searchable select
+│   │   ├── OptimizedImage.tsx # General image optimization wrapper
 │   │   └── Providers.tsx      # Context providers
 │   │
 │   ├── lib/                   # Utility libraries
 │   │   ├── auth.ts            # NextAuth configuration
 │   │   ├── session.ts         # Session helpers
-│   │   ├── prisma.ts          # Prisma client setup
+│   │   ├── prisma.ts          # Prisma client setup (with 30s timeout)
 │   │   ├── rateLimit.ts       # Rate limiting config
 │   │   ├── auditLog.ts        # Audit logging utilities
-│   │   ├── sanitize.ts        # Input sanitization (NEW)
-│   │   ├── csrf.ts            # CSRF utilities (NEW)
-│   │   ├── env.ts             # Environment validation (NEW)
-│   │   └── themeHelpers.ts    # Theme utilities
+│   │   ├── cache.ts           # Redis caching layer (NEW)
+│   │   ├── monitoring.ts      # Alerting & observability (NEW)
+│   │   ├── sanitize.ts        # Input sanitization
+│   │   ├── csrf.ts            # CSRF utilities
+│   │   ├── env.ts             # Environment validation
+│   │   └── themeHelpers.ts    # Theme utilities + normalizePhotoUrl
 │   │
 │   ├── types/
 │   │   └── next-auth.d.ts     # NextAuth type extensions
