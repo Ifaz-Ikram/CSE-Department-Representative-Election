@@ -102,6 +102,8 @@ export async function GET(req: NextRequest) {
       indexNumber: candidate.indexNumber,
       email: candidate.email,
       photoUrl: candidate.photoUrl,
+      languages: candidate.languages,
+      stream: candidate.stream,
       voteCount: candidate._count.ballotChoices,
     }));
 

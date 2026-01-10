@@ -35,6 +35,25 @@ export const authOptions: NextAuthOptions = {
         return "/?error=InvalidDomain";
       }
 
+      // Validate email domain - must be CSE 23 batch email (ends with .23@cse.mrt.ac.lk)
+      const cse23EmailPattern = /\.23@cse\.mrt\.ac\.lk$/i;
+      if (!cse23EmailPattern.test(user.email)) {
+        // Email doesn't match CSE 23 pattern - deny access
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 200 + 100)); // 100-300ms
+
+        monitorAuthFailure(
+          "Invalid email domain - not CSE 23 batch",
+          user.email,
+          undefined
+        );
+        monitorSecurityEvent(
+          "unauthorized_login_attempt",
+          AlertSeverity.WARNING,
+          { email: user.email, reason: "invalid_email_domain" }
+        );
+        return "/?error=InvalidDomain";
+      }
+
       // 1) Check whitelist - must be in the authorized voter registry
       const registry = await prisma.voterRegistry.findUnique({
         where: { email: user.email },

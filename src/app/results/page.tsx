@@ -16,6 +16,8 @@ interface CandidateStats {
   email: string;
   photoUrl?: string | null;
   symbol?: string | null;
+  languages?: string[];
+  stream?: string | null;
   voteCount: number;
 }
 
@@ -426,7 +428,32 @@ function ResultsPageContent() {
                                 'text-cyan'
                             }`}>
                             {candidate.indexNumber}
+                            {candidate.stream && (
+                              <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${candidate.stream === 'Cyber' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                                  candidate.stream === 'DSE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                                    candidate.stream === 'ICE' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                                      'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                                }`}>
+                                {candidate.stream}
+                              </span>
+                            )}
                           </p>
+                          {/* Language Badges */}
+                          {candidate.languages && candidate.languages.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {["English", "Sinhala", "Tamil"].filter(lang => candidate.languages?.includes(lang)).map((lang) => (
+                                <span
+                                  key={lang}
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${lang === "English" ? "bg-cyan/10 text-cyan border-cyan/30"
+                                    : lang === "Sinhala" ? "bg-gold/10 text-gold border-gold/30"
+                                      : "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                                    }`}
+                                >
+                                  {lang}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* Vote Count */}

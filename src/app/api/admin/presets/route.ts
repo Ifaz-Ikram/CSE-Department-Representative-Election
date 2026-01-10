@@ -12,6 +12,7 @@ interface CandidatePresetData {
     symbol: string | null;
     photoUrl: string | null;
     languages: string[];
+    stream: string | null;
 }
 
 // GET - List all available presets
@@ -109,6 +110,7 @@ export async function POST(request: NextRequest) {
                 symbol: true,
                 photoUrl: true,
                 languages: true,
+                stream: true,
             },
         });
 
@@ -127,6 +129,7 @@ export async function POST(request: NextRequest) {
             symbol: c.symbol,
             photoUrl: c.photoUrl,
             languages: c.languages || [],
+            stream: c.stream || null,
         }));
 
         const preset = await prisma.candidatePreset.create({
@@ -246,6 +249,7 @@ export async function PUT(request: NextRequest) {
                     symbol: candidate.symbol,
                     photoUrl: candidate.photoUrl,
                     languages: candidate.languages || [],
+                    stream: candidate.stream || null,
                 },
             });
 

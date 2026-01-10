@@ -106,6 +106,7 @@ model Candidate {
   symbol       String?       // Ballot paper symbol (emoji like 🌙, ⭐, etc.)
   photoUrl     String?
   languages    String[]      @default([])
+  stream       String?       // Cyber, DSE, ICE, Main
 
   election      Election      @relation(fields: [electionId], references: [id], onDelete: Cascade)
   user          User?         @relation(fields: [userId], references: [id])

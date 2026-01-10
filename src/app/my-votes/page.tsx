@@ -17,6 +17,7 @@ interface Candidate {
     symbol?: string | null;
     photoUrl?: string | null;
     languages?: string[];
+    stream?: string | null;
 }
 
 interface Ballot {
@@ -259,6 +260,15 @@ function MyVotesContent() {
                                                     </h3>
                                                     <p className="text-green-400 text-sm font-semibold">
                                                         {choice.candidate.indexNumber}
+                                                        {choice.candidate.stream && (
+                                                            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${choice.candidate.stream === 'Cyber' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                                                                    choice.candidate.stream === 'DSE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                                                                        choice.candidate.stream === 'ICE' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                                                                            'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                                                                }`}>
+                                                                {choice.candidate.stream}
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
 

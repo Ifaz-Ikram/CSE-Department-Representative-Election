@@ -17,6 +17,7 @@ interface Candidate {
   symbol?: string | null;
   photoUrl?: string | null;
   languages?: string[];
+  stream?: string | null;
 }
 
 export default function ManageCandidatesPage() {
@@ -33,6 +34,7 @@ export default function ManageCandidatesPage() {
   const [editSymbol, setEditSymbol] = useState("");
   const [editPhotoUrl, setEditPhotoUrl] = useState("");
   const [editLanguages, setEditLanguages] = useState<string[]>([]);
+  const [editStream, setEditStream] = useState<string | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editError, setEditError] = useState("");
   const [showWarningModal, setShowWarningModal] = useState<{ type: 'edit' | 'delete', candidate: Candidate } | null>(null);
@@ -154,6 +156,7 @@ export default function ManageCandidatesPage() {
     setEditSymbol(candidate.symbol || "");
     setEditPhotoUrl(candidate.photoUrl || "");
     setEditLanguages(candidate.languages || []);
+    setEditStream(candidate.stream || null);
     setEditError("");
   };
 
@@ -172,6 +175,7 @@ export default function ManageCandidatesPage() {
           symbol: editSymbol.trim() || null,
           photoUrl: editPhotoUrl.trim() || null,
           languages: editLanguages,
+          stream: editStream,
         }),
       });
 
@@ -813,6 +817,55 @@ export default function ManageCandidatesPage() {
                       Select all languages the candidate can speak
                     </p>
                   </div>
+
+                  {/* Stream Selector */}
+                  <div>
+                    <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
+                      Stream
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {["Cyber", "DSE", "ICE", "Main"].map((stream) => (
+                        <label
+                          key={stream}
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-lg border cursor-pointer transition-all ${editStream === stream
+                            ? stream === "Cyber" ? "bg-red-500/20 border-red-500 text-red-400"
+                              : stream === "DSE" ? "bg-green-500/20 border-green-500 text-green-400"
+                                : stream === "ICE" ? "bg-blue-500/20 border-blue-500 text-blue-400"
+                                  : "bg-gray-500/20 border-gray-500 text-gray-400"
+                            : "bg-navy-dark/50 border-cyan/30 text-gray-400 hover:border-cyan/50"
+                            }`}
+                        >
+                          <input
+                            type="radio"
+                            name="stream"
+                            value={stream}
+                            checked={editStream === stream}
+                            onChange={(e) => setEditStream(e.target.value)}
+                            className="sr-only"
+                          />
+                          <span className="font-medium">{stream}</span>
+                          {editStream === stream && (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </label>
+                      ))}
+                      {/* Clear button */}
+                      {editStream && (
+                        <button
+                          type="button"
+                          onClick={() => setEditStream(null)}
+                          className="px-3 py-2 rounded-lg border border-gray-600 text-gray-400 hover:border-red-500 hover:text-red-400 transition-all text-sm"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-gray-500 text-xs mt-2">
+                      Select the candidate's specialization stream
+                    </p>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -911,6 +964,15 @@ export default function ManageCandidatesPage() {
                     </h3>
                     <p className="text-gold text-sm font-semibold mb-1">
                       {candidate.indexNumber}
+                      {candidate.stream && (
+                        <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${candidate.stream === 'Cyber' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                            candidate.stream === 'DSE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                              candidate.stream === 'ICE' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                                'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                          }`}>
+                          {candidate.stream}
+                        </span>
+                      )}
                     </p>
                     <p className="text-gray-400 text-xs truncate">
                       {candidate.email}

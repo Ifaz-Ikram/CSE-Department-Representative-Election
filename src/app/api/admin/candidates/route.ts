@@ -16,6 +16,7 @@ const CreateCandidateSchema = z.object({
   symbol: z.string().optional(),
   photoUrl: z.string().url().optional().or(z.literal("")),
   languages: z.array(z.enum(["English", "Sinhala", "Tamil"])).optional().default([]),
+  stream: z.enum(["Cyber", "DSE", "ICE", "Main"]).optional(),
 });
 
 const UpdateCandidateSchema = z.object({
@@ -23,6 +24,7 @@ const UpdateCandidateSchema = z.object({
   symbol: z.string().nullable().optional(),
   photoUrl: z.string().url().nullable().optional().or(z.literal("")).or(z.null()),
   languages: z.array(z.enum(["English", "Sinhala", "Tamil"])).optional(),
+  stream: z.enum(["Cyber", "DSE", "ICE", "Main"]).nullable().optional(),
 });
 
 
@@ -119,6 +121,7 @@ export async function POST(request: NextRequest) {
         symbol: sanitizedSymbol,
         photoUrl: sanitizedPhotoUrl,
         languages: data.languages || [],
+        stream: data.stream || null,
       },
     });
 
@@ -240,6 +243,7 @@ export async function PUT(request: NextRequest) {
         symbol: data.symbol,
         photoUrl: data.photoUrl === "" ? null : data.photoUrl,
         ...(data.languages !== undefined && { languages: data.languages }),
+        ...(data.stream !== undefined && { stream: data.stream }),
       },
     });
 
@@ -252,7 +256,7 @@ export async function PUT(request: NextRequest) {
       targetType: 'Candidate',
       targetId: candidate.id,
       targetName: candidate.name,
-      details: { symbol: data.symbol, photoUrl: data.photoUrl, languages: data.languages },
+      details: { symbol: data.symbol, photoUrl: data.photoUrl, languages: data.languages, stream: data.stream },
     });
 
     // Invalidate candidate cache for this election

@@ -33,6 +33,7 @@ export default function CandidateSelector({
   const [symbol, setSymbol] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [languages, setLanguages] = useState<string[]>([]);
+  const [stream, setStream] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -101,6 +102,7 @@ export default function CandidateSelector({
           symbol: symbol.trim() || undefined,
           photoUrl: photoUrl.trim() || undefined,
           languages: languages,
+          stream: stream,
         }),
       });
 
@@ -405,6 +407,55 @@ export default function CandidateSelector({
               </div>
               <p className="text-gray-500 text-xs mt-2">
                 Select all languages the candidate can speak
+              </p>
+            </div>
+
+            {/* Stream Selector */}
+            <div>
+              <label className="block text-cyan mb-2 font-semibold text-sm uppercase tracking-wide">
+                Stream
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {["Cyber", "DSE", "ICE", "Main"].map((s) => (
+                  <label
+                    key={s}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg border cursor-pointer transition-all ${stream === s
+                      ? s === "Cyber" ? "bg-red-500/20 border-red-500 text-red-400"
+                        : s === "DSE" ? "bg-green-500/20 border-green-500 text-green-400"
+                          : s === "ICE" ? "bg-blue-500/20 border-blue-500 text-blue-400"
+                            : "bg-gray-500/20 border-gray-500 text-gray-400"
+                      : "bg-navy-dark/50 border-cyan/30 text-gray-400 hover:border-cyan/50"
+                      }`}
+                  >
+                    <input
+                      type="radio"
+                      name="stream"
+                      value={s}
+                      checked={stream === s}
+                      onChange={(e) => setStream(e.target.value)}
+                      className="sr-only"
+                    />
+                    <span className="font-medium">{s}</span>
+                    {stream === s && (
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </label>
+                ))}
+                {/* Clear button */}
+                {stream && (
+                  <button
+                    type="button"
+                    onClick={() => setStream(null)}
+                    className="px-3 py-2 rounded-lg border border-gray-600 text-gray-400 hover:border-red-500 hover:text-red-400 transition-all text-sm"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <p className="text-gray-500 text-xs mt-2">
+                Select the candidate's specialization stream
               </p>
             </div>
           </div>
