@@ -41,12 +41,20 @@ export async function GET(req: NextRequest) {
     const isAdmin = session.user.role === "admin";
     const isVoter = session.user.role === "voter";
 
+    // Voters are never allowed to see statistics/results
+    if (isVoter) {
+      return NextResponse.json(
+        { error: "Results are only accessible to administrators" },
+        { status: 403 }
+      );
+    }
+
     // During election: only super_admin can see stats
     if (isElectionActive && !isSuperAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // After election: visibility rules
+    // After election: visibility rules for admins
     if (isElectionEnded) {
       if (isSuperAdmin) {
         // Super admin can always see results
@@ -62,14 +70,9 @@ export async function GET(req: NextRequest) {
           });
           election.resultsVisible = true;
           election.resultsAutoEnabled = true;
-        } else if (!election.resultsVisible && !election.publicResultsVisible) {
+        } else if (!election.resultsVisible) {
           // If resultsVisible is false but resultsAutoEnabled is true,
           // it means super admin manually disabled it - don't re-enable
-          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-      } else if (isVoter) {
-        // Regular voters can only see if publicResultsVisible is true
-        if (!election.publicResultsVisible) {
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
       } else {

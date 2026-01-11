@@ -59,8 +59,14 @@ function ResultsPageContent() {
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/");
+    } else if (status === "authenticated") {
+      // Only admins can view results - redirect voters away
+      const role = (session?.user as any)?.role;
+      if (role === "voter") {
+        router.push("/vote");
+      }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   useEffect(() => {
     if (session) {
@@ -430,9 +436,9 @@ function ResultsPageContent() {
                             {candidate.indexNumber}
                             {candidate.stream && (
                               <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${candidate.stream === 'Cyber' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-                                  candidate.stream === 'DSE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                                    candidate.stream === 'ICE' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                                      'bg-gray-500/10 text-gray-400 border-gray-500/30'
+                                candidate.stream === 'DSE' ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                                  candidate.stream === 'ICE' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                                    'bg-gray-500/10 text-gray-400 border-gray-500/30'
                                 }`}>
                                 {candidate.stream}
                               </span>
