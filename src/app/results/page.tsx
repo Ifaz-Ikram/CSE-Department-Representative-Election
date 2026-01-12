@@ -386,13 +386,24 @@ function ResultsPageContent() {
                   return (
                     <div
                       key={candidate.candidateId}
-                      className={`glass-card p-5 transition-all duration-300 animate-slide-up ${index === 0 ? 'border-gold/50 hover:border-gold' :
+                      className={`glass-card p-5 transition-all duration-300 animate-slide-up relative ${index === 0 ? 'border-gold/50 hover:border-gold' :
                         index === 1 ? 'border-gray-400/30 hover:border-gray-400/50' :
                           index === 2 ? 'border-orange-700/30 hover:border-orange-700/50' :
                             ''
                         }`}
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
+                      {/* Vote Count - Absolute positioned right, vertically centered */}
+                      <div className="absolute top-[45%] -translate-y-1/2 right-5 text-right">
+                        <div className={`text-2xl sm:text-3xl font-bold ${index === 0 ? 'text-gold' :
+                          index === 1 ? 'text-gray-300' :
+                            index === 2 ? 'text-orange-500' :
+                              'text-cyan'
+                          }`}>
+                          {candidate.voteCount}
+                        </div>
+                        <div className="text-xs sm:text-sm text-gray-400">votes</div>
+                      </div>
                       <div className="flex items-center space-x-4 mb-4">
                         {/* Rank Badge */}
                         <div
@@ -460,18 +471,6 @@ function ResultsPageContent() {
                               ))}
                             </div>
                           )}
-                        </div>
-
-                        {/* Vote Count */}
-                        <div className="text-right">
-                          <div className={`text-3xl font-bold ${index === 0 ? 'text-gold' :
-                            index === 1 ? 'text-gray-300' :
-                              index === 2 ? 'text-orange-500' :
-                                'text-cyan'
-                            }`}>
-                            {candidate.voteCount}
-                          </div>
-                          <div className="text-sm text-gray-400">votes</div>
                         </div>
                       </div>
 
