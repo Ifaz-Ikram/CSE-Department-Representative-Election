@@ -50,14 +50,16 @@
   - Vote confirmation with candidate preview
   - Anonymous vote storage (no voter-candidate mapping for regular users)
   - **"My Votes" History**: Dedicated page to review all submitted ballots
+  - **Stream-Based Representation**: Voting considers candidate streams (Cyber, DSE, ICE, Main) for fair representation
 
-- **📊 Real-Time Results**
+- **📊 Real-Time Results** (Admin-Only Access)
   - Live vote counting and statistics
+  - **Results Access**: Voters are permanently blocked from viewing results (redirected to voting page)
   - **Dual Visibility Controls**:
     - `resultsVisible`: Admin-only results toggle
-    - `publicResultsVisible`: Public results for all voters
+    - `publicResultsVisible`: Public results visibility setting
   - `resultsAutoEnabled`: Automatic results publication after election ends
-  - Detailed candidate rankings with vote percentages
+  - Detailed candidate rankings with vote percentages and stream badges
   - Participation rate tracking
 
 ### Administrative Features
@@ -81,7 +83,8 @@
 
 - **📋 Candidate Presets System**
   - Instant loading of pre-configured candidate lists
-  - Batch-specific templates (English, Sinhala, Tamil streams)
+  - Batch-specific templates (English, Sinhala, Tamil language streams)
+  - **Stream Assignment**: Candidates assigned to specializations (Cyber, DSE, ICE, Main) for fair representation
   - Duplicate prevention and smart merging
 
 - **📥 Data Export**
@@ -113,6 +116,12 @@
   - Candidate profiles with language preferences (English, Sinhala, Tamil)
   - **Ballot Symbols**: Emoji-based candidate identification (🌙, ⭐, etc.)
   - Internationalized interface elements
+
+- **🎓 Stream-Based Representation**
+  - Candidates tagged with specialization streams: **Cyber**, **DSE**, **ICE**, or **Main**
+  - Color-coded stream badges for visual identification (Red=Cyber, Green=DSE, Blue=ICE, Gray=Main)
+  - Stream information displayed on voting page, results, and admin interfaces
+  - Supports fair representation across all specialization streams
 
 ---
 
@@ -245,8 +254,8 @@
 
 ✅ **Pagination**
 - Server-side pagination on all list endpoints:
-  - Users: 50 items per page
-  - Ballots: 50 items per page
+  - Users: **200 items per page** (default)
+  - Ballots: **200 items per page** (default)
   - Audit logs: 50 items per page
 - Prevents memory exhaustion with large datasets
 - Cursor-ready architecture for future scaling
@@ -523,8 +532,8 @@ Voter (Vote & View Public Results)
 | Edit vote (before deadline) | ✅ | ✅ | ✅ |
 | View own voting history | ✅ | ✅ | ✅ |
 | **Results** |
-| View public results | ✅ | ✅ | ✅ |
-| View restricted results (after election) | ❌ | ✅* | ✅ |
+| Access results page | ❌ | ✅ | ✅ |
+| View results (after election) | ❌ | ✅* | ✅ |
 | View live statistics | ❌ | ❌ | ✅ |
 | **Election Management** |
 | Create new election | ❌ | ❌ | ✅ |
@@ -547,6 +556,8 @@ Voter (Vote & View Public Results)
 | View ballot mapping | ❌ | ❌ | ✅ |
 
 **\*Admin access to restricted results requires results to be marked as visible by Super Admin**
+
+> **Note**: Voters are permanently blocked from accessing the results page and are automatically redirected to the voting page. This ensures vote integrity during and after elections.
 
 ### Voter Whitelist Management
 
@@ -781,11 +792,11 @@ List candidates for an election
 
 All admin endpoints require authentication and appropriate role.
 
-#### `GET /api/admin/users?page=1&limit=50`
+#### `GET /api/admin/users?page=1&limit=200`
 
 List all users (Admin/Super Admin only)
 
-**Pagination:** Yes (50 per page)
+**Pagination:** Yes (200 per page default)
 
 #### `PATCH /api/admin/users`
 
@@ -809,7 +820,7 @@ Get election statistics
 - During election: Super Admin only
 - After election: Admin (if resultsVisible) or Super Admin
 
-#### `GET /api/admin/ballots?electionId={id}&page=1&limit=50`
+#### `GET /api/admin/ballots?electionId={id}&page=1&limit=200`
 
 Get ballot details with voter mapping
 
@@ -818,7 +829,7 @@ Get ballot details with voter mapping
 - During election: Super Admin only
 - After election: Admin (if resultsVisible) or Super Admin
 
-**Pagination:** Yes (50 per page)
+**Pagination:** Yes (200 per page default)
 
 #### `GET /api/admin/export?electionId={id}&type={type}`
 
